@@ -1,0 +1,16 @@
+{
+    "private": true,
+    "workspaces": [
+        "packages/api",
+        "packages/app"
+    ],
+    "scripts": {
+        "build": "npm run build --workspaces",
+        "test": "npm run test --workspaces",
+        "lint": "npm run lint --workspaces",
+        "lint:fix": "npm run lint:fix --workspaces",
+        "format": "npm run format --workspaces",
+        "clean": "npm run clean --workspaces",
+        "bump": "node scripts/bump-version.mjs"
+    }
+}
