@@ -5,6 +5,8 @@ import { CacheModule } from './cache/cache.module';
 import { TmdbModule } from './tmdb/tmdb.module';
 import { LanguagesModule } from './languages/languages.module';
 import { StremioModule } from './stremio/stremio.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -14,6 +16,8 @@ import { MongooseModule } from '@nestjs/mongoose';
     TmdbModule,
     LanguagesModule,
     StremioModule,
+    AuthModule,
+    UsersModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

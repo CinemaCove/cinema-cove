@@ -1,0 +1,77 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.google-icon {
+  font-weight: 700;
+  font-size: 14px;
+  color: #4285f4;
+}
+
+.divider {
+  margin: 20px 0;
+  position: relative;
+}
+
+.divider-label {
+  padding: 0 8px;
+  color: var(--mat-sys-outline);
+  font: var(--mat-sys-body-small);
+  background: var(--mat-sys-surface);
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-message {
+  margin: 0;
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-medium);
+}
+
+.login-link {
+  margin: 16px 0 0;
+  text-align: center;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+
+  a {
+    color: var(--mat-sys-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
