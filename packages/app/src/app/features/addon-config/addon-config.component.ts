@@ -1,9 +1,9 @@
 import {
   Component,
   OnInit,
-  signal,
   computed,
   inject,
+  DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import {
@@ -16,6 +16,7 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -26,13 +27,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {
-  LanguagesService,
-  ConfigurationLanguage,
-} from '../../core/services/languages.service';
-import { SortOption, SortOptionsService } from '../../core/services/sort-options.service';
-import { AddonConfigsService } from '../../core/services/addon-configs.service';
+import { Store } from '@ngrx/store';
 import { environment } from '../../../environments/environment';
+import { LanguagesActions } from '../../store/languages/languages.actions';
+import { languagesFeature, selectLanguagesLoading } from '../../store/languages/languages.reducer';
+import { SortOptionsActions } from '../../store/sort-options/sort-options.actions';
+import { sortOptionsFeature } from '../../store/sort-options/sort-options.reducer';
+import { AddonConfigActions } from '../../store/addon-config/addon-config.actions';
+import { addonConfigFeature } from '../../store/addon-config/addon-config.reducer';
 
 function maxSelectionsValidator(max: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -62,17 +64,18 @@ function maxSelectionsValidator(max: number): ValidatorFn {
   styleUrl: './addon-config.component.scss',
 })
 export class AddonConfigComponent implements OnInit {
-  private readonly languagesService = inject(LanguagesService);
-  private readonly sortOptionsService = inject(SortOptionsService);
-  private readonly addonConfigsService = inject(AddonConfigsService);
+  private readonly store = inject(Store);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly loading = signal(true);
-  readonly languages = signal<ConfigurationLanguage[]>([]);
-  readonly sortOptions = signal<SortOption[]>([]);
-  readonly savedId = signal<string | null>(null);
-  readonly saving = signal(false);
-  readonly saveError = signal<string | null>(null);
+  readonly languages = toSignal(this.store.select(languagesFeature.selectItems), { requireSync: true });
+  readonly sortOptions = toSignal(this.store.select(sortOptionsFeature.selectItems), { requireSync: true });
+  readonly loading = toSignal(this.store.select(selectLanguagesLoading), { requireSync: true });
+  readonly addonStatus = toSignal(this.store.select(addonConfigFeature.selectStatus), { requireSync: true });
+  readonly savedId = toSignal(this.store.select(addonConfigFeature.selectSavedId), { requireSync: true });
+  readonly saveError = toSignal(this.store.select(addonConfigFeature.selectError), { requireSync: true });
+
+  readonly saving = computed(() => this.addonStatus() === 'saving');
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', {
@@ -101,10 +104,7 @@ export class AddonConfigComponent implements OnInit {
     this.form.controls.name.valueChanges,
     { initialValue: this.form.controls.name.value },
   );
-  private readonly typeValue = toSignal(
-    this.form.controls.type.valueChanges,
-    { initialValue: this.form.controls.type.value },
-  );
+
   protected readonly selectedLanguages = toSignal(
     this.form.controls.languages.valueChanges,
     { initialValue: this.form.controls.languages.value },
@@ -128,28 +128,19 @@ export class AddonConfigComponent implements OnInit {
     return `stremio://${apiHost}/${id}/manifest.json`;
   });
 
+  readonly isFormValid = computed(() => this.formStatus() === 'VALID');
+
   ngOnInit(): void {
-    this.languagesService.getLanguages().subscribe({
-      next: (langs) => {
-        this.languages.set(langs);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
+    this.store.dispatch(LanguagesActions.load());
+    this.store.dispatch(SortOptionsActions.load());
 
-    this.sortOptionsService.getSortOptions().subscribe({
-      next: (options) => this.sortOptions.set(options),
-    });
-
-    // Reset savedId whenever any form value changes
-    this.form.valueChanges.subscribe(() => {
-      if (this.savedId() !== null) {
-        this.savedId.set(null);
-        this.saveError.set(null);
-      }
-    });
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.savedId() !== null) {
+          this.store.dispatch(AddonConfigActions.resetSaved());
+        }
+      });
   }
 
   isSelected(code: string): boolean {
@@ -168,19 +159,8 @@ export class AddonConfigComponent implements OnInit {
 
   save(): void {
     if (this.form.invalid || this.saving()) return;
-    this.saving.set(true);
-    this.saveError.set(null);
-    const { name, type, languages, sort } = this.form.getRawValue();
-    this.addonConfigsService.save({ name, type, languages, sort }).subscribe({
-      next: ({ id }) => {
-        this.savedId.set(id);
-        this.saving.set(false);
-      },
-      error: () => {
-        this.saveError.set('Failed to save config. Are you logged in?');
-        this.saving.set(false);
-      },
-    });
+    const { name, type: contentType, languages, sort } = this.form.getRawValue();
+    this.store.dispatch(AddonConfigActions.save({ name, contentType, languages, sort }));
   }
 
   copyUrl(): void {
@@ -189,9 +169,5 @@ export class AddonConfigComponent implements OnInit {
     void navigator.clipboard.writeText(url).then(() => {
       this.snackBar.open('Copied!', undefined, { duration: 2000 });
     });
-  }
-
-  isFormValid(): boolean {
-    return this.formStatus() === 'VALID';
   }
 }
