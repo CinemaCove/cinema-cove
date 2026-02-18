@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  DiscoverMovieResultItem,
+  DiscoverTvShowResultItem,
+} from '@cinemacove/tmdb-client/v3';
 import { TmdbService } from '../tmdb/tmdb.service';
 import { AddonConfig } from './types/addon-config.interface';
 
@@ -8,10 +12,6 @@ interface StremioMeta {
   type: string;
   name: string;
   poster?: string;
-}
-
-interface StremioMetaWithPop extends StremioMeta {
-  popularity: number;
 }
 
 @Injectable()
@@ -75,46 +75,26 @@ export class StremioService {
     const lang = catalogId.split('-').pop()!;
     const page = Math.floor(skip / 20) + 1;
 
-    let genreId: number | undefined;
+    const genreId = genreName
+      ? type === 'movie'
+        ? await this.tmdbService.resolveMovieGenreIds(genreName)
+        : await this.tmdbService.resolveTvShowGenreIds(genreName)
+      : undefined;
 
-    if (genreName) {
-      genreId =
-        type == 'movie'
-          ? await this.tmdbService.resolveMovieGenreIds(genreName)
-          : await this.tmdbService.getTvShowGenres();
-    }
+    const results: (DiscoverMovieResultItem | DiscoverTvShowResultItem)[] =
+      type === 'movie'
+        ? (await this.tmdbService.discoverMovies(lang, page, genreId)).results
+        : (await this.tmdbService.discoverTvShows(lang, page, genreId)).results;
 
-    const data =
-      type == 'movie'
-        ? await this.tmdbService.discoverMovies(lang, page, genreId)
-        : await this.tmdbService.discoverTvShows(lang, page, genreId);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const toMeta = (
-      item: any,
-      type: 'movie' | 'series',
-      titleKey: string,
-    ): StremioMetaWithPop => ({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/restrict-template-expressions
+    const stremioType = type === 'movie' ? 'movie' : 'series';
+    const metas: StremioMeta[] = results.map((item) => ({
       id: `tmdb:${item.id}`,
-      type,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      name: item[titleKey],
+      type: stremioType,
+      name: 'title' in item ? item.title : item.name,
       poster: item.posterPath
-        ? // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `https://image.tmdb.org/t/p/w500${item.posterPath}`
+        ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
         : undefined,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      popularity: item.popularity ?? 0,
-    });
-
-    const metas = (data.results as any[]).map((i) =>
-      toMeta(
-        i,
-        type === 'movie' ? 'movie' : 'series',
-        type === 'movie' ? 'title' : 'name',
-      ),
-    );
+    }));
 
     return { metas };
   }
