@@ -33,8 +33,9 @@ export class StremioController {
     const { type } = this.decodeConfig(configBase64);
     const params = new URLSearchParams(extras);
     const genre = params.get('genre') ?? undefined;
+    const search = params.get('search') ?? undefined;
     const skip = parseInt(params.get('skip') ?? '0', 10);
-    return this.stremioService.buildCatalog(type, id, skip, genre);
+    return this.stremioService.buildCatalog(type, id, skip, genre, search);
   }
 
   private decodeConfig(base64: string): AddonConfig {

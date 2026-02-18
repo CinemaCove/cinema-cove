@@ -4,8 +4,13 @@ import {
   ConfigurationLanguage,
   DiscoverMovieResultItem,
   DiscoverTvShowResultItem,
+  MovieDetail,
+  MovieDetailsWithAppends,
+  MovieExternalIdsResult,
   PaginatedResult,
   TmdbClient,
+  TvShowDetailsWithAppend,
+  TvShowExternalIdsResult,
 } from '@cinemacove/tmdb-client/v3';
 import { CacheService } from '../cache/cache.service';
 
@@ -86,8 +91,9 @@ export class TmdbService {
     language: string,
     page: number,
     genreId?: number,
+    search?: string,
   ): Promise<PaginatedResult<DiscoverMovieResultItem>> {
-    const key = `discover:movie:${language}:${page}:${genreId ?? 'none'}`;
+    const key = `discover:movie:${language}:${page}:${genreId ?? 'none'}:${search ?? 'none'}`;
     const cached =
       await this.cache.get<PaginatedResult<DiscoverMovieResultItem>>(key);
     if (cached) return cached;
@@ -97,6 +103,7 @@ export class TmdbService {
       sortBy: 'popularity.desc',
       page,
       ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
+      ...(search !== undefined ? { withTextQuery: search } : {}),
     });
     await this.cache.set(key, result, this.shortCacheTtl);
     return result;
@@ -106,8 +113,9 @@ export class TmdbService {
     language: string,
     page: number,
     genreId?: number,
+    search?: string,
   ): Promise<PaginatedResult<DiscoverTvShowResultItem>> {
-    const key = `discover:tv:${language}:${page}:${genreId ?? 'none'}`;
+    const key = `discover:tv:${language}:${page}:${genreId ?? 'none'}:${search ?? 'none'}`;
     const cached =
       await this.cache.get<PaginatedResult<DiscoverTvShowResultItem>>(key);
     if (cached) return cached;
@@ -117,7 +125,63 @@ export class TmdbService {
       sortBy: 'popularity.desc',
       page,
       ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
+      ...(search !== undefined ? { withTextQuery: search } : {}),
     });
+    await this.cache.set(key, result, this.shortCacheTtl);
+    return result;
+  }
+
+  async getMovieExternalIds(movieId: number): Promise<MovieExternalIdsResult> {
+    const key = `movie:${movieId}:external-ids`;
+    const cached = await this.cache.get<MovieExternalIdsResult>(key);
+    if (cached) return cached;
+
+    const result: MovieExternalIdsResult =
+      await this.client.movie.getExternalIds(movieId);
+    await this.cache.set(key, result, this.shortCacheTtl);
+    return result;
+  }
+
+  async getTvShowExternalIds(
+    tvShowId: number,
+  ): Promise<TvShowExternalIdsResult> {
+    const key = `tv-show:${tvShowId}:external-ids`;
+    const cached = await this.cache.get<TvShowExternalIdsResult>(key);
+    if (cached) return cached;
+
+    const result: TvShowExternalIdsResult =
+      await this.client.tvShow.getExternalIds(tvShowId);
+    await this.cache.set(key, result, this.shortCacheTtl);
+    return result;
+  }
+
+  async getMovieDetails(movieId: number): Promise<MovieDetailsWithAppends> {
+    const key = `movie:${movieId}:details`;
+    const cached = await this.cache.get<MovieDetailsWithAppends>(key);
+    if (cached) return cached;
+
+    const result: MovieDetailsWithAppends = await this.client.movie.getDetails(
+      movieId,
+      {
+        appendToResponse: ['credits', 'videos'],
+      },
+    );
+    await this.cache.set(key, result, this.shortCacheTtl);
+    return result;
+  }
+
+  async getTvShowDetails(tvShowId: number): Promise<TvShowDetailsWithAppend> {
+    const key = `tv-show:${tvShowId}:details`;
+    const cached = await this.cache.get<TvShowDetailsWithAppend>(key);
+    if (cached) return cached;
+
+    const result: TvShowDetailsWithAppend = await this.client.tvShow.getDetails(
+      tvShowId,
+      {
+        appendToResponse: ['external_ids', 'credits', 'videos'],
+        language: 'en-US',
+      },
+    );
     await this.cache.set(key, result, this.shortCacheTtl);
     return result;
   }
