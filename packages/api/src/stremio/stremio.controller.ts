@@ -1,21 +1,25 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { StremioService } from './stremio.service';
+import { AddonConfigsService } from '../addon-configs/addon-configs.service';
 import { AddonConfig } from './types/addon-config.interface';
 
 @Controller()
 export class StremioController {
-  constructor(private readonly stremioService: StremioService) {}
+  constructor(
+    private readonly stremioService: StremioService,
+    private readonly addonConfigsService: AddonConfigsService,
+  ) {}
 
-  @Get(':config/manifest.json')
-  getManifest(@Param('config') configBase64: string) {
-    const config = this.decodeConfig(configBase64);
+  @Get(':configId/manifest.json')
+  async getManifest(@Param('configId') configId: string) {
+    const config = await this.resolveConfig(configId);
     return this.stremioService.buildManifest(config);
   }
 
   /** Catalog without extras — first page, no genre filter */
-  @Get(':config/catalog/:type/:id.json')
-  getCatalog(@Param('config') configBase64: string, @Param('id') id: string) {
-    const { type, sort } = this.decodeConfig(configBase64);
+  @Get(':configId/catalog/:type/:id.json')
+  async getCatalog(@Param('configId') configId: string, @Param('id') id: string) {
+    const { type, sort } = await this.resolveConfig(configId);
     return this.stremioService.buildCatalog(type, id, 0, sort);
   }
 
@@ -24,13 +28,13 @@ export class StremioController {
    * Stremio sends extras as `key=value&key=value` before `.json`,
    * e.g. `genre=Action&skip=20.json` — parsed with URLSearchParams.
    */
-  @Get(':config/catalog/:type/:id/:extras.json')
-  getCatalogWithExtras(
-    @Param('config') configBase64: string,
+  @Get(':configId/catalog/:type/:id/:extras.json')
+  async getCatalogWithExtras(
+    @Param('configId') configId: string,
     @Param('id') id: string,
     @Param('extras') extras: string,
   ) {
-    const { type, sort } = this.decodeConfig(configBase64);
+    const { type, sort } = await this.resolveConfig(configId);
     const params = new URLSearchParams(extras);
     const genre = params.get('genre') ?? undefined;
     const search = params.get('search') ?? undefined;
@@ -38,7 +42,9 @@ export class StremioController {
     return this.stremioService.buildCatalog(type, id, skip, sort, genre, search);
   }
 
-  private decodeConfig(base64: string): AddonConfig {
-    return JSON.parse(Buffer.from(base64, 'base64').toString()) as AddonConfig;
+  private async resolveConfig(id: string): Promise<AddonConfig> {
+    const doc = await this.addonConfigsService.findById(id);
+    if (!doc) throw new NotFoundException('Addon config not found');
+    return doc as unknown as AddonConfig;
   }
 }

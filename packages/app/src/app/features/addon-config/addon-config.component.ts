@@ -31,6 +31,7 @@ import {
   ConfigurationLanguage,
 } from '../../core/services/languages.service';
 import { SortOption, SortOptionsService } from '../../core/services/sort-options.service';
+import { AddonConfigsService } from '../../core/services/addon-configs.service';
 import { environment } from '../../../environments/environment';
 
 function maxSelectionsValidator(max: number): ValidatorFn {
@@ -63,11 +64,15 @@ function maxSelectionsValidator(max: number): ValidatorFn {
 export class AddonConfigComponent implements OnInit {
   private readonly languagesService = inject(LanguagesService);
   private readonly sortOptionsService = inject(SortOptionsService);
+  private readonly addonConfigsService = inject(AddonConfigsService);
   private readonly snackBar = inject(MatSnackBar);
 
   readonly loading = signal(true);
   readonly languages = signal<ConfigurationLanguage[]>([]);
   readonly sortOptions = signal<SortOption[]>([]);
+  readonly savedId = signal<string | null>(null);
+  readonly saving = signal(false);
+  readonly saveError = signal<string | null>(null);
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', {
@@ -100,10 +105,6 @@ export class AddonConfigComponent implements OnInit {
     this.form.controls.type.valueChanges,
     { initialValue: this.form.controls.type.value },
   );
-  private readonly sortValue = toSignal(
-    this.form.controls.sort.valueChanges,
-    { initialValue: this.form.controls.sort.value },
-  );
   protected readonly selectedLanguages = toSignal(
     this.form.controls.languages.valueChanges,
     { initialValue: this.form.controls.languages.value },
@@ -121,16 +122,10 @@ export class AddonConfigComponent implements OnInit {
   );
 
   readonly installUrl = computed(() => {
-    if (this.formStatus() !== 'VALID') return '';
-    const name = this.nameValue();
-    const type = this.typeValue();
-    const languages = this.selectedLanguages();
-    const sort = this.sortValue();
-    if (!name || !type || !languages.length) return '';
-    const config = { name, type, languages, sort };
-    const encoded = btoa(JSON.stringify(config));
+    const id = this.savedId();
+    if (!id) return '';
     const apiHost = new URL(environment.apiUrl || window.location.origin).host;
-    return `stremio://${apiHost}/${encoded}/manifest.json`;
+    return `stremio://${apiHost}/${id}/manifest.json`;
   });
 
   ngOnInit(): void {
@@ -146,6 +141,14 @@ export class AddonConfigComponent implements OnInit {
 
     this.sortOptionsService.getSortOptions().subscribe({
       next: (options) => this.sortOptions.set(options),
+    });
+
+    // Reset savedId whenever any form value changes
+    this.form.valueChanges.subscribe(() => {
+      if (this.savedId() !== null) {
+        this.savedId.set(null);
+        this.saveError.set(null);
+      }
     });
   }
 
@@ -163,11 +166,32 @@ export class AddonConfigComponent implements OnInit {
     this.form.controls.languages.setValue(current.filter((c) => c !== code));
   }
 
+  save(): void {
+    if (this.form.invalid || this.saving()) return;
+    this.saving.set(true);
+    this.saveError.set(null);
+    const { name, type, languages, sort } = this.form.getRawValue();
+    this.addonConfigsService.save({ name, type, languages, sort }).subscribe({
+      next: ({ id }) => {
+        this.savedId.set(id);
+        this.saving.set(false);
+      },
+      error: () => {
+        this.saveError.set('Failed to save config. Are you logged in?');
+        this.saving.set(false);
+      },
+    });
+  }
+
   copyUrl(): void {
     const url = this.installUrl();
     if (!url) return;
     void navigator.clipboard.writeText(url).then(() => {
       this.snackBar.open('Copied!', undefined, { duration: 2000 });
     });
+  }
+
+  isFormValid(): boolean {
+    return this.formStatus() === 'VALID';
   }
 }
