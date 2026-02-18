@@ -39,6 +39,16 @@
           </mat-button-toggle-group>
         </div>
 
+        <!-- Sort Order -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Sort By</mat-label>
+          <mat-select formControlName="sort">
+            @for (option of sortOptions(); track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
         <!-- Language Selector -->
         @if (loading()) {
           <div class="loading-row">

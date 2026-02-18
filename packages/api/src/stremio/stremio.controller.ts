@@ -15,8 +15,8 @@ export class StremioController {
   /** Catalog without extras — first page, no genre filter */
   @Get(':config/catalog/:type/:id.json')
   getCatalog(@Param('config') configBase64: string, @Param('id') id: string) {
-    const { type } = this.decodeConfig(configBase64);
-    return this.stremioService.buildCatalog(type, id, 0);
+    const { type, sort } = this.decodeConfig(configBase64);
+    return this.stremioService.buildCatalog(type, id, 0, sort);
   }
 
   /**
@@ -30,12 +30,12 @@ export class StremioController {
     @Param('id') id: string,
     @Param('extras') extras: string,
   ) {
-    const { type } = this.decodeConfig(configBase64);
+    const { type, sort } = this.decodeConfig(configBase64);
     const params = new URLSearchParams(extras);
     const genre = params.get('genre') ?? undefined;
     const search = params.get('search') ?? undefined;
     const skip = parseInt(params.get('skip') ?? '0', 10);
-    return this.stremioService.buildCatalog(type, id, skip, genre, search);
+    return this.stremioService.buildCatalog(type, id, skip, sort, genre, search);
   }
 
   private decodeConfig(base64: string): AddonConfig {

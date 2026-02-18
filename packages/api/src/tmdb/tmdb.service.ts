@@ -13,6 +13,8 @@ import {
 } from '@cinemacove/tmdb-client/v3';
 import { CacheService } from '../cache/cache.service';
 
+export type SortBy = 'popularity.desc' | 'release_date.desc' | 'vote_average.desc';
+
 export interface TmdbGenre {
   id: number;
   name: string;
@@ -93,20 +95,22 @@ export class TmdbService {
   public async discoverMovies(
     language: string,
     page: number,
+    sortBy: SortBy = 'popularity.desc',
     genreId?: number,
     search?: string,
   ): Promise<PaginatedResult<DiscoverMovieResultItem>> {
-    const key = `discover:movie:${language}:${page}:${genreId ?? 'none'}:${search ?? 'none'}`;
+    const tmdbSort = sortBy === 'release_date.desc' ? 'primary_release_date.desc' : sortBy;
+    const key = `discover:movie:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}`;
     return this.cache.getOrSet(
       key,
       () =>
         this.client.discover.searchMovies({
           withOriginalLanguage: language,
-          sortBy: 'popularity.desc',
+          sortBy: tmdbSort,
           page,
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
-        }),
+        } as any),
       this.shortCacheTtl,
     );
   }
@@ -114,20 +118,22 @@ export class TmdbService {
   public async discoverTvShows(
     language: string,
     page: number,
+    sortBy: SortBy = 'popularity.desc',
     genreId?: number,
     search?: string,
   ): Promise<PaginatedResult<DiscoverTvShowResultItem>> {
-    const key = `discover:tv:${language}:${page}:${genreId ?? 'none'}:${search ?? 'none'}`;
+    const tmdbSort = sortBy === 'release_date.desc' ? 'first_air_date.desc' : sortBy;
+    const key = `discover:tv:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}`;
     return this.cache.getOrSet(
       key,
       () =>
         this.client.discover.searchTvShows({
           withOriginalLanguage: language,
-          sortBy: 'popularity.desc',
+          sortBy: tmdbSort,
           page,
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
-        }),
+        } as any),
       this.shortCacheTtl,
     );
   }

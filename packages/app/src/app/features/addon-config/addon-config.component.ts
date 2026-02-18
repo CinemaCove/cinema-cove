@@ -30,7 +30,8 @@ import {
   LanguagesService,
   ConfigurationLanguage,
 } from '../../core/services/languages.service';
-import {environment} from "../../../environments/environment";
+import { SortOption, SortOptionsService } from '../../core/services/sort-options.service';
+import { environment } from '../../../environments/environment';
 
 function maxSelectionsValidator(max: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -61,10 +62,12 @@ function maxSelectionsValidator(max: number): ValidatorFn {
 })
 export class AddonConfigComponent implements OnInit {
   private readonly languagesService = inject(LanguagesService);
+  private readonly sortOptionsService = inject(SortOptionsService);
   private readonly snackBar = inject(MatSnackBar);
 
   readonly loading = signal(true);
   readonly languages = signal<ConfigurationLanguage[]>([]);
+  readonly sortOptions = signal<SortOption[]>([]);
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', {
@@ -83,6 +86,10 @@ export class AddonConfigComponent implements OnInit {
       validators: [Validators.required, maxSelectionsValidator(10)],
       nonNullable: true,
     }),
+    sort: new FormControl<string>('popularity.desc', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
   });
 
   private readonly nameValue = toSignal(
@@ -92,6 +99,10 @@ export class AddonConfigComponent implements OnInit {
   private readonly typeValue = toSignal(
     this.form.controls.type.valueChanges,
     { initialValue: this.form.controls.type.value },
+  );
+  private readonly sortValue = toSignal(
+    this.form.controls.sort.valueChanges,
+    { initialValue: this.form.controls.sort.value },
   );
   protected readonly selectedLanguages = toSignal(
     this.form.controls.languages.valueChanges,
@@ -114,8 +125,9 @@ export class AddonConfigComponent implements OnInit {
     const name = this.nameValue();
     const type = this.typeValue();
     const languages = this.selectedLanguages();
+    const sort = this.sortValue();
     if (!name || !type || !languages.length) return '';
-    const config = { name, type, languages };
+    const config = { name, type, languages, sort };
     const encoded = btoa(JSON.stringify(config));
     const apiHost = new URL(environment.apiUrl || window.location.origin).host;
     return `stremio://${apiHost}/${encoded}/manifest.json`;
@@ -130,6 +142,10 @@ export class AddonConfigComponent implements OnInit {
       error: () => {
         this.loading.set(false);
       },
+    });
+
+    this.sortOptionsService.getSortOptions().subscribe({
+      next: (options) => this.sortOptions.set(options),
     });
   }
 

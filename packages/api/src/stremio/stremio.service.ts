@@ -7,8 +7,9 @@ import {
   SearchMoviesResultItem,
   SearchTvShowsResultItem,
 } from '@cinemacove/tmdb-client/v3';
-import { TmdbService } from '../tmdb/tmdb.service';
+import { SortBy, TmdbService } from '../tmdb/tmdb.service';
 import { AddonConfig } from './types/addon-config.interface';
+
 import pLimit from 'p-limit';
 
 interface StremioMeta {
@@ -85,6 +86,7 @@ export class StremioService {
     type: 'movie' | 'tv',
     catalogId: string,
     skip: number,
+    sort: SortBy = 'popularity.desc',
     genreName?: string,
     search?: string,
   ): Promise<object> {
@@ -99,9 +101,8 @@ export class StremioService {
 
     const results: (DiscoverMovieResultItem | DiscoverTvShowResultItem)[] =
       type === 'movie'
-        ? (await this.tmdbService.discoverMovies(lang, page, genreId, search))
-            .results
-        : (await this.tmdbService.discoverTvShows(lang, page, genreId, search)).results;
+        ? (await this.tmdbService.discoverMovies(lang, page, sort, genreId, search)).results
+        : (await this.tmdbService.discoverTvShows(lang, page, sort, genreId, search)).results;
 
     const limit = pLimit(5);
 
