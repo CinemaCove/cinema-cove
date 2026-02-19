@@ -1,0 +1,56 @@
+<div class="page-header">
+    <h2 class="page-title">Integrations</h2>
+    <p class="page-subtitle">Connect external services to expand your CinemaCove experience.</p>
+</div>
+
+<div class="integration-grid">
+
+    <!-- TMDB -->
+    <mat-card class="integration-card" appearance="outlined">
+        <div class="card-header">
+            <span class="int-logo int-tmdb" aria-label="TMDB logo">TMDB</span>
+            <div class="card-meta">
+                <h3 class="card-title">The Movie Database</h3>
+                <p class="card-desc">
+                    Access your TMDB watchlists, favorites, and rated movies directly in your catalogs.
+                </p>
+            </div>
+        </div>
+        <mat-divider/>
+        <div class="card-footer">
+            <span class="status-chip status-off">
+                <mat-icon aria-hidden="true">link_off</mat-icon>
+                Not connected
+            </span>
+            <button mat-flat-button disabled aria-describedby="tmdb-soon">
+                Connect
+            </button>
+        </div>
+        <p class="coming-soon-note" id="tmdb-soon">Coming soon</p>
+    </mat-card>
+
+    <!-- Trakt -->
+    <mat-card class="integration-card" appearance="outlined">
+        <div class="card-header">
+            <span class="int-logo int-trakt" aria-label="Trakt logo">trakt</span>
+            <div class="card-meta">
+                <h3 class="card-title">Trakt</h3>
+                <p class="card-desc">
+                    Sync your Trakt watch history, lists, and recommendations into your catalogs.
+                </p>
+            </div>
+        </div>
+        <mat-divider/>
+        <div class="card-footer">
+            <span class="status-chip status-off">
+                <mat-icon aria-hidden="true">link_off</mat-icon>
+                Not connected
+            </span>
+            <button mat-flat-button disabled aria-describedby="trakt-soon">
+                Connect
+            </button>
+        </div>
+        <p class="coming-soon-note" id="trakt-soon">Coming soon</p>
+    </mat-card>
+
+</div>

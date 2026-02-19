@@ -27,14 +27,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Store } from '@ngrx/store';
 import { environment } from '../../../environments/environment';
-import { LanguagesActions } from '../../store/languages/languages.actions';
-import { languagesFeature, selectLanguagesLoading } from '../../store/languages/languages.reducer';
-import { SortOptionsActions } from '../../store/sort-options/sort-options.actions';
-import { sortOptionsFeature } from '../../store/sort-options/sort-options.reducer';
-import { AddonConfigActions } from '../../store/addon-config/addon-config.actions';
-import { addonConfigFeature } from '../../store/addon-config/addon-config.reducer';
+import { LanguagesStore } from '../../signal-store/languages.store';
+import { SortOptionsStore } from '../../signal-store/sort-options.store';
+import { AddonConfigStore } from '../../signal-store/addon-config.store';
 
 function maxSelectionsValidator(max: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -64,18 +60,19 @@ function maxSelectionsValidator(max: number): ValidatorFn {
   styleUrl: './addon-config.component.scss',
 })
 export class AddonConfigComponent implements OnInit {
-  private readonly store = inject(Store);
+  private readonly languagesStore = inject(LanguagesStore);
+  private readonly sortOptionsStore = inject(SortOptionsStore);
+  private readonly addonConfigStore = inject(AddonConfigStore);
   private readonly destroyRef = inject(DestroyRef);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly languages = toSignal(this.store.select(languagesFeature.selectItems), { requireSync: true });
-  readonly sortOptions = toSignal(this.store.select(sortOptionsFeature.selectItems), { requireSync: true });
-  readonly loading = toSignal(this.store.select(selectLanguagesLoading), { requireSync: true });
-  readonly addonStatus = toSignal(this.store.select(addonConfigFeature.selectStatus), { requireSync: true });
-  readonly savedId = toSignal(this.store.select(addonConfigFeature.selectSavedId), { requireSync: true });
-  readonly saveError = toSignal(this.store.select(addonConfigFeature.selectError), { requireSync: true });
+  readonly languages = this.languagesStore.items;
+  readonly sortOptions = this.sortOptionsStore.items;
+  readonly loading = this.languagesStore.loading;
+  readonly savedId = this.addonConfigStore.savedId;
+  readonly saveError = this.addonConfigStore.error;
 
-  readonly saving = computed(() => this.addonStatus() === 'saving');
+  readonly saving = computed(() => this.addonConfigStore.status() === 'saving');
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', {
@@ -131,14 +128,14 @@ export class AddonConfigComponent implements OnInit {
   readonly isFormValid = computed(() => this.formStatus() === 'VALID');
 
   ngOnInit(): void {
-    this.store.dispatch(LanguagesActions.load());
-    this.store.dispatch(SortOptionsActions.load());
+    this.languagesStore.load();
+    this.sortOptionsStore.load();
 
     this.form.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (this.savedId() !== null) {
-          this.store.dispatch(AddonConfigActions.resetSaved());
+          this.addonConfigStore.resetSaved();
         }
       });
   }
@@ -159,8 +156,8 @@ export class AddonConfigComponent implements OnInit {
 
   save(): void {
     if (this.form.invalid || this.saving()) return;
-    const { name, type: contentType, languages, sort } = this.form.getRawValue();
-    this.store.dispatch(AddonConfigActions.save({ name, contentType, languages, sort }));
+    const { name, type, languages, sort } = this.form.getRawValue();
+    this.addonConfigStore.save({ name, type, languages, sort });
   }
 
   copyUrl(): void {

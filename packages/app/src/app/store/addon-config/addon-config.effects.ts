@@ -14,7 +14,7 @@ export class AddonConfigEffects {
     this.actions$.pipe(
       ofType(AddonConfigActions.save),
       switchMap(({ name, contentType, languages, sort }) =>
-        this.addonConfigsService.save({ name, type: contentType, languages: [...languages], sort }).pipe(
+        this.addonConfigsService.create({ name, type: contentType, languages: [...languages], sort }).pipe(
           map(({ id }) => AddonConfigActions.saveSuccess({ id })),
           catchError(() => of(AddonConfigActions.saveFailure({ error: 'Failed to save config. Are you logged in?' }))),
         ),

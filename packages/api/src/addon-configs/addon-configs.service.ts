@@ -10,6 +10,13 @@ interface CreateAddonConfigDto {
   sort: string;
 }
 
+interface UpdateAddonConfigDto {
+  name?: string;
+  type?: 'movie' | 'tv';
+  languages?: string[];
+  sort?: string;
+}
+
 @Injectable()
 export class AddonConfigsService {
   constructor(
@@ -27,5 +34,21 @@ export class AddonConfigsService {
 
   findById(id: string): Promise<AddonConfigDocument | null> {
     return this.addonConfigModel.findById(id).exec();
+  }
+
+  updateByOwner(id: string, userId: string, data: UpdateAddonConfigDto): Promise<AddonConfigDocument | null> {
+    return this.addonConfigModel
+      .findOneAndUpdate(
+        { _id: new Types.ObjectId(id), owner: new Types.ObjectId(userId) },
+        { $set: data },
+        { new: true },
+      )
+      .exec();
+  }
+
+  deleteByOwner(id: string, userId: string): Promise<AddonConfigDocument | null> {
+    return this.addonConfigModel
+      .findOneAndDelete({ _id: new Types.ObjectId(id), owner: new Types.ObjectId(userId) })
+      .exec();
   }
 }

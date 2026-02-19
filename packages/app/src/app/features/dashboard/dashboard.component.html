@@ -1,0 +1,122 @@
+<div class="page-header">
+    <h2 class="page-title">Dashboard</h2>
+</div>
+
+@if (!catalogsStore.loading() && catalogsStore.items().length > 0) {
+    <div class="stats-row" role="list" aria-label="Catalog statistics">
+        <div class="stat-chip" role="listitem">
+            <mat-icon aria-hidden="true">video_library</mat-icon>
+            <span>{{ catalogsStore.items().length }}
+                catalog{{ catalogsStore.items().length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="stat-chip" role="listitem">
+            <mat-icon aria-hidden="true">movie</mat-icon>
+            <span>{{ movieCount() }} movie{{ movieCount() !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="stat-chip" role="listitem">
+            <mat-icon aria-hidden="true">tv</mat-icon>
+            <span>{{ tvCount() }} TV show{{ tvCount() !== 1 ? 's' : '' }}</span>
+        </div>
+    </div>
+}
+
+<!-- My Catalogs -->
+<section class="dash-section" aria-labelledby="section-catalogs">
+    <div class="section-header">
+        <h3 class="section-title" id="section-catalogs">
+            <mat-icon aria-hidden="true">video_library</mat-icon>
+            My Catalogs
+        </h3>
+        <a mat-button routerLink="/catalogs" aria-label="View all catalogs">
+            View all
+            <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+        </a>
+    </div>
+
+    @if (catalogsStore.loading()) {
+        <div class="state-center">
+            <mat-spinner diameter="40" aria-label="Loading catalogs"/>
+        </div>
+    } @else if (catalogsStore.items().length === 0) {
+        <div class="empty-state">
+            <mat-icon class="empty-icon" aria-hidden="true">video_library</mat-icon>
+            <p class="empty-message">No catalogs yet.</p>
+            <a mat-flat-button routerLink="/catalogs">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                Create your first catalog
+            </a>
+        </div>
+    } @else {
+        <div class="preview-grid">
+            @for (catalog of previewCatalogs(); track catalog.id) {
+                <div class="preview-tile" [style.background]="catalogGradient(catalog)">
+                    <span class="preview-type">{{ catalog.type === 'movie' ? 'Movies' : 'TV Shows' }}</span>
+                    <span class="preview-name">{{ catalog.name }}</span>
+                </div>
+            }
+            @if (extraCount() > 0) {
+                <a class="preview-tile preview-more"
+                   routerLink="/catalogs"
+                   [attr.aria-label]="'+' + extraCount() + ' more catalogs'">
+                    <mat-icon aria-hidden="true">more_horiz</mat-icon>
+                    <span>+{{ extraCount() }} more</span>
+                </a>
+            }
+        </div>
+    }
+</section>
+
+<!-- Curated Lists -->
+<section class="dash-section" aria-labelledby="section-curated">
+    <div class="section-header">
+        <h3 class="section-title" id="section-curated">
+            <mat-icon aria-hidden="true">local_library</mat-icon>
+            Curated Lists
+        </h3>
+        <span class="badge-soon" role="status">Coming soon</span>
+    </div>
+    <div class="preview-grid" aria-hidden="true">
+        @for (teaser of curatedTeasers; track teaser.title) {
+            <div class="preview-tile preview-teaser" [style.background]="teaser.gradient">
+                <mat-icon class="teaser-icon" aria-hidden="true">{{ teaser.icon }}</mat-icon>
+                <span class="preview-name">{{ teaser.title }}</span>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Integrations -->
+<section class="dash-section" aria-labelledby="section-integrations">
+    <div class="section-header">
+        <h3 class="section-title" id="section-integrations">
+            <mat-icon aria-hidden="true">extension</mat-icon>
+            Integrations
+        </h3>
+        <a mat-button routerLink="/integrations" aria-label="View all integrations">
+            View all
+            <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+        </a>
+    </div>
+    <div class="integration-row">
+        <div class="integration-status-card">
+            <span class="int-logo int-tmdb" aria-label="TMDB logo">TMDB</span>
+            <div class="int-info">
+                <span class="int-name">The Movie Database</span>
+                <span class="int-status int-status--off">
+                    <mat-icon aria-hidden="true">link_off</mat-icon>
+                    Not connected
+                </span>
+            </div>
+        </div>
+        <div class="integration-status-card">
+            <span class="int-logo int-trakt" aria-label="Trakt logo">trakt</span>
+            <div class="int-info">
+                <span class="int-name">Trakt</span>
+                <span class="int-status int-status--off">
+                    <mat-icon aria-hidden="true">link_off</mat-icon>
+                    Not connected
+                </span>
+            </div>
+        </div>
+    </div>
+</section>

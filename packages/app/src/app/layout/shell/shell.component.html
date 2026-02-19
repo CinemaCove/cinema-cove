@@ -1,0 +1,65 @@
+<mat-toolbar class="app-toolbar">
+    <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle navigation">
+        <mat-icon>menu</mat-icon>
+    </button>
+
+    <a routerLink="/" class="brand" aria-label="CinemaCove home">
+        <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="1" y="5" width="22" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="3" y="7.5" width="2.5" height="2.5" rx="0.5" fill="currentColor"/>
+            <rect x="3" y="11" width="2.5" height="2.5" rx="0.5" fill="currentColor"/>
+            <rect x="3" y="14.5" width="2.5" height="2.5" rx="0.5" fill="currentColor"/>
+            <rect x="18.5" y="7.5" width="2.5" height="2.5" rx="0.5" fill="currentColor"/>
+            <rect x="18.5" y="11" width="2.5" height="2.5" rx="0.5" fill="currentColor"/>
+            <rect x="18.5" y="14.5" width="2.5" height="2.5" rx="0.5" fill="currentColor"/>
+            <line x1="7.5" y1="5" x2="7.5" y2="19" stroke="currentColor" stroke-width="1" stroke-dasharray="2 1"/>
+            <line x1="16.5" y1="5" x2="16.5" y2="19" stroke="currentColor" stroke-width="1" stroke-dasharray="2 1"/>
+            <path d="M10.5 9.5l4.5 2.5-4.5 2.5V9.5z" fill="currentColor"/>
+        </svg>
+        <span class="brand-name">CinemaCove</span>
+    </a>
+
+    <span class="spacer"></span>
+
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Account menu">
+        <mat-icon>account_circle</mat-icon>
+    </button>
+</mat-toolbar>
+
+<mat-menu #userMenu="matMenu">
+    <a mat-menu-item routerLink="/integrations">
+        <mat-icon>extension</mat-icon>
+        <span>Integrations</span>
+    </a>
+    <mat-divider />
+    <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Sign out</span>
+    </button>
+</mat-menu>
+
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav
+            [mode]="isHandset() ? 'over' : 'side'"
+            [opened]="!isHandset() || sidenavOpen()"
+            (closedStart)="sidenavOpen.set(false)">
+        <mat-nav-list>
+            @for (item of navItems; track item.route) {
+                <a mat-list-item
+                   [routerLink]="item.route"
+                   routerLinkActive="active-nav-item"
+                   [routerLinkActiveOptions]="{ exact: item.exact }"
+                   (click)="isHandset() && sidenavOpen.set(false)">
+                    <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                    <span matListItemTitle>{{ item.label }}</span>
+                </a>
+            }
+        </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+        <main class="main-content">
+            <router-outlet />
+        </main>
+    </mat-sidenav-content>
+</mat-sidenav-container>

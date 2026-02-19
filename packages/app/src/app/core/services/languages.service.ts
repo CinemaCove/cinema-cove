@@ -14,7 +14,7 @@ export class LanguagesService {
 
   getLanguages() {
     return this.http.get<ConfigurationLanguage[]>(
-      `${environment.apiUrl}/languages`,
+      `${environment.apiUrl}/reference/languages`,
     );
   }
 }

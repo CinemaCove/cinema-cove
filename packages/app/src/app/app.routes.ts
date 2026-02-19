@@ -6,9 +6,37 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/addon-config/addon-config.component').then(
-        (m) => m.AddonConfigComponent,
-      ),
+      import('./layout/shell/shell.component').then((m) => m.ShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent,
+          ),
+      },
+      {
+        path: 'catalogs',
+        loadComponent: () =>
+          import('./features/catalogs/catalogs.component').then(
+            (m) => m.CatalogsComponent,
+          ),
+      },
+      {
+        path: 'curated',
+        loadComponent: () =>
+          import('./features/curated/curated.component').then(
+            (m) => m.CuratedComponent,
+          ),
+      },
+      {
+        path: 'integrations',
+        loadComponent: () =>
+          import('./features/integrations/integrations.component').then(
+            (m) => m.IntegrationsComponent,
+          ),
+      },
+    ],
   },
   {
     path: 'login',
@@ -18,7 +46,9 @@ export const routes: Routes = [
   {
     path: 'register',
     loadComponent: () =>
-      import('./features/register/register.component').then((m) => m.RegisterComponent),
+      import('./features/register/register.component').then(
+        (m) => m.RegisterComponent,
+      ),
   },
   {
     path: 'auth/callback',

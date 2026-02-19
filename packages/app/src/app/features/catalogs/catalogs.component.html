@@ -1,0 +1,43 @@
+<div class="page-header">
+    <h2 class="page-title">My Catalogs</h2>
+</div>
+
+@if (catalogsStore.loading()) {
+    <div class="state-center">
+        <mat-spinner diameter="48"/>
+    </div>
+} @else if (catalogsStore.status() === 'error') {
+    <div class="state-center">
+        <p class="state-message">Failed to load catalogs.</p>
+        <button mat-stroked-button (click)="catalogsStore.load()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+        </button>
+    </div>
+} @else if (catalogsStore.items().length === 0) {
+    <div class="state-center">
+        <mat-icon class="empty-icon">video_library</mat-icon>
+        <p class="state-message">No catalogs yet.</p>
+        <button mat-flat-button (click)="openFormDialog()">
+            <mat-icon>add</mat-icon>
+            Create your first catalog
+        </button>
+    </div>
+} @else {
+    <div class="catalog-grid">
+        @for (config of catalogsStore.items(); track config.id) {
+            <cc-catalog-card
+                    [config]="config"
+                    [isDeleting]="catalogsStore.deletingId() === config.id"
+                    (editClicked)="openFormDialog(config)"
+                    (deleteClicked)="openDeleteConfirm(config)"/>
+        }
+    </div>
+}
+
+<button mat-fab
+        class="fab"
+        aria-label="Create new catalog"
+        (click)="openFormDialog()">
+    <mat-icon>add</mat-icon>
+</button>

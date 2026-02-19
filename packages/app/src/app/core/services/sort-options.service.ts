@@ -12,6 +12,6 @@ export class SortOptionsService {
   private readonly http = inject(HttpClient);
 
   getSortOptions() {
-    return this.http.get<SortOption[]>(`${environment.apiUrl}/sort-options`);
+    return this.http.get<SortOption[]>(`${environment.apiUrl}/reference/sort-options`);
   }
 }

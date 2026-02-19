@@ -3,28 +3,39 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface AddonConfigSavePayload {
+export interface AddonConfigPayload {
   name: string;
   type: 'movie' | 'tv';
   languages: string[];
   sort: string;
 }
 
-export interface AddonConfigListItem {
+export interface AddonConfigItem {
   id: string;
   name: string;
-  type: string;
+  type: 'movie' | 'tv';
+  languages: string[];
+  sort: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AddonConfigsService {
   private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/addon-configs`;
 
-  save(config: AddonConfigSavePayload): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(`${environment.apiUrl}/addon-configs`, config);
+  list(): Observable<AddonConfigItem[]> {
+    return this.http.get<AddonConfigItem[]>(this.base);
   }
 
-  list(): Observable<AddonConfigListItem[]> {
-    return this.http.get<AddonConfigListItem[]>(`${environment.apiUrl}/addon-configs`);
+  create(config: AddonConfigPayload): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(this.base, config);
+  }
+
+  update(id: string, config: Partial<AddonConfigPayload>): Observable<{ id: string }> {
+    return this.http.patch<{ id: string }>(`${this.base}/${id}`, config);
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }
