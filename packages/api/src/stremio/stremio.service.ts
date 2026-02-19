@@ -49,7 +49,7 @@ export class StremioService {
     );
 
     const nameLower = config.name.toLowerCase();
-    const catalogType = `CinemaCove-${config.name}`;
+    const catalogType = `CC-${config.name}`;
     const genreOptions = genres.map((g) => g.name);
 
     const catalogs = config.languages.map((lang) => ({

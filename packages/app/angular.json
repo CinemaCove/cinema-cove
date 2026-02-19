@@ -65,6 +65,10 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json",
+            "allowedHosts": ["eustolia-eucalyptic-chris.ngrok-free.dev"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "app:build:production"

@@ -108,9 +108,10 @@ export class TmdbService {
           withOriginalLanguage: language,
           sortBy: tmdbSort,
           page,
+          ...(sortBy === 'vote_average.desc' ? { 'voteAverage.gte': 300 } : {}),
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
-        } as any),
+        }),
       this.shortCacheTtl,
     );
   }
@@ -131,6 +132,7 @@ export class TmdbService {
           withOriginalLanguage: language,
           sortBy: tmdbSort,
           page,
+          ...(sortBy === 'vote_average.desc' ? { 'voteCount.gte': 100 } : {}),
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
         } as any),

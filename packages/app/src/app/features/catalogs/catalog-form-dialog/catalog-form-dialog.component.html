@@ -5,7 +5,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Catalog Name</mat-label>
-            <input matInput formControlName="name" placeholder="e.g. Action"/>
+            <input matInput formControlName="name" placeholder="e.g. French"/>
             <mat-hint>Letters, numbers, - and _ only (max 20)</mat-hint>
             @if (form.controls.name.dirty) {
                 @if (form.controls.name.hasError('required')) {

@@ -16,6 +16,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../shared/confirm-dialog/confirm-dialog.component';
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'cc-catalogs',
@@ -34,18 +35,23 @@ export class CatalogsComponent implements OnInit {
   private readonly languagesStore = inject(LanguagesStore);
   private readonly sortOptionsStore = inject(SortOptionsStore);
   private readonly dialog = inject(MatDialog);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     this.catalogsStore.load();
     this.languagesStore.load();
     this.sortOptionsStore.load();
+
+    if (this.route.snapshot.queryParamMap.get('action') === 'create') {
+      this.openFormDialog();
+    }
   }
 
   openFormDialog(config?: AddonConfigItem): void {
     this.dialog
       .open<CatalogFormDialogComponent, { config?: AddonConfigItem }, CatalogFormDialogResult>(
         CatalogFormDialogComponent,
-        { data: { config }, width: '560px', maxWidth: '95vw' },
+        { data: { config }, width: '560px', maxWidth: '95vw', maxHeight: '95vh' },
       )
       .afterClosed()
       .subscribe((result) => {

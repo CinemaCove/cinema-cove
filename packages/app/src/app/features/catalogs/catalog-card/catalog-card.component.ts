@@ -8,8 +8,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AddonConfigItem } from '../../../core/services/addon-configs.service';
 import { LanguagesStore } from '../../../signal-store/languages.store';
 import { SortOptionsStore } from '../../../signal-store/sort-options.store';
-import { environment } from '../../../../environments/environment';
-
 @Component({
   selector: 'cc-catalog-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,10 +55,7 @@ export class CatalogCardComponent {
 
   readonly hiddenCount = computed(() => Math.max(0, this.config().languages.length - 3));
 
-  readonly installUrl = computed(() => {
-    const host = new URL(environment.apiUrl || window.location.origin).host;
-    return `stremio://${host}/${this.config().id}/manifest.json`;
-  });
+  readonly installUrl = computed(() => this.config().installUrl);
 
   copyUrl(): void {
     void navigator.clipboard.writeText(this.installUrl()).then(() => {

@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Patch, Post, Req, Request, UseGuards } from '@nestjs/common';
+import type { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AddonConfigsService } from './addon-configs.service';
 
@@ -28,7 +29,7 @@ export class AddonConfigsController {
   }
 
   @Get()
-  async list(@Request() req: { user: { sub: string } }) {
+  async list(@Req() req: ExpressRequest & { user: { sub: string } }) {
     const docs = await this.addonConfigsService.findByOwner(req.user.sub);
     return docs.map((d) => ({
       id: d._id,
@@ -36,6 +37,7 @@ export class AddonConfigsController {
       type: d.type,
       languages: d.languages,
       sort: d.sort,
+      installUrl: `stremio://${req.get('host')}/${d._id}/manifest.json`,
     }));
   }
 

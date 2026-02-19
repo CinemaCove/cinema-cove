@@ -1,0 +1,8 @@
+{
+  "/auth/login": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/auth/register": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/auth/google": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/auth/facebook": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/addon-configs": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/reference": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true }
+}

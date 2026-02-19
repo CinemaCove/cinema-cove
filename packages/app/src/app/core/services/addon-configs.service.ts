@@ -16,6 +16,7 @@ export interface AddonConfigItem {
   type: 'movie' | 'tv';
   languages: string[];
   sort: string;
+  installUrl: string;
 }
 
 @Injectable({ providedIn: 'root' })

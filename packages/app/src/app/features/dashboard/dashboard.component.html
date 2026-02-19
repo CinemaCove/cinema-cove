@@ -27,7 +27,8 @@
             <mat-icon aria-hidden="true">video_library</mat-icon>
             My Catalogs
         </h3>
-        <a mat-button routerLink="/catalogs" aria-label="View all catalogs">
+        <a mat-button routerLink="/catalogs"
+           aria-label="View all catalogs">
             View all
             <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
         </a>
@@ -41,7 +42,9 @@
         <div class="empty-state">
             <mat-icon class="empty-icon" aria-hidden="true">video_library</mat-icon>
             <p class="empty-message">No catalogs yet.</p>
-            <a mat-flat-button routerLink="/catalogs">
+            <a mat-flat-button
+               routerLink="/catalogs"
+               [queryParams]="{action: 'create'}">
                 <mat-icon aria-hidden="true">add</mat-icon>
                 Create your first catalog
             </a>
