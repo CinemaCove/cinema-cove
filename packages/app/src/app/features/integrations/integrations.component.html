@@ -84,32 +84,33 @@
 
 </div>
 
-<!-- TMDB Lists -->
 @if (store.tmdbConnected()) {
-    <section class="lists-section" aria-labelledby="tmdb-lists-heading">
-        <h3 class="section-title" id="tmdb-lists-heading">Your TMDB Lists</h3>
-        <p class="section-subtitle">Install these as Stremio addons to stream directly from your lists.</p>
 
-        @if (store.listsLoading()) {
-            <div class="lists-loading" aria-label="Loading TMDB lists">
-                <mat-spinner diameter="32"/>
-            </div>
-        } @else {
+    @if (store.listsLoading()) {
+        <div class="lists-loading" aria-label="Loading your TMDB lists">
+            <mat-spinner diameter="32"/>
+        </div>
+    } @else {
+
+        <!-- Built-in Lists -->
+        <section class="lists-section" aria-labelledby="builtin-lists-heading">
+            <h3 class="section-title" id="builtin-lists-heading">TMDB Lists</h3>
+            <p class="section-subtitle">Your watchlist, favorites, and rated titles.</p>
             <div class="lists-grid">
-                @for (list of store.tmdbLists(); track list.listType + list.type) {
+                @for (list of store.builtinLists(); track list.listType + list.type) {
                     <mat-card class="list-card" appearance="outlined">
                         <div class="list-card-content">
                             <mat-icon class="list-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
                             <div class="list-info">
                                 <span class="list-label">{{ list.label }}</span>
-                                <span class="list-count">{{ list.totalResults }} {{ list.type === 'movie' ? 'movies' : 'shows' }}</span>
+                                <span class="list-count">{{ list.itemCount }} {{ list.type === 'movie' ? 'movies' : 'shows' }}</span>
                             </div>
                             <button mat-icon-button
                                     [disabled]="store.isInstalling()"
-                                    [attr.aria-label]="'Install ' + list.label + ' as Stremio addon'"
-                                    [matTooltip]="'Install on Stremio'"
-                                    (click)="store.installTmdbList({ listType: list.listType, type: list.type, label: list.label })">
-                                @if (isInstalling(list.listType, list.type)) {
+                                    [attr.aria-label]="'Install ' + list.label + ' on Stremio'"
+                                    matTooltip="Install on Stremio"
+                                    (click)="store.installBuiltinList(list)">
+                                @if (store.installingKey() === list.listType + '-' + list.type) {
                                     <mat-spinner diameter="20"/>
                                 } @else {
                                     <mat-icon>download</mat-icon>
@@ -119,6 +120,64 @@
                     </mat-card>
                 }
             </div>
-        }
-    </section>
+        </section>
+
+        <!-- Custom Lists -->
+        <section class="lists-section" aria-labelledby="custom-lists-heading">
+            <div class="lists-header">
+                <div>
+                    <h3 class="section-title" id="custom-lists-heading">Your Custom Lists</h3>
+                    <p class="section-subtitle">User-created lists — movies and TV shows as separate catalogs.</p>
+                </div>
+                @if (store.listsTotalPages() > 1) {
+                    <div class="lists-pagination" role="navigation" aria-label="Custom list pages">
+                        <button mat-icon-button
+                                [disabled]="!store.hasPrevPage()"
+                                (click)="store.prevPage()"
+                                aria-label="Previous page">
+                            <mat-icon>chevron_left</mat-icon>
+                        </button>
+                        <span class="page-label" aria-live="polite">{{ store.listsPage() }} / {{ store.listsTotalPages() }}</span>
+                        <button mat-icon-button
+                                [disabled]="!store.hasNextPage()"
+                                (click)="store.nextPage()"
+                                aria-label="Next page">
+                            <mat-icon>chevron_right</mat-icon>
+                        </button>
+                    </div>
+                }
+            </div>
+
+            @if (store.customLists().length === 0) {
+                <p class="lists-empty">No custom lists found on your TMDB account.</p>
+            } @else {
+                <div class="lists-grid">
+                    @for (list of store.customLists(); track list.id) {
+                        <mat-card class="list-card" appearance="outlined">
+                            <div class="list-card-content">
+                                <mat-icon class="list-icon" aria-hidden="true">list</mat-icon>
+                                <div class="list-info">
+                                    <span class="list-label" [title]="list.name">{{ list.name }}</span>
+                                    <span class="list-count">{{ list.itemCount }} items</span>
+                                </div>
+                                <button mat-icon-button
+                                        [disabled]="store.isInstalling()"
+                                        [attr.aria-label]="'Install ' + list.name + ' on Stremio'"
+                                        matTooltip="Install on Stremio"
+                                        (click)="store.installCustomList(list)">
+                                    @if (store.installingKey() === list.id) {
+                                        <mat-spinner diameter="20"/>
+                                    } @else {
+                                        <mat-icon>download</mat-icon>
+                                    }
+                                </button>
+                            </div>
+                        </mat-card>
+                    }
+                </div>
+            }
+        </section>
+
+    }
+
 }

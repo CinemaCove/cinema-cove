@@ -7,5 +7,6 @@ export interface AddonConfig {
   languages: string[];
   sort: SortBy;
   source: 'discover' | 'tmdb-list';
+  tmdbListId?: string;
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
 }

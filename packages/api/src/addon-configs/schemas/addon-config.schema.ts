@@ -23,6 +23,9 @@ export class AddonConfig {
   @Prop({ required: true, enum: ['discover', 'tmdb-list'], default: 'discover' })
   source!: 'discover' | 'tmdb-list';
 
+  @Prop()
+  tmdbListId?: string;
+
   @Prop({ enum: ['watchlist', 'favorites', 'rated'] })
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
 }

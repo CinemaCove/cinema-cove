@@ -37,9 +37,4 @@ export class IntegrationsComponent implements OnInit {
       this.snackBar.open('TMDB connected successfully!', undefined, { duration: 3000 });
     }
   }
-
-  isInstalling(listType: string, type: string): boolean {
-    const i = this.store.installing();
-    return i?.listType === listType && i?.type === type;
-  }
 }

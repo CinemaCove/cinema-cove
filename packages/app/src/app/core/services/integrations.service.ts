@@ -9,21 +9,29 @@ export interface TmdbStatus {
   username: string | null;
 }
 
-export interface TmdbListInfo {
+export interface TmdbBuiltinList {
   listType: 'watchlist' | 'favorites' | 'rated';
   type: 'movie' | 'tv';
   label: string;
   icon: string;
-  totalResults: number;
+  itemCount: number;
 }
 
-export interface InstallTmdbListRequest {
-  listType: 'watchlist' | 'favorites' | 'rated';
-  type: 'movie' | 'tv';
-  label: string;
+export interface TmdbCustomList {
+  id: string;
+  name: string;
+  description: string;
+  itemCount: number;
 }
 
-export interface InstallTmdbListResponse {
+export interface TmdbListsResponse {
+  builtinLists: TmdbBuiltinList[];
+  customLists: TmdbCustomList[];
+  totalPages: number;
+  page: number;
+}
+
+export interface InstallResponse {
   id: string;
   installUrl: string;
 }
@@ -45,11 +53,28 @@ export class IntegrationsService {
     return this.http.delete<void>(`${this.base}/tmdb/disconnect`);
   }
 
-  getTmdbLists(): Observable<{ lists: TmdbListInfo[] }> {
-    return this.http.get<{ lists: TmdbListInfo[] }>(`${this.base}/tmdb/lists`);
+  getTmdbLists(page: number): Observable<TmdbListsResponse> {
+    return this.http.get<TmdbListsResponse>(`${this.base}/tmdb/lists?page=${page}`);
   }
 
-  installTmdbList(body: InstallTmdbListRequest): Observable<InstallTmdbListResponse> {
-    return this.http.post<InstallTmdbListResponse>(`${this.base}/tmdb/lists/install`, body);
+  installBuiltinList(
+    listType: 'watchlist' | 'favorites' | 'rated',
+    type: 'movie' | 'tv',
+    label: string,
+  ): Observable<InstallResponse> {
+    return this.http.post<InstallResponse>(`${this.base}/tmdb/lists/install`, {
+      kind: 'builtin',
+      listType,
+      type,
+      label,
+    });
+  }
+
+  installCustomList(listId: string, name: string): Observable<InstallResponse> {
+    return this.http.post<InstallResponse>(`${this.base}/tmdb/lists/install`, {
+      kind: 'custom',
+      listId,
+      name,
+    });
   }
 }

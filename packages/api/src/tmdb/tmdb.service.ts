@@ -230,15 +230,45 @@ export class TmdbService {
     sessionId: string,
     page: number = 1,
   ): Promise<{ results: any[]; total_results: number; total_pages: number }> {
-    const endpoint = listType === 'watchlist'
-      ? `watchlist/${mediaType === 'movie' ? 'movies' : 'tv'}`
-      : listType === 'favorites'
-        ? `favorite/${mediaType === 'movie' ? 'movies' : 'tv'}`
-        : `rated/${mediaType === 'movie' ? 'movies' : 'tv'}`;
+    const endpoint =
+      listType === 'watchlist'
+        ? `watchlist/${mediaType === 'movie' ? 'movies' : 'tv'}`
+        : listType === 'favorites'
+          ? `favorite/${mediaType === 'movie' ? 'movies' : 'tv'}`
+          : `rated/${mediaType === 'movie' ? 'movies' : 'tv'}`;
 
     const res = await fetch(
       `https://api.themoviedb.org/3/account/${accountId}/${endpoint}?api_key=${this.apiKey}&session_id=${sessionId}&page=${page}`,
     );
     return res.json() as Promise<{ results: any[]; total_results: number; total_pages: number }>;
+  }
+
+  async getUserCustomLists(
+    accountId: number,
+    sessionId: string,
+    page: number = 1,
+  ): Promise<{
+    results: { id: number; name: string; description: string; item_count: number }[];
+    total_pages: number;
+    total_results: number;
+  }> {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/account/${accountId}/lists?api_key=${this.apiKey}&session_id=${sessionId}&page=${page}`,
+    );
+    return res.json() as Promise<{ results: { id: number; name: string; description: string; item_count: number }[]; total_pages: number; total_results: number }>;
+  }
+
+  async getCustomListItems(
+    listId: string,
+    page: number = 1,
+  ): Promise<{
+    items: { id: number; media_type: string; title?: string; name?: string; poster_path?: string; overview: string }[];
+    total_pages: number;
+    total_results: number;
+  }> {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/list/${listId}?api_key=${this.apiKey}&page=${page}`,
+    );
+    return res.json() as Promise<{ items: any[]; total_pages: number; total_results: number }>;
   }
 }

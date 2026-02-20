@@ -9,6 +9,7 @@ interface CreateAddonConfigDto {
   languages: string[];
   sort: string;
   source?: 'discover' | 'tmdb-list';
+  tmdbListId?: string;
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
 }
 

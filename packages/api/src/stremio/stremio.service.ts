@@ -231,33 +231,58 @@ export class StremioService {
     return { metas };
   }
 
-  // ── TMDB User Lists ────────────────────────────────────────────────────────
+  // ── TMDB Custom Lists ──────────────────────────────────────────────────────
 
-  private readonly listTypeLabels: Record<string, string> = {
-    watchlist: 'Watchlist',
-    favorites: 'Favorites',
-    rated: 'Rated',
-  };
+  /** Max chars for addon/catalog name shown in Stremio sidebar. */
+  private truncate(name: string, max = 20): string {
+    return name.length > max ? name.slice(0, max - 1) + '…' : name;
+  }
 
   async buildTmdbListManifest(config: AddonConfig): Promise<object> {
-    const label = this.listTypeLabels[config.tmdbListType!] ?? config.tmdbListType;
-    const catalogType = config.type === 'movie' ? 'movie' : 'series';
+    const shortName = this.truncate(config.name);
     const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+    const addonId = config.tmdbListId
+      ? `com.cinemacove.list.${config.owner}.${config.tmdbListId}`
+      : `com.cinemacove.builtin.${config.owner}.${config.tmdbListType}.${config.type}`;
+
+    // Built-in lists (watchlist/favorites/rated) are single-type.
+    // Custom lists are mixed → expose both catalog types so Stremio can request either.
+    const isBuiltin = !!config.tmdbListType;
+    const catalogType = isBuiltin
+      ? config.type === 'movie' ? 'movie' : 'series'
+      : undefined;
+
+    const catalogs = isBuiltin
+      ? [
+          {
+            type: catalogType!,
+            id: `cinemacove-builtin-${config.tmdbListType}-${config.type}`,
+            name: shortName,
+            extra: [{ name: 'skip', isRequired: false }],
+          },
+        ]
+      : [
+          {
+            type: 'movie',
+            id: `cinemacove-list-${config.tmdbListId}-movie`,
+            name: shortName,
+            extra: [{ name: 'skip', isRequired: false }],
+          },
+          {
+            type: 'series',
+            id: `cinemacove-list-${config.tmdbListId}-series`,
+            name: shortName,
+            extra: [{ name: 'skip', isRequired: false }],
+          },
+        ];
 
     return {
-      id: `com.cinemacove.tmdb-${config.tmdbListType}-${config.type}-${config.owner}`,
+      id: addonId,
       version: '1.0.0',
-      name: `CinemaCove – TMDB ${label}`,
+      name: `CinemaCove – ${shortName}`,
       resources: ['catalog'],
-      types: [catalogType],
-      catalogs: [
-        {
-          type: catalogType,
-          id: `cinemacove-tmdb-${config.tmdbListType}-${config.type}`,
-          name: `TMDB ${label}`,
-          extra: [{ name: 'skip', isRequired: false }],
-        },
-      ],
+      types: isBuiltin ? [catalogType!] : ['movie', 'series'],
+      catalogs,
       behaviorHints: {
         configurable: true,
         configurationURL: configureUrl,
@@ -265,24 +290,45 @@ export class StremioService {
     };
   }
 
+  /**
+   * @param stremioType  - 'movie' or 'series', from the Stremio catalog URL
+   * @param creds        - required only for built-in lists (watchlist/favorites/rated)
+   */
   async buildTmdbListCatalog(
     config: AddonConfig,
+    stremioType: 'movie' | 'series',
     skip: number,
-    accountId: number,
-    sessionId: string,
+    creds?: { accountId: number; sessionId: string },
   ): Promise<object> {
     const page = Math.floor(skip / 20) + 1;
-    const listType = config.tmdbListType!;
-    const type = config.type;
+    const tmdbMediaType = stremioType === 'movie' ? 'movie' : 'tv';
 
-    const data = await this.tmdbService.getTmdbUserList(listType, type, accountId, sessionId, page);
-    const results: any[] = data.results ?? [];
+    let items: any[];
+
+    if (config.tmdbListType) {
+      // Built-in list — needs user credentials
+      if (!creds) return { metas: [] };
+      const data = await this.tmdbService.getTmdbUserList(
+        config.tmdbListType,
+        config.type, // 'movie' | 'tv' — already type-specific
+        creds.accountId,
+        creds.sessionId,
+        page,
+      );
+      // Only return items when the requested Stremio type matches the list's content type
+      if (tmdbMediaType !== config.type) return { metas: [] };
+      items = data.results ?? [];
+    } else {
+      // Custom list — public endpoint, no credentials needed
+      const data = await this.tmdbService.getCustomListItems(config.tmdbListId!, page);
+      items = (data.items ?? []).filter((item: any) => item.media_type === tmdbMediaType);
+    }
 
     const limit = pLimit(5);
     const metas: StremioMeta[] = await Promise.all(
-      results.map((item) =>
+      items.map((item) =>
         limit(async () => {
-          if (type === 'movie') {
+          if (tmdbMediaType === 'movie') {
             const details = await this.tmdbService.getMovieDetails(item.id);
             const directors = [...details.credits!.crew]
               .filter((c) => c.job === 'Director')
@@ -296,8 +342,8 @@ export class StremioService {
               id: details.imdbId || `tmdb:${details.id}`,
               type: 'movie',
               name: details.originalTitle,
-              poster: item.posterPath
-                ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
+              poster: item.poster_path
+                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
                 : undefined,
               description: details.overview,
               imdbId: details.imdbId,
@@ -331,8 +377,8 @@ export class StremioService {
               id: details.externalIds?.imdbId || `tmdb:${details.id}`,
               type: 'series',
               name: details.name,
-              poster: item.posterPath
-                ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
+              poster: item.poster_path
+                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
                 : undefined,
               description: details.overview,
               imdbId: details.externalIds?.imdbId,

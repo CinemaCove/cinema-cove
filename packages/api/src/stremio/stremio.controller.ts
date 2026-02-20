@@ -21,13 +21,22 @@ export class StremioController {
     return this.stremioService.buildManifest(config);
   }
 
-  /** Catalog without extras — first page, no genre filter */
+  /** Catalog without extras — first page */
   @Get(':configId/catalog/:type/:id.json')
-  async getCatalog(@Param('configId') configId: string, @Param('id') id: string) {
+  async getCatalog(
+    @Param('configId') configId: string,
+    @Param('type') stremioType: string,
+    @Param('id') id: string,
+  ) {
     const config = await this.resolveConfig(configId);
     if (config.source === 'tmdb-list') {
-      const { accountId, sessionId } = await this.resolveTmdbCredentials(config.owner);
-      return this.stremioService.buildTmdbListCatalog(config, 0, accountId, sessionId);
+      const creds = config.tmdbListType ? await this.resolveTmdbCredentials(config.owner) : undefined;
+      return this.stremioService.buildTmdbListCatalog(
+        config,
+        stremioType === 'movie' ? 'movie' : 'series',
+        0,
+        creds,
+      );
     }
     return this.stremioService.buildCatalog(config.type, id, 0, config.sort);
   }
@@ -40,6 +49,7 @@ export class StremioController {
   @Get(':configId/catalog/:type/:id/:extras.json')
   async getCatalogWithExtras(
     @Param('configId') configId: string,
+    @Param('type') stremioType: string,
     @Param('id') id: string,
     @Param('extras') extras: string,
   ) {
@@ -48,8 +58,13 @@ export class StremioController {
     const skip = parseInt(params.get('skip') ?? '0', 10);
 
     if (config.source === 'tmdb-list') {
-      const { accountId, sessionId } = await this.resolveTmdbCredentials(config.owner);
-      return this.stremioService.buildTmdbListCatalog(config, skip, accountId, sessionId);
+      const creds = config.tmdbListType ? await this.resolveTmdbCredentials(config.owner) : undefined;
+      return this.stremioService.buildTmdbListCatalog(
+        config,
+        stremioType === 'movie' ? 'movie' : 'series',
+        skip,
+        creds,
+      );
     }
 
     const genre = params.get('genre') ?? undefined;
@@ -67,15 +82,16 @@ export class StremioController {
       languages: doc.languages,
       sort: doc.sort as AddonConfig['sort'],
       source: (doc.source ?? 'discover') as AddonConfig['source'],
+      tmdbListId: doc.tmdbListId,
       tmdbListType: doc.tmdbListType,
     };
   }
 
-  private async resolveTmdbCredentials(ownerId: string): Promise<{ accountId: number; sessionId: string }> {
+  private async resolveTmdbCredentials(
+    ownerId: string,
+  ): Promise<{ accountId: number; sessionId: string } | undefined> {
     const user = await this.usersService.findById(ownerId);
-    if (!user?.tmdbSessionId || !user?.tmdbAccountId) {
-      throw new NotFoundException('TMDB credentials not found for this user');
-    }
+    if (!user?.tmdbSessionId || !user?.tmdbAccountId) return undefined;
     return { accountId: user.tmdbAccountId!, sessionId: user.tmdbSessionId! };
   }
 }

@@ -100,21 +100,48 @@
   margin-top: 40px;
 }
 
+.lists-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .section-title {
   margin: 0 0 4px;
   font: var(--mat-sys-title-large);
 }
 
 .section-subtitle {
-  margin: 0 0 20px;
+  margin: 0;
   font: var(--mat-sys-body-medium);
   color: var(--mat-sys-on-surface-variant);
+}
+
+.lists-pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.page-label {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+  min-width: 40px;
+  text-align: center;
 }
 
 .lists-loading {
   display: flex;
   justify-content: center;
   padding: 32px 0;
+}
+
+.lists-empty {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .lists-grid {

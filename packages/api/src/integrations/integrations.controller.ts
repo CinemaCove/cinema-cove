@@ -19,13 +19,13 @@ import { TmdbService } from '../tmdb/tmdb.service';
 import { UsersService } from '../users/users.service';
 import { AddonConfigsService } from '../addon-configs/addon-configs.service';
 
-const TMDB_LISTS = [
+const BUILTIN_LISTS = [
   { listType: 'watchlist' as const, type: 'movie' as const, label: 'Movie Watchlist', icon: 'bookmark' },
-  { listType: 'watchlist' as const, type: 'tv' as const, label: 'TV Watchlist', icon: 'bookmark' },
+  { listType: 'watchlist' as const, type: 'tv' as const,    label: 'TV Watchlist',    icon: 'bookmark' },
   { listType: 'favorites' as const, type: 'movie' as const, label: 'Favorite Movies', icon: 'favorite' },
-  { listType: 'favorites' as const, type: 'tv' as const, label: 'Favorite TV Shows', icon: 'favorite' },
-  { listType: 'rated' as const, type: 'movie' as const, label: 'Rated Movies', icon: 'star' },
-  { listType: 'rated' as const, type: 'tv' as const, label: 'Rated TV Shows', icon: 'star' },
+  { listType: 'favorites' as const, type: 'tv' as const,    label: 'Favorite Shows',  icon: 'favorite' },
+  { listType: 'rated' as const,     type: 'movie' as const, label: 'Rated Movies',    icon: 'star' },
+  { listType: 'rated' as const,     type: 'tv' as const,    label: 'Rated Shows',     icon: 'star' },
 ];
 
 @Controller('integrations')
@@ -56,10 +56,6 @@ export class IntegrationsController {
 
   // ── Connect ───────────────────────────────────────────────────────────────
 
-  /**
-   * Returns the TMDB authentication URL.
-   * Angular opens it via window.location.href so the user can approve on TMDB.
-   */
   @Post('tmdb/connect')
   @UseGuards(AuthGuard('jwt'))
   async tmdbConnect(
@@ -108,59 +104,91 @@ export class IntegrationsController {
     await this.usersService.clearTmdbSession(req.user.sub);
   }
 
-  // ── TMDB Lists ────────────────────────────────────────────────────────────
+  // ── Lists ─────────────────────────────────────────────────────────────────
 
   @Get('tmdb/lists')
   @UseGuards(AuthGuard('jwt'))
-  async getTmdbLists(@Req() req: Request & { user: { sub: string } }) {
+  async getTmdbLists(
+    @Req() req: Request & { user: { sub: string } },
+    @Query('page') pageStr?: string,
+  ) {
     const user = await this.usersService.findById(req.user.sub);
     if (!user?.tmdbSessionId || !user?.tmdbAccountId) {
-      return { lists: [] };
+      return { builtinLists: [], customLists: [], totalPages: 0, page: 1 };
     }
 
-    const lists = await Promise.all(
-      TMDB_LISTS.map(async (def) => {
-        const data = await this.tmdbService.getTmdbUserList(
-          def.listType,
-          def.type,
-          user.tmdbAccountId!,
-          user.tmdbSessionId!,
-          1,
-        );
-        return {
-          listType: def.listType,
-          type: def.type,
-          label: def.label,
-          icon: def.icon,
-          totalResults: data.total_results ?? 0,
-        };
-      }),
-    );
+    const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1);
 
-    return { lists };
+    const [builtinResults, customData] = await Promise.all([
+      Promise.all(
+        BUILTIN_LISTS.map(async (def) => {
+          const data = await this.tmdbService.getTmdbUserList(
+            def.listType,
+            def.type,
+            user.tmdbAccountId!,
+            user.tmdbSessionId!,
+            1,
+          );
+          return {
+            listType: def.listType,
+            type: def.type,
+            label: def.label,
+            icon: def.icon,
+            itemCount: data.total_results ?? 0,
+          };
+        }),
+      ),
+      this.tmdbService.getUserCustomLists(user.tmdbAccountId, user.tmdbSessionId, page),
+    ]);
+
+    return {
+      builtinLists: builtinResults,
+      customLists: customData.results.map((l) => ({
+        id: String(l.id),
+        name: l.name,
+        description: l.description,
+        itemCount: l.item_count,
+      })),
+      totalPages: customData.total_pages,
+      page,
+    };
   }
 
   @Post('tmdb/lists/install')
   @UseGuards(AuthGuard('jwt'))
   async installTmdbList(
     @Req() req: Request & { user: { sub: string } },
-    @Body() body: { listType: 'watchlist' | 'favorites' | 'rated'; type: 'movie' | 'tv'; label: string },
+    @Body()
+    body:
+      | { kind: 'builtin'; listType: 'watchlist' | 'favorites' | 'rated'; type: 'movie' | 'tv'; label: string }
+      | { kind: 'custom'; listId: string; name: string },
   ) {
-    const def = TMDB_LISTS.find((d) => d.listType === body.listType && d.type === body.type);
-    if (!def) throw new BadRequestException('Invalid list type');
-
-    const doc = await this.addonConfigsService.create(req.user.sub, {
-      name: body.label,
-      type: body.type,
-      languages: [],
-      sort: 'popularity.desc',
-      source: 'tmdb-list',
-      tmdbListType: body.listType,
-    });
+    let doc;
+    if (body.kind === 'builtin') {
+      const def = BUILTIN_LISTS.find((d) => d.listType === body.listType && d.type === body.type);
+      if (!def) throw new BadRequestException('Invalid built-in list');
+      doc = await this.addonConfigsService.create(req.user.sub, {
+        name: body.label,
+        type: body.type,
+        languages: [],
+        sort: 'popularity.desc',
+        source: 'tmdb-list',
+        tmdbListType: body.listType,
+      });
+    } else {
+      if (!body.listId || !body.name) throw new BadRequestException('listId and name are required');
+      doc = await this.addonConfigsService.create(req.user.sub, {
+        name: body.name,
+        type: 'movie', // placeholder — ignored for custom list
+        languages: [],
+        sort: 'popularity.desc',
+        source: 'tmdb-list',
+        tmdbListId: body.listId,
+      });
+    }
 
     const host = req.get('X-Forwarded-Host') ?? req.get('host');
     const installUrl = `stremio://${host}/api/${doc._id}/manifest.json`;
-
     return { id: doc._id, installUrl };
   }
 }

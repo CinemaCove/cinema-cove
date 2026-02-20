@@ -5,24 +5,25 @@ import { EMPTY, pipe } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import {
   IntegrationsService,
-  TmdbListInfo,
+  TmdbBuiltinList,
+  TmdbCustomList,
   TmdbStatus,
-  InstallTmdbListRequest,
 } from '../core/services/integrations.service';
 
-interface InstallingList {
-  listType: string;
-  type: string;
-}
+/** A unique key for tracking which install button is spinning. */
+export type InstallKey = string;
 
 interface IntegrationsState {
   readonly tmdb: TmdbStatus | null;
   readonly status: 'idle' | 'loading' | 'success' | 'error';
   readonly connecting: boolean;
   readonly disconnecting: boolean;
-  readonly tmdbLists: readonly TmdbListInfo[];
+  readonly builtinLists: readonly TmdbBuiltinList[];
+  readonly customLists: readonly TmdbCustomList[];
+  readonly listsPage: number;
+  readonly listsTotalPages: number;
   readonly listsStatus: 'idle' | 'loading' | 'success' | 'error';
-  readonly installing: InstallingList | null;
+  readonly installingKey: InstallKey | null;
 }
 
 export const IntegrationsStore = signalStore(
@@ -32,19 +33,43 @@ export const IntegrationsStore = signalStore(
     status: 'idle',
     connecting: false,
     disconnecting: false,
-    tmdbLists: [],
+    builtinLists: [],
+    customLists: [],
+    listsPage: 1,
+    listsTotalPages: 1,
     listsStatus: 'idle',
-    installing: null,
+    installingKey: null,
   }),
-  withComputed(({ tmdb, status, listsStatus, installing }) => ({
+  withComputed(({ tmdb, status, listsStatus, installingKey, listsPage, listsTotalPages }) => ({
     loading: computed(() => status() === 'loading'),
     tmdbConnected: computed(() => tmdb()?.connected ?? false),
     tmdbUsername: computed(() => tmdb()?.username ?? null),
     listsLoading: computed(() => listsStatus() === 'loading'),
-    isInstalling: computed(() => installing() !== null),
+    hasPrevPage: computed(() => listsPage() > 1),
+    hasNextPage: computed(() => listsPage() < listsTotalPages()),
+    isInstalling: computed(() => installingKey() !== null),
   })),
   withMethods((store) => {
     const service = inject(IntegrationsService);
+
+    function fetchLists(page: number) {
+      patchState(store, { listsStatus: 'loading', listsPage: page });
+      return service.getTmdbLists(page).pipe(
+        tap(({ builtinLists, customLists, totalPages }) =>
+          patchState(store, {
+            builtinLists,
+            customLists,
+            listsTotalPages: totalPages || 1,
+            listsStatus: 'success',
+          }),
+        ),
+        catchError(() => {
+          patchState(store, { listsStatus: 'error' });
+          return EMPTY;
+        }),
+      );
+    }
+
     return {
       load: rxMethod<void>(
         pipe(
@@ -88,7 +113,10 @@ export const IntegrationsStore = signalStore(
                 patchState(store, {
                   disconnecting: false,
                   tmdb: { connected: false, accountId: null, username: null },
-                  tmdbLists: [],
+                  builtinLists: [],
+                  customLists: [],
+                  listsPage: 1,
+                  listsTotalPages: 1,
                   listsStatus: 'idle',
                 }),
               ),
@@ -102,13 +130,28 @@ export const IntegrationsStore = signalStore(
       ),
 
       loadTmdbLists: rxMethod<void>(
+        pipe(switchMap(() => fetchLists(1))),
+      ),
+
+      prevPage: rxMethod<void>(
+        pipe(switchMap(() => fetchLists(store.listsPage() - 1))),
+      ),
+
+      nextPage: rxMethod<void>(
+        pipe(switchMap(() => fetchLists(store.listsPage() + 1))),
+      ),
+
+      installBuiltinList: rxMethod<TmdbBuiltinList>(
         pipe(
-          tap(() => patchState(store, { listsStatus: 'loading' })),
-          switchMap(() =>
-            service.getTmdbLists().pipe(
-              tap(({ lists }) => patchState(store, { tmdbLists: lists, listsStatus: 'success' })),
+          tap((list) => patchState(store, { installingKey: `${list.listType}-${list.type}` })),
+          switchMap((list) =>
+            service.installBuiltinList(list.listType, list.type, list.label).pipe(
+              tap(({ installUrl }) => {
+                patchState(store, { installingKey: null });
+                window.location.href = installUrl;
+              }),
               catchError(() => {
-                patchState(store, { listsStatus: 'error' });
+                patchState(store, { installingKey: null });
                 return EMPTY;
               }),
             ),
@@ -116,17 +159,17 @@ export const IntegrationsStore = signalStore(
         ),
       ),
 
-      installTmdbList: rxMethod<InstallTmdbListRequest>(
+      installCustomList: rxMethod<TmdbCustomList>(
         pipe(
-          tap((req) => patchState(store, { installing: { listType: req.listType, type: req.type } })),
-          switchMap((req) =>
-            service.installTmdbList(req).pipe(
+          tap((list) => patchState(store, { installingKey: list.id })),
+          switchMap((list) =>
+            service.installCustomList(list.id, list.name).pipe(
               tap(({ installUrl }) => {
-                patchState(store, { installing: null });
+                patchState(store, { installingKey: null });
                 window.location.href = installUrl;
               }),
               catchError(() => {
-                patchState(store, { installing: null });
+                patchState(store, { installingKey: null });
                 return EMPTY;
               }),
             ),
