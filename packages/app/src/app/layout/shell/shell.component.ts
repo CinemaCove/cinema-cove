@@ -38,6 +38,7 @@ const NAV_ITEMS = [
   styleUrl: './shell.component.scss',
 })
 export class ShellComponent {
+  readonly year = new Date().getFullYear();
   private readonly auth = inject(AuthService);
   private readonly breakpointObserver = inject(BreakpointObserver);
 
