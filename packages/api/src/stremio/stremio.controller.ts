@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Redirect } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StremioService } from './stremio.service';
 import { AddonConfigsService } from '../addon-configs/addon-configs.service';
@@ -13,6 +13,13 @@ export class StremioController {
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Get('configure')
+  @Redirect()
+  getConfigure() {
+    const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+    return { url: configureUrl, statusCode: 302 };
+  }
 
   @Get('manifest.json')
   getLandingManifest() {
