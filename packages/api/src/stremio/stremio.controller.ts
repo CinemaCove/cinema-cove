@@ -1,4 +1,5 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { StremioService } from './stremio.service';
 import { AddonConfigsService } from '../addon-configs/addon-configs.service';
 import { UsersService } from '../users/users.service';
@@ -10,7 +11,27 @@ export class StremioController {
     private readonly stremioService: StremioService,
     private readonly addonConfigsService: AddonConfigsService,
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
   ) {}
+
+  @Get('manifest.json')
+  getLandingManifest() {
+    const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+    return {
+      id: 'com.cinemacove',
+      version: '1.0.0',
+      name: 'CinemaCove',
+      description:
+        'Personalised movie and TV catalogs for Stremio, powered by TMDb and Trakt. Configure your own catalogs with custom languages, filters, and sorting.',
+      resources: ['catalog'],
+      types: ['movie', 'series'],
+      catalogs: [],
+      behaviorHints: {
+        configurable: true,
+        configurationURL: configureUrl,
+      },
+    };
+  }
 
   @Get(':configId/manifest.json')
   async getManifest(@Param('configId') configId: string) {
