@@ -65,21 +65,50 @@
             <div class="card-meta">
                 <h3 class="card-title">Trakt</h3>
                 <p class="card-desc">
-                    Sync your Trakt watch history, lists, and recommendations into your catalogs.
+                    Sync your Trakt watchlist, favorites, rated titles, and custom lists into your catalogs.
                 </p>
             </div>
         </div>
         <mat-divider/>
         <div class="card-footer">
-            <span class="status-chip status-off">
-                <mat-icon aria-hidden="true">link_off</mat-icon>
-                Not connected
-            </span>
-            <button mat-flat-button disabled aria-describedby="trakt-soon">
-                Connect
-            </button>
+            @if (store.traktLoading()) {
+                <span class="status-chip">
+                    <mat-spinner diameter="14" aria-label="Loading status"/>
+                    Checking...
+                </span>
+                <span></span>
+            } @else if (store.traktConnected()) {
+                <span class="status-chip status-on">
+                    <mat-icon aria-hidden="true">link</mat-icon>
+                    {{ store.traktUsername() }}
+                </span>
+                <button mat-stroked-button
+                        [disabled]="store.traktDisconnecting()"
+                        (click)="store.disconnectTrakt()"
+                        aria-label="Disconnect Trakt account">
+                    @if (store.traktDisconnecting()) {
+                        <mat-spinner diameter="18"/>
+                    } @else {
+                        Disconnect
+                    }
+                </button>
+            } @else {
+                <span class="status-chip status-off">
+                    <mat-icon aria-hidden="true">link_off</mat-icon>
+                    Not connected
+                </span>
+                <button mat-flat-button
+                        [disabled]="store.traktConnecting()"
+                        (click)="store.connectTrakt()"
+                        aria-label="Connect your Trakt account">
+                    @if (store.traktConnecting()) {
+                        <mat-spinner diameter="18"/>
+                    } @else {
+                        Connect
+                    }
+                </button>
+            }
         </div>
-        <p class="coming-soon-note" id="trakt-soon">Coming soon</p>
     </mat-card>
 
 </div>
@@ -166,6 +195,83 @@
                                         matTooltip="Install on Stremio"
                                         (click)="store.installCustomList(list)">
                                     @if (store.installingKey() === list.id) {
+                                        <mat-spinner diameter="20"/>
+                                    } @else {
+                                        <mat-icon>download</mat-icon>
+                                    }
+                                </button>
+                            </div>
+                        </mat-card>
+                    }
+                </div>
+            }
+        </section>
+
+    }
+
+}
+
+@if (store.traktConnected()) {
+
+    @if (store.traktListsLoading()) {
+        <div class="lists-loading" aria-label="Loading your Trakt lists">
+            <mat-spinner diameter="32"/>
+        </div>
+    } @else {
+
+        <!-- Trakt Built-in Lists -->
+        <section class="lists-section" aria-labelledby="trakt-builtin-lists-heading">
+            <h3 class="section-title" id="trakt-builtin-lists-heading">Trakt Lists</h3>
+            <p class="section-subtitle">Your watchlist, favorites, and rated titles.</p>
+            <div class="lists-grid">
+                @for (list of store.traktBuiltinLists(); track list.listType + list.type) {
+                    <mat-card class="list-card" appearance="outlined">
+                        <div class="list-card-content">
+                            <mat-icon class="list-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                            <div class="list-info">
+                                <span class="list-label">{{ list.label }}</span>
+                                <span class="list-count">{{ list.itemCount }} {{ list.type === 'movie' ? 'movies' : 'shows' }}</span>
+                            </div>
+                            <button mat-icon-button
+                                    [disabled]="store.isTraktInstalling()"
+                                    [attr.aria-label]="'Install ' + list.label + ' on Stremio'"
+                                    matTooltip="Install on Stremio"
+                                    (click)="store.installTraktBuiltinList(list)">
+                                @if (store.traktInstallingKey() === list.listType + '-' + list.type) {
+                                    <mat-spinner diameter="20"/>
+                                } @else {
+                                    <mat-icon>download</mat-icon>
+                                }
+                            </button>
+                        </div>
+                    </mat-card>
+                }
+            </div>
+        </section>
+
+        <!-- Trakt Custom Lists -->
+        <section class="lists-section" aria-labelledby="trakt-custom-lists-heading">
+            <h3 class="section-title" id="trakt-custom-lists-heading">Your Trakt Lists</h3>
+            <p class="section-subtitle">User-created lists — movies and TV shows as separate catalogs.</p>
+
+            @if (store.traktCustomLists().length === 0) {
+                <p class="lists-empty">No custom lists found on your Trakt account.</p>
+            } @else {
+                <div class="lists-grid">
+                    @for (list of store.traktCustomLists(); track list.id) {
+                        <mat-card class="list-card" appearance="outlined">
+                            <div class="list-card-content">
+                                <mat-icon class="list-icon" aria-hidden="true">list</mat-icon>
+                                <div class="list-info">
+                                    <span class="list-label" [title]="list.name">{{ list.name }}</span>
+                                    <span class="list-count">{{ list.itemCount }} items</span>
+                                </div>
+                                <button mat-icon-button
+                                        [disabled]="store.isTraktInstalling()"
+                                        [attr.aria-label]="'Install ' + list.name + ' on Stremio'"
+                                        matTooltip="Install on Stremio"
+                                        (click)="store.installTraktCustomList(list)">
+                                    @if (store.traktInstallingKey() === list.id) {
                                         <mat-spinner diameter="20"/>
                                     } @else {
                                         <mat-icon>download</mat-icon>

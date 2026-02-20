@@ -36,6 +36,18 @@ export class User {
 
   @Prop()
   tmdbUsername?: string;
+
+  @Prop()
+  traktAccessToken?: string;
+
+  @Prop()
+  traktRefreshToken?: string;
+
+  @Prop()
+  traktUsername?: string;
+
+  @Prop()
+  traktExpiresAt?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

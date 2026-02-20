@@ -35,8 +35,8 @@ export class CatalogCardComponent {
   readonly gradientStyle = computed(() => ({
     background:
       this.config().type === 'movie'
-        ? 'linear-gradient(135deg, #0D1B3E 0%, #1A237E 60%, #4A148C 100%)'
-        : 'linear-gradient(135deg, #003832 0%, #004D40 60%, #0D47A1 100%)',
+        ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
+        : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)',
   }));
 
   readonly sortLabel = computed(() => {

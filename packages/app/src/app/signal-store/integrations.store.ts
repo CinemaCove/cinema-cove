@@ -8,6 +8,9 @@ import {
   TmdbBuiltinList,
   TmdbCustomList,
   TmdbStatus,
+  TraktBuiltinList,
+  TraktCustomList,
+  TraktStatus,
 } from '../core/services/integrations.service';
 
 /** A unique key for tracking which install button is spinning. */
@@ -24,6 +27,15 @@ interface IntegrationsState {
   readonly listsTotalPages: number;
   readonly listsStatus: 'idle' | 'loading' | 'success' | 'error';
   readonly installingKey: InstallKey | null;
+  // Trakt
+  readonly trakt: TraktStatus | null;
+  readonly traktStatus: 'idle' | 'loading' | 'success' | 'error';
+  readonly traktConnecting: boolean;
+  readonly traktDisconnecting: boolean;
+  readonly traktBuiltinLists: readonly TraktBuiltinList[];
+  readonly traktCustomLists: readonly TraktCustomList[];
+  readonly traktListsStatus: 'idle' | 'loading' | 'success' | 'error';
+  readonly traktInstallingKey: InstallKey | null;
 }
 
 export const IntegrationsStore = signalStore(
@@ -39,8 +51,19 @@ export const IntegrationsStore = signalStore(
     listsTotalPages: 1,
     listsStatus: 'idle',
     installingKey: null,
+    trakt: null,
+    traktStatus: 'idle',
+    traktConnecting: false,
+    traktDisconnecting: false,
+    traktBuiltinLists: [],
+    traktCustomLists: [],
+    traktListsStatus: 'idle',
+    traktInstallingKey: null,
   }),
-  withComputed(({ tmdb, status, listsStatus, installingKey, listsPage, listsTotalPages }) => ({
+  withComputed(({
+    tmdb, status, listsStatus, installingKey, listsPage, listsTotalPages,
+    trakt, traktStatus, traktListsStatus, traktInstallingKey,
+  }) => ({
     loading: computed(() => status() === 'loading'),
     tmdbConnected: computed(() => tmdb()?.connected ?? false),
     tmdbUsername: computed(() => tmdb()?.username ?? null),
@@ -48,6 +71,11 @@ export const IntegrationsStore = signalStore(
     hasPrevPage: computed(() => listsPage() > 1),
     hasNextPage: computed(() => listsPage() < listsTotalPages()),
     isInstalling: computed(() => installingKey() !== null),
+    traktLoading: computed(() => traktStatus() === 'loading'),
+    traktConnected: computed(() => trakt()?.connected ?? false),
+    traktUsername: computed(() => trakt()?.username ?? null),
+    traktListsLoading: computed(() => traktListsStatus() === 'loading'),
+    isTraktInstalling: computed(() => traktInstallingKey() !== null),
   })),
   withMethods((store) => {
     const service = inject(IntegrationsService);
@@ -181,6 +209,128 @@ export const IntegrationsStore = signalStore(
         patchState(store, {
           tmdb: { connected: true, accountId, username },
           status: 'success',
+        });
+      },
+
+      // ── Trakt ──────────────────────────────────────────────────────────────
+
+      loadTrakt: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { traktStatus: 'loading' })),
+          switchMap(() =>
+            service.getTraktStatus().pipe(
+              tap((trakt) => patchState(store, { trakt, traktStatus: 'success' })),
+              catchError(() => {
+                patchState(store, { traktStatus: 'error' });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      connectTrakt: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { traktConnecting: true })),
+          switchMap(() =>
+            service.connectTrakt().pipe(
+              tap(({ authUrl }) => {
+                patchState(store, { traktConnecting: false });
+                window.location.href = authUrl;
+              }),
+              catchError(() => {
+                patchState(store, { traktConnecting: false });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      disconnectTrakt: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { traktDisconnecting: true })),
+          switchMap(() =>
+            service.disconnectTrakt().pipe(
+              tap(() =>
+                patchState(store, {
+                  traktDisconnecting: false,
+                  trakt: { connected: false, username: null },
+                  traktBuiltinLists: [],
+                  traktCustomLists: [],
+                  traktListsStatus: 'idle',
+                }),
+              ),
+              catchError(() => {
+                patchState(store, { traktDisconnecting: false });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      loadTraktLists: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { traktListsStatus: 'loading' })),
+          switchMap(() =>
+            service.getTraktLists().pipe(
+              tap(({ builtinLists, customLists }) =>
+                patchState(store, {
+                  traktBuiltinLists: builtinLists,
+                  traktCustomLists: customLists,
+                  traktListsStatus: 'success',
+                }),
+              ),
+              catchError(() => {
+                patchState(store, { traktListsStatus: 'error' });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      installTraktBuiltinList: rxMethod<TraktBuiltinList>(
+        pipe(
+          tap((list) => patchState(store, { traktInstallingKey: `${list.listType}-${list.type}` })),
+          switchMap((list) =>
+            service.installTraktBuiltinList(list.listType, list.type, list.label).pipe(
+              tap(({ installUrl }) => {
+                patchState(store, { traktInstallingKey: null });
+                window.location.href = installUrl;
+              }),
+              catchError(() => {
+                patchState(store, { traktInstallingKey: null });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      installTraktCustomList: rxMethod<TraktCustomList>(
+        pipe(
+          tap((list) => patchState(store, { traktInstallingKey: list.id })),
+          switchMap((list) =>
+            service.installTraktCustomList(list.id, list.slug, list.name).pipe(
+              tap(({ installUrl }) => {
+                patchState(store, { traktInstallingKey: null });
+                window.location.href = installUrl;
+              }),
+              catchError(() => {
+                patchState(store, { traktInstallingKey: null });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      markTraktConnected(username: string): void {
+        patchState(store, {
+          trakt: { connected: true, username },
+          traktStatus: 'success',
         });
       },
     };

@@ -10,9 +10,11 @@ interface CreateAddonConfigDto {
   type: 'movie' | 'tv';
   languages: string[];
   sort: string;
-  source?: 'discover' | 'tmdb-list';
+  source?: 'discover' | 'tmdb-list' | 'trakt-list';
   tmdbListId?: string;
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
+  traktListId?: string;
+  traktListType?: 'watchlist' | 'favorites' | 'rated';
 }
 
 interface UpdateAddonConfigDto {
@@ -55,6 +57,20 @@ export class AddonConfigsService {
     };
     if (query.tmdbListType) filter['tmdbListType'] = query.tmdbListType;
     if (query.tmdbListId) filter['tmdbListId'] = query.tmdbListId;
+    if (query.type) filter['type'] = query.type;
+    return this.addonConfigModel.findOne(filter).exec();
+  }
+
+  findExistingTraktList(
+    userId: string,
+    query: { traktListType?: string; traktListId?: string; type?: string },
+  ): Promise<AddonConfigDocument | null> {
+    const filter: Record<string, unknown> = {
+      owner: new Types.ObjectId(userId),
+      source: 'trakt-list',
+    };
+    if (query.traktListType) filter['traktListType'] = query.traktListType;
+    if (query.traktListId) filter['traktListId'] = query.traktListId;
     if (query.type) filter['type'] = query.type;
     return this.addonConfigModel.findOne(filter).exec();
   }

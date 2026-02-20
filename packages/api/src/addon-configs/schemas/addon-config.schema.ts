@@ -20,14 +20,20 @@ export class AddonConfig {
   @Prop({ required: true })
   sort!: string;
 
-  @Prop({ required: true, enum: ['discover', 'tmdb-list'], default: 'discover' })
-  source!: 'discover' | 'tmdb-list';
+  @Prop({ required: true, enum: ['discover', 'tmdb-list', 'trakt-list'], default: 'discover' })
+  source!: 'discover' | 'tmdb-list' | 'trakt-list';
 
   @Prop()
   tmdbListId?: string;
 
   @Prop({ enum: ['watchlist', 'favorites', 'rated'] })
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
+
+  @Prop()
+  traktListId?: string;
+
+  @Prop({ enum: ['watchlist', 'favorites', 'rated'] })
+  traktListType?: 'watchlist' | 'favorites' | 'rated';
 }
 
 export const AddonConfigSchema = SchemaFactory.createForClass(AddonConfig);

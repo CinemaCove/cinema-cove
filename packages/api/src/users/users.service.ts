@@ -53,4 +53,30 @@ export class UsersService {
       )
       .exec();
   }
+
+  async saveTraktTokens(
+    userId: string,
+    data: { accessToken: string; refreshToken: string; username: string; expiresAt: number },
+  ): Promise<void> {
+    await this.userModel
+      .updateOne(
+        { _id: userId },
+        {
+          traktAccessToken: data.accessToken,
+          traktRefreshToken: data.refreshToken,
+          traktUsername: data.username,
+          traktExpiresAt: data.expiresAt,
+        },
+      )
+      .exec();
+  }
+
+  async clearTraktTokens(userId: string): Promise<void> {
+    await this.userModel
+      .updateOne(
+        { _id: userId },
+        { $unset: { traktAccessToken: '', traktRefreshToken: '', traktUsername: '', traktExpiresAt: '' } },
+      )
+      .exec();
+  }
 }

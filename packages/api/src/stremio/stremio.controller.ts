@@ -18,6 +18,9 @@ export class StremioController {
     if (config.source === 'tmdb-list') {
       return this.stremioService.buildTmdbListManifest(config);
     }
+    if (config.source === 'trakt-list') {
+      return this.stremioService.buildTraktListManifest(config);
+    }
     return this.stremioService.buildManifest(config);
   }
 
@@ -36,6 +39,16 @@ export class StremioController {
         stremioType === 'movie' ? 'movie' : 'series',
         0,
         creds,
+      );
+    }
+    if (config.source === 'trakt-list') {
+      const token = await this.resolveTraktAccessToken(config.owner);
+      if (!token) return { metas: [] };
+      return this.stremioService.buildTraktListCatalog(
+        config,
+        stremioType === 'movie' ? 'movie' : 'series',
+        0,
+        token,
       );
     }
     return this.stremioService.buildCatalog(config.type, id, 0, config.sort);
@@ -66,6 +79,16 @@ export class StremioController {
         creds,
       );
     }
+    if (config.source === 'trakt-list') {
+      const token = await this.resolveTraktAccessToken(config.owner);
+      if (!token) return { metas: [] };
+      return this.stremioService.buildTraktListCatalog(
+        config,
+        stremioType === 'movie' ? 'movie' : 'series',
+        skip,
+        token,
+      );
+    }
 
     const genre = params.get('genre') ?? undefined;
     const search = params.get('search') ?? undefined;
@@ -84,6 +107,8 @@ export class StremioController {
       source: (doc.source ?? 'discover') as AddonConfig['source'],
       tmdbListId: doc.tmdbListId,
       tmdbListType: doc.tmdbListType,
+      traktListId: doc.traktListId,
+      traktListType: doc.traktListType,
     };
   }
 
@@ -93,5 +118,10 @@ export class StremioController {
     const user = await this.usersService.findById(ownerId);
     if (!user?.tmdbSessionId || !user?.tmdbAccountId) return undefined;
     return { accountId: user.tmdbAccountId!, sessionId: user.tmdbSessionId! };
+  }
+
+  private async resolveTraktAccessToken(ownerId: string): Promise<string | undefined> {
+    const user = await this.usersService.findById(ownerId);
+    return user?.traktAccessToken ?? undefined;
   }
 }

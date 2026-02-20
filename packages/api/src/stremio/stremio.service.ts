@@ -3,11 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import {
   DiscoverMovieResultItem,
   DiscoverTvShowResultItem,
-  MovieDetailsWithAppends,
-  SearchMoviesResultItem,
-  SearchTvShowsResultItem,
 } from '@cinemacove/tmdb-client/v3';
 import { SortBy, TmdbService } from '../tmdb/tmdb.service';
+import { TraktService } from '../trakt/trakt.service';
 import { AddonConfig } from './types/addon-config.interface';
 
 import pLimit from 'p-limit';
@@ -34,6 +32,7 @@ interface StremioMeta {
 export class StremioService {
   constructor(
     private readonly tmdbService: TmdbService,
+    private readonly traktService: TraktService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -379,6 +378,182 @@ export class StremioService {
               name: details.name,
               poster: item.poster_path
                 ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                : undefined,
+              description: details.overview,
+              imdbId: details.externalIds?.imdbId,
+              genres: details.genres.map((g) => g.name),
+              releaseInfo: `${details.firstAirDate?.slice(0, 4)}-${details.lastAirDate?.slice(0, 4)}`,
+              director: directors,
+              cast: topActors,
+              imdbRating: details.voteAverage.toFixed(1),
+              trailers: (details.videos?.results ?? [])
+                .filter((v) => v.site === 'YouTube' && v.type === 'Trailer')
+                .map((v) => ({ source: v.key, type: 'Trailer' })),
+              runtime: details.episodeRunTime[0]
+                ? `${Math.floor(details.episodeRunTime[0] / 60)}h ${details.episodeRunTime[0] % 60}m`
+                    .replace(/0h /, '')
+                    .replace(/ 0m$/, 'h')
+                : 'N/A',
+              language: details.originalLanguage,
+              country: details.productionCountries.map((c) => c.name).join(', '),
+            } as StremioMeta;
+          }
+        }),
+      ),
+    );
+
+    return { metas };
+  }
+
+  // ── Trakt Lists ────────────────────────────────────────────────────────────
+
+  async buildTraktListManifest(config: AddonConfig): Promise<object> {
+    const shortName = this.truncate(config.name);
+    const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+    const addonId = config.traktListId
+      ? `com.cinemacove.trakt.list.${config.owner}.${config.traktListId}`
+      : `com.cinemacove.trakt.builtin.${config.owner}.${config.traktListType}.${config.type}`;
+
+    const isBuiltin = !!config.traktListType;
+    const catalogType = isBuiltin
+      ? config.type === 'movie' ? 'movie' : 'series'
+      : undefined;
+
+    const catalogs = isBuiltin
+      ? [
+          {
+            type: catalogType!,
+            id: `cinemacove-trakt-builtin-${config.traktListType}-${config.type}`,
+            name: shortName,
+            extra: [{ name: 'skip', isRequired: false }],
+          },
+        ]
+      : [
+          {
+            type: 'movie',
+            id: `cinemacove-trakt-list-${config.traktListId}-movie`,
+            name: shortName,
+            extra: [{ name: 'skip', isRequired: false }],
+          },
+          {
+            type: 'series',
+            id: `cinemacove-trakt-list-${config.traktListId}-series`,
+            name: shortName,
+            extra: [{ name: 'skip', isRequired: false }],
+          },
+        ];
+
+    return {
+      id: addonId,
+      version: '1.0.0',
+      name: `CinemaCove – ${shortName}`,
+      resources: ['catalog'],
+      types: isBuiltin ? [catalogType!] : ['movie', 'series'],
+      catalogs,
+      behaviorHints: {
+        configurable: true,
+        configurationURL: configureUrl,
+      },
+    };
+  }
+
+  /**
+   * @param stremioType   - 'movie' or 'series', from the Stremio catalog URL
+   * @param accessToken   - Trakt access token for the catalog owner
+   */
+  async buildTraktListCatalog(
+    config: AddonConfig,
+    stremioType: 'movie' | 'series',
+    skip: number,
+    accessToken: string,
+  ): Promise<object> {
+    const page = Math.floor(skip / 20) + 1;
+    const tmdbMediaType = stremioType === 'movie' ? 'movie' : 'tv';
+    const traktType = stremioType === 'movie' ? 'movies' : 'shows';
+
+    let tmdbIds: number[];
+
+    if (config.traktListType) {
+      // Built-in list — only matches the catalog's own type
+      if (tmdbMediaType !== config.type) return { metas: [] };
+      const items =
+        config.traktListType === 'watchlist'
+          ? await this.traktService.getWatchlist(accessToken, traktType, page)
+          : config.traktListType === 'favorites'
+            ? await this.traktService.getFavorites(accessToken, traktType, page)
+            : await this.traktService.getRatings(accessToken, traktType, page);
+
+      tmdbIds = (items as any[])
+        .map((item) => (tmdbMediaType === 'movie' ? item.movie?.ids?.tmdb : item.show?.ids?.tmdb))
+        .filter((id): id is number => !!id);
+    } else {
+      // Custom list — filter by requested type
+      const items = await this.traktService.getUserListItems(
+        accessToken,
+        config.traktListId!,
+        stremioType === 'movie' ? 'movie' : 'show',
+        page,
+      );
+      tmdbIds = (items as any[])
+        .map((item) => (tmdbMediaType === 'movie' ? item.movie?.ids?.tmdb : item.show?.ids?.tmdb))
+        .filter((id): id is number => !!id);
+    }
+
+    const limit = pLimit(5);
+    const metas: StremioMeta[] = await Promise.all(
+      tmdbIds.map((tmdbId) =>
+        limit(async () => {
+          if (tmdbMediaType === 'movie') {
+            const details = await this.tmdbService.getMovieDetails(tmdbId);
+            const directors = [...details.credits!.crew]
+              .filter((c) => c.job === 'Director')
+              .map((c) => c.name);
+            const topActors = [...details.credits!.cast]
+              .sort((a, b) => a.order - b.order)
+              .slice(0, 5)
+              .map((a) => a.name);
+
+            return {
+              id: details.imdbId || `tmdb:${details.id}`,
+              type: 'movie',
+              name: details.originalTitle,
+              poster: details.posterPath
+                ? `https://image.tmdb.org/t/p/w500${details.posterPath}`
+                : undefined,
+              description: details.overview,
+              imdbId: details.imdbId,
+              genres: details.genres.map((g) => g.name),
+              releaseInfo: details.releaseDate?.slice(0, 4),
+              director: directors,
+              cast: topActors,
+              imdbRating: details.voteAverage.toFixed(1),
+              trailers: (details.videos?.results ?? [])
+                .filter((v) => v.site === 'YouTube' && v.type === 'Trailer')
+                .map((v) => ({ source: v.key, type: 'Trailer' })),
+              runtime: details.runtime
+                ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m`
+                    .replace(/0h /, '')
+                    .replace(/ 0m$/, 'h')
+                : 'N/A',
+              language: details.originalLanguage,
+              country: details.productionCountries.map((c) => c.name).join(', '),
+            } as StremioMeta;
+          } else {
+            const details = await this.tmdbService.getTvShowDetails(tmdbId);
+            const directors = [...details.credits!.crew]
+              .filter((c) => c.job === 'Director')
+              .map((c) => c.name);
+            const topActors = [...details.credits!.cast]
+              .sort((a, b) => a.order - b.order)
+              .slice(0, 5)
+              .map((a) => a.name);
+
+            return {
+              id: details.externalIds?.imdbId || `tmdb:${details.id}`,
+              type: 'series',
+              name: details.name,
+              poster: details.posterPath
+                ? `https://image.tmdb.org/t/p/w500${details.posterPath}`
                 : undefined,
               description: details.overview,
               imdbId: details.externalIds?.imdbId,

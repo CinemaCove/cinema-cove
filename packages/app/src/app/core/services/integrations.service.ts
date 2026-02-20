@@ -36,6 +36,32 @@ export interface InstallResponse {
   installUrl: string;
 }
 
+export interface TraktStatus {
+  connected: boolean;
+  username: string | null;
+}
+
+export interface TraktBuiltinList {
+  listType: 'watchlist' | 'favorites' | 'rated';
+  type: 'movie' | 'tv';
+  label: string;
+  icon: string;
+  itemCount: number;
+}
+
+export interface TraktCustomList {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  itemCount: number;
+}
+
+export interface TraktListsResponse {
+  builtinLists: TraktBuiltinList[];
+  customLists: TraktCustomList[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class IntegrationsService {
   private readonly http = inject(HttpClient);
@@ -74,6 +100,46 @@ export class IntegrationsService {
     return this.http.post<InstallResponse>(`${this.base}/tmdb/lists/install`, {
       kind: 'custom',
       listId,
+      name,
+    });
+  }
+
+  // ── Trakt ──────────────────────────────────────────────────────────────────
+
+  getTraktStatus(): Observable<TraktStatus> {
+    return this.http.get<TraktStatus>(`${this.base}/trakt/status`);
+  }
+
+  connectTrakt(): Observable<{ authUrl: string }> {
+    return this.http.post<{ authUrl: string }>(`${this.base}/trakt/connect`, {});
+  }
+
+  disconnectTrakt(): Observable<void> {
+    return this.http.delete<void>(`${this.base}/trakt/disconnect`);
+  }
+
+  getTraktLists(): Observable<TraktListsResponse> {
+    return this.http.get<TraktListsResponse>(`${this.base}/trakt/lists`);
+  }
+
+  installTraktBuiltinList(
+    listType: 'watchlist' | 'favorites' | 'rated',
+    type: 'movie' | 'tv',
+    label: string,
+  ): Observable<InstallResponse> {
+    return this.http.post<InstallResponse>(`${this.base}/trakt/lists/install`, {
+      kind: 'builtin',
+      listType,
+      type,
+      label,
+    });
+  }
+
+  installTraktCustomList(listId: string, slug: string, name: string): Observable<InstallResponse> {
+    return this.http.post<InstallResponse>(`${this.base}/trakt/lists/install`, {
+      kind: 'custom',
+      listId,
+      slug,
       name,
     });
   }

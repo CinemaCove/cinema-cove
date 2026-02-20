@@ -31,10 +31,17 @@ export class IntegrationsComponent implements OnInit {
   ngOnInit(): void {
     this.store.load();
     this.store.loadTmdbLists();
+    this.store.loadTrakt();
+    this.store.loadTraktLists();
 
     const tmdb = this.route.snapshot.queryParamMap.get('tmdb');
     if (tmdb === 'connected') {
       this.snackBar.open('TMDB connected successfully!', undefined, { duration: 3000 });
+    }
+
+    const trakt = this.route.snapshot.queryParamMap.get('trakt');
+    if (trakt === 'connected') {
+      this.snackBar.open('Trakt connected successfully!', undefined, { duration: 3000 });
     }
   }
 }
