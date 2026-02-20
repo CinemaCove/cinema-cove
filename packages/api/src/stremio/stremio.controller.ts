@@ -23,6 +23,7 @@ export class StremioController {
       name: 'CinemaCove',
       description:
         'Personalised movie and TV catalogs for Stremio, powered by TMDb and Trakt. Configure your own catalogs with custom languages, filters, and sorting.',
+      logo: `${configureUrl}/web-app-manifest-512x512.png`,
       resources: ['catalog'],
       types: ['movie', 'series'],
       catalogs: [],
