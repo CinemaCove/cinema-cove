@@ -12,8 +12,8 @@
         "format": "npm run format --workspaces",
         "clean": "npm run clean --workspaces",
         "bump": "node scripts/bump-version.mjs",
-        "deploy:api": "dotenv -- curl -s -o /dev/null -w \"%{http_code}\" \"$RENDER_DEPLOY_HOOK_API\" && echo \" api deploy triggered\"",
-        "deploy:app": "dotenv -- curl -s -o /dev/null -w \"%{http_code}\" \"$RENDER_DEPLOY_HOOK_APP\" && echo \" app deploy triggered\"",
+        "deploy:api": "node scripts/deploy.mjs api",
+        "deploy:app": "node scripts/deploy.mjs app",
         "deploy": "npm run deploy:api && npm run deploy:app"
     },
     "devDependencies": {
