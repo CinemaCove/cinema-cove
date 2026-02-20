@@ -213,21 +213,6 @@ export class StremioService {
       ),
     );
 
-    // const stremioType = type === 'movie' ? 'movie' : 'series';
-    // const metas: StremioMeta[] = resultsWithDetails.map(
-    //   (item) =>
-    //     ({
-    //       id: `${item.imdbId}`,
-    //       type: stremioType,
-    //       name: 'title' in item ? item.title : item.name,
-    //       poster: item.posterPath
-    //         ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
-    //         : undefined,
-    //       description: item.overview,
-    //       imdbRating: '8.5',
-    //     }) as any,
-    // );
-
     return { metas };
   }
 
@@ -257,7 +242,7 @@ export class StremioService {
           {
             type: catalogType!,
             id: `cinemacove-builtin-${config.tmdbListType}-${config.type}`,
-            name: shortName,
+            name: `CC-${shortName}`,
             extra: [{ name: 'skip', isRequired: false }],
           },
         ]
@@ -265,13 +250,13 @@ export class StremioService {
           {
             type: 'movie',
             id: `cinemacove-list-${config.tmdbListId}-movie`,
-            name: shortName,
+            name: `CC-${shortName}`,
             extra: [{ name: 'skip', isRequired: false }],
           },
           {
             type: 'series',
             id: `cinemacove-list-${config.tmdbListId}-series`,
-            name: shortName,
+            name: `CC-${shortName}`,
             extra: [{ name: 'skip', isRequired: false }],
           },
         ];
