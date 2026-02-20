@@ -1,4 +1,10 @@
-import { Controller, Get, NotFoundException, Param, Redirect } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Redirect,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StremioService } from './stremio.service';
 import { AddonConfigsService } from '../addon-configs/addon-configs.service';
@@ -17,13 +23,19 @@ export class StremioController {
   @Get('configure')
   @Redirect()
   getConfigure() {
-    const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+    const configureUrl = this.configService.get<string>(
+      'CONFIGURE_URL',
+      'http://localhost:4200',
+    );
     return { url: configureUrl, statusCode: 302 };
   }
 
   @Get('manifest.json')
   getLandingManifest() {
-    const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+    const configureUrl = this.configService.get<string>(
+      'CONFIGURE_URL',
+      'http://localhost:4200',
+    );
     return {
       id: 'com.cinemacove',
       version: '1.0.0',
@@ -37,6 +49,11 @@ export class StremioController {
       behaviorHints: {
         configurable: true,
         configurationURL: configureUrl,
+      },
+      stremioAddonsConfig: {
+        issuer: 'https://stremio-addons.net',
+        signature:
+          'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..mtjbsZGexCvCI8wV-vpd-w.A5i9Fbisnid-4DMiAuMPE-zgTe9sVmjVDgg0nOTyPBx8f565fP6KKdgFH1knyGT0uEMNnuzAj931aN1TjerGKyyG9Jl0Z73Jh-XNn1WeK7zb69XyEcesEKQsvhhLRbXP.yxkHHG-4aGecNoElDx-gVQ',
       },
     };
   }
@@ -62,7 +79,9 @@ export class StremioController {
   ) {
     const config = await this.resolveConfig(configId);
     if (config.source === 'tmdb-list') {
-      const creds = config.tmdbListType ? await this.resolveTmdbCredentials(config.owner) : undefined;
+      const creds = config.tmdbListType
+        ? await this.resolveTmdbCredentials(config.owner)
+        : undefined;
       return this.stremioService.buildTmdbListCatalog(
         config,
         stremioType === 'movie' ? 'movie' : 'series',
@@ -80,7 +99,15 @@ export class StremioController {
         token,
       );
     }
-    return this.stremioService.buildCatalog(config.type, id, 0, config.sort, undefined, undefined, this.discoverFilters(config));
+    return this.stremioService.buildCatalog(
+      config.type,
+      id,
+      0,
+      config.sort,
+      undefined,
+      undefined,
+      this.discoverFilters(config),
+    );
   }
 
   /**
@@ -100,7 +127,9 @@ export class StremioController {
     const skip = parseInt(params.get('skip') ?? '0', 10);
 
     if (config.source === 'tmdb-list') {
-      const creds = config.tmdbListType ? await this.resolveTmdbCredentials(config.owner) : undefined;
+      const creds = config.tmdbListType
+        ? await this.resolveTmdbCredentials(config.owner)
+        : undefined;
       return this.stremioService.buildTmdbListCatalog(
         config,
         stremioType === 'movie' ? 'movie' : 'series',
@@ -121,7 +150,15 @@ export class StremioController {
 
     const genre = params.get('genre') ?? undefined;
     const search = params.get('search') ?? undefined;
-    return this.stremioService.buildCatalog(config.type, id, skip, config.sort, genre, search, this.discoverFilters(config));
+    return this.stremioService.buildCatalog(
+      config.type,
+      id,
+      skip,
+      config.sort,
+      genre,
+      search,
+      this.discoverFilters(config),
+    );
   }
 
   private async resolveConfig(id: string): Promise<AddonConfig> {
@@ -146,7 +183,9 @@ export class StremioController {
     };
   }
 
-  private discoverFilters(config: AddonConfig): import('../tmdb/tmdb.service').DiscoverFilters {
+  private discoverFilters(
+    config: AddonConfig,
+  ): import('../tmdb/tmdb.service').DiscoverFilters {
     return {
       includeAdult: config.includeAdult,
       minVoteAverage: config.minVoteAverage,
@@ -164,7 +203,9 @@ export class StremioController {
     return { accountId: user.tmdbAccountId!, sessionId: user.tmdbSessionId! };
   }
 
-  private async resolveTraktAccessToken(ownerId: string): Promise<string | undefined> {
+  private async resolveTraktAccessToken(
+    ownerId: string,
+  ): Promise<string | undefined> {
     const user = await this.usersService.findById(ownerId);
     return user?.traktAccessToken ?? undefined;
   }
