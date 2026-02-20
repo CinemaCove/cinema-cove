@@ -57,4 +57,11 @@ export const routes: Routes = [
         (m) => m.AuthCallbackComponent,
       ),
   },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./features/privacy/privacy.component').then(
+        (m) => m.PrivacyComponent,
+      ),
+  },
 ];
