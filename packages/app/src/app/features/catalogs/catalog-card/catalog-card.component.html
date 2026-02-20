@@ -1,0 +1,56 @@
+<mat-card appearance="outlined" class="catalog-card">
+    <div class="card-visual" [style]="gradientStyle()">
+        <span class="type-badge">{{ config().type === 'movie' ? 'Movies' : 'TV Shows' }}</span>
+    </div>
+
+    <mat-card-content>
+        <h3 class="catalog-name">{{ config().name }}</h3>
+        <p class="sort-label">{{ sortLabel() }}</p>
+        <div class="language-chips" aria-label="Selected languages">
+            @for (name of visibleLanguages(); track name) {
+                <span class="lang-chip">{{ name }}</span>
+            }
+            @if (hiddenCount() > 0) {
+                <span class="lang-chip lang-chip--more">+{{ hiddenCount() }} more</span>
+            }
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions class="card-actions">
+        <a mat-stroked-button
+           [href]="installUrl()"
+           class="install-btn"
+           aria-label="Open this catalog in Stremio">
+            <mat-icon>open_in_new</mat-icon>
+            Install
+        </a>
+
+        <span class="action-spacer"></span>
+
+        <button mat-icon-button
+                matTooltip="Copy URL"
+                aria-label="Copy install URL"
+                (click)="copyUrl()">
+            <mat-icon>content_copy</mat-icon>
+        </button>
+
+        <button mat-icon-button
+                matTooltip="Edit"
+                aria-label="Edit catalog"
+                (click)="editClicked.emit()">
+            <mat-icon>edit</mat-icon>
+        </button>
+
+        <button mat-icon-button
+                matTooltip="Delete"
+                aria-label="Delete catalog"
+                [disabled]="isDeleting()"
+                (click)="deleteClicked.emit()">
+            @if (isDeleting()) {
+                <mat-spinner diameter="20" />
+            } @else {
+                <mat-icon class="delete-icon">delete</mat-icon>
+            }
+        </button>
+    </mat-card-actions>
+</mat-card>

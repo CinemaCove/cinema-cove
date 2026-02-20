@@ -1,0 +1,264 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  margin: 0;
+  font: var(--mat-sys-headline-small);
+}
+
+// Stats row
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--mat-sys-surface-container);
+  font: var(--mat-sys-label-large);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Sections
+
+.dash-section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.badge-soon {
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+  font: var(--mat-sys-label-small);
+}
+
+// Preview grid
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.preview-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  border-radius: 12px;
+  height: 96px;
+  overflow: hidden;
+  color: white;
+  text-decoration: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 60%);
+  }
+}
+
+.preview-type {
+  position: relative;
+  font: var(--mat-sys-label-small);
+  opacity: 0.8;
+}
+
+.preview-name {
+  position: relative;
+  font: var(--mat-sys-title-small);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  &::before {
+    display: none;
+  }
+}
+
+// Curated teasers
+
+.preview-teaser {
+  opacity: 0.55;
+  filter: blur(0.8px);
+  pointer-events: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &::before {
+    display: none;
+  }
+}
+
+.teaser-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+// States
+
+.state-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container);
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.4;
+}
+
+.empty-message {
+  margin: 0;
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Integrations summary
+
+.integration-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.integration-status-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container);
+  flex: 1;
+  min-width: 200px;
+}
+
+.int-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.int-tmdb {
+  background: #032541;
+  color: #01d277;
+}
+
+.int-trakt {
+  background: #1a1a1a;
+  color: #ed1c24;
+}
+
+.int-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.int-name {
+  font: var(--mat-sys-body-medium);
+  font-weight: 500;
+}
+
+.int-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font: var(--mat-sys-label-small);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &--off {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &--on {
+    color: var(--mat-sys-primary);
+  }
+}

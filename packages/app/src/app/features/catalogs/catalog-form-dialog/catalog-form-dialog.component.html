@@ -1,0 +1,100 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" class="dialog-form">
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Catalog Name</mat-label>
+            <input matInput formControlName="name" placeholder="e.g. French"/>
+            <mat-hint>Letters, numbers, - and _ only (max 20)</mat-hint>
+            @if (form.controls.name.dirty) {
+                @if (form.controls.name.hasError('required')) {
+                    <mat-error>Name is required</mat-error>
+                } @else if (form.controls.name.hasError('pattern')) {
+                    <mat-error>Only letters, numbers, - and _ allowed</mat-error>
+                } @else if (form.controls.name.hasError('maxlength')) {
+                    <mat-error>Max 20 characters</mat-error>
+                }
+            }
+        </mat-form-field>
+
+        <div class="field-group">
+            <label class="field-label">Content Type</label>
+            <mat-button-toggle-group formControlName="type" class="type-toggle">
+                <mat-button-toggle value="movie">
+                    <mat-icon>movie</mat-icon>
+                    Movies
+                </mat-button-toggle>
+                <mat-button-toggle value="tv">
+                    <mat-icon>tv</mat-icon>
+                    TV Shows
+                </mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sort By</mat-label>
+            <mat-select formControlName="sort">
+                @for (option of sortOptionsStore.items(); track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        @if (languagesStore.loading()) {
+            <div class="loading-row">
+                <mat-spinner diameter="24"/>
+                <span>Loading languages…</span>
+            </div>
+        } @else {
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Languages (up to 10)</mat-label>
+                <mat-select formControlName="languages" multiple>
+                    @for (lang of languagesStore.items(); track lang.iso639_1) {
+                        <mat-option
+                                [value]="lang.iso639_1"
+                                [disabled]="maxReached() && !isSelected(lang.iso639_1)">
+                            {{ lang.englishName || lang.name }}
+                        </mat-option>
+                    }
+                </mat-select>
+                @if (maxReached()) {
+                    <mat-hint>Maximum 10 languages selected</mat-hint>
+                } @else {
+                    <mat-hint>{{ selectedLanguages().length }}/10 selected</mat-hint>
+                }
+            </mat-form-field>
+
+            @if (selectedLanguages().length > 0) {
+                <mat-chip-set class="lang-chips" aria-label="Selected languages">
+                    @for (code of selectedLanguages(); track code) {
+                        <mat-chip (removed)="removeLanguage(code)">
+                            {{ getLanguageName(code) }}
+                            <button matChipRemove [attr.aria-label]="'Remove ' + getLanguageName(code)">
+                                <mat-icon>cancel</mat-icon>
+                            </button>
+                        </mat-chip>
+                    }
+                </mat-chip-set>
+            }
+        }
+
+        @if (saveError()) {
+            <p class="save-error" role="alert">{{ saveError() }}</p>
+        }
+
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-flat-button
+            (click)="save()"
+            [disabled]="!isFormValid() || saving()">
+        @if (saving()) {
+            <mat-spinner diameter="18" class="btn-spinner"/>
+        } @else {
+            {{ isEditMode ? 'Save Changes' : 'Create Catalog' }}
+        }
+    </button>
+</mat-dialog-actions>
