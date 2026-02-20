@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AddonConfigItem } from '../../core/services/addon-configs.service';
 import { CatalogsStore } from '../../signal-store/catalogs.store';
+import { IntegrationsStore } from '../../signal-store/integrations.store';
 
 const CURATED_TEASERS = [
   {
@@ -33,6 +34,7 @@ const CURATED_TEASERS = [
 })
 export class DashboardComponent implements OnInit {
   protected readonly catalogsStore = inject(CatalogsStore);
+  protected readonly integrationsStore = inject(IntegrationsStore);
   protected readonly curatedTeasers = CURATED_TEASERS;
 
   protected readonly previewCatalogs = computed(() => this.catalogsStore.items().slice(0, 3));
@@ -54,5 +56,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.catalogsStore.load();
+    this.integrationsStore.load();
   }
 }

@@ -8,6 +8,7 @@ import { StremioModule } from './stremio/stremio.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AddonConfigsModule } from './addon-configs/addon-configs.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -20,6 +21,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     AuthModule,
     UsersModule,
     AddonConfigsModule,
+    IntegrationsModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

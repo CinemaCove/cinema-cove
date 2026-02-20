@@ -108,6 +108,10 @@
     height: 16px;
   }
 
+  mat-spinner {
+    display: inline-block;
+  }
+
   &.status-off {
     color: var(--mat-sys-on-surface-variant);
   }

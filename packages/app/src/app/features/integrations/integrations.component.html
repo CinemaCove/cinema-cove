@@ -18,15 +18,44 @@
         </div>
         <mat-divider/>
         <div class="card-footer">
-            <span class="status-chip status-off">
-                <mat-icon aria-hidden="true">link_off</mat-icon>
-                Not connected
-            </span>
-            <button mat-flat-button disabled aria-describedby="tmdb-soon">
-                Connect
-            </button>
+            @if (store.loading()) {
+                <span class="status-chip">
+                    <mat-spinner diameter="14" aria-label="Loading status"/>
+                    Checking...
+                </span>
+                <span></span>
+            } @else if (store.tmdbConnected()) {
+                <span class="status-chip status-on">
+                    <mat-icon aria-hidden="true">link</mat-icon>
+                    {{ store.tmdbUsername() }}
+                </span>
+                <button mat-stroked-button
+                        [disabled]="store.disconnecting()"
+                        (click)="store.disconnectTmdb()"
+                        aria-label="Disconnect TMDB account">
+                    @if (store.disconnecting()) {
+                        <mat-spinner diameter="18"/>
+                    } @else {
+                        Disconnect
+                    }
+                </button>
+            } @else {
+                <span class="status-chip status-off">
+                    <mat-icon aria-hidden="true">link_off</mat-icon>
+                    Not connected
+                </span>
+                <button mat-flat-button
+                        [disabled]="store.connecting()"
+                        (click)="store.connectTmdb()"
+                        aria-label="Connect your TMDB account">
+                    @if (store.connecting()) {
+                        <mat-spinner diameter="18"/>
+                    } @else {
+                        Connect
+                    }
+                </button>
+            }
         </div>
-        <p class="coming-soon-note" id="tmdb-soon">Coming soon</p>
     </mat-card>
 
     <!-- Trakt -->

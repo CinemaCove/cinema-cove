@@ -37,7 +37,7 @@ export class AddonConfigsController {
       type: d.type,
       languages: d.languages,
       sort: d.sort,
-      installUrl: `stremio://${req.get('host')}/${d._id}/manifest.json`,
+      installUrl: `stremio://${req.get('host')}/api/${d._id}/manifest.json`,
     }));
   }
 

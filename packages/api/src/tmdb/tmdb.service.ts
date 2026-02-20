@@ -50,7 +50,7 @@ export class TmdbService {
   }
 
   async getLanguages(): Promise<ConfigurationLanguage[]> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       'languages',
       async () =>
         (await this.client.configuration.getLanguages()).sort((a, b) =>
@@ -61,7 +61,7 @@ export class TmdbService {
   }
 
   async getMovieGenres(): Promise<TmdbGenre[]> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       'genres:movie',
       async () => {
         const res = await this.client.genre.getMovieGenres();
@@ -72,7 +72,7 @@ export class TmdbService {
   }
 
   async getTvShowGenres(): Promise<TmdbGenre[]> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       'genres:tv',
       async () => {
         const res = await this.client.genre.getTvShowGenres();
@@ -101,14 +101,14 @@ export class TmdbService {
   ): Promise<PaginatedResult<DiscoverMovieResultItem>> {
     const tmdbSort = sortBy === 'release_date.desc' ? 'primary_release_date.desc' : sortBy;
     const key = `discover:movie:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}`;
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       key,
       () =>
         this.client.discover.searchMovies({
           withOriginalLanguage: language,
           sortBy: tmdbSort,
           page,
-          ...(sortBy === 'vote_average.desc' ? { 'voteAverage.gte': 300 } : {}),
+          ...(sortBy === 'vote_average.desc' ? { 'voteCount.gte': 300 } : {}),
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
         }),
@@ -125,7 +125,7 @@ export class TmdbService {
   ): Promise<PaginatedResult<DiscoverTvShowResultItem>> {
     const tmdbSort = sortBy === 'release_date.desc' ? 'first_air_date.desc' : sortBy;
     const key = `discover:tv:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}`;
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       key,
       () =>
         this.client.discover.searchTvShows({
@@ -141,7 +141,7 @@ export class TmdbService {
   }
 
   public async getMovieExternalIds(movieId: number): Promise<MovieExternalIdsResult> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       `movie:${movieId}:external-ids`,
       () => this.client.movie.getExternalIds(movieId),
       this.shortCacheTtl,
@@ -149,7 +149,7 @@ export class TmdbService {
   }
 
   public async getTvShowExternalIds(tvShowId: number): Promise<TvShowExternalIdsResult> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       `tv-show:${tvShowId}:external-ids`,
       () => this.client.tvShow.getExternalIds(tvShowId),
       this.shortCacheTtl,
@@ -157,7 +157,7 @@ export class TmdbService {
   }
 
   public async getMovieDetails(movieId: number): Promise<MovieDetailsWithAppends> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       `movie:${movieId}:details`,
       () => this.client.movie.getDetails(movieId, { appendToResponse: ['credits', 'videos'] }),
       this.shortCacheTtl,
@@ -165,7 +165,7 @@ export class TmdbService {
   }
 
   public async getTvShowDetails(tvShowId: number): Promise<TvShowDetailsWithAppend> {
-    return this.cache.getOrSet(
+    return await this.cache.getOrSet(
       `tv-show:${tvShowId}:details`,
       () =>
         this.client.tvShow.getDetails(tvShowId, {
@@ -173,6 +173,53 @@ export class TmdbService {
           language: 'en-US',
         }),
       this.shortCacheTtl,
+    );
+  }
+
+  // ── TMDB User Auth ─────────────────────────────────────────────────────────
+
+  private get apiKey(): string {
+    return this.configService.getOrThrow<string>('TMDB_API_KEY');
+  }
+
+  async createRequestToken(): Promise<string> {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/authentication/token/new?api_key=${this.apiKey}`,
+    );
+    const data = (await res.json()) as { success: boolean; request_token: string };
+    if (!data.success) throw new Error('Failed to create TMDB request token');
+    return data.request_token;
+  }
+
+  async createSession(requestToken: string): Promise<string> {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/authentication/session/new?api_key=${this.apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request_token: requestToken }),
+      },
+    );
+    const data = (await res.json()) as { success: boolean; session_id: string };
+    if (!data.success) throw new Error('Failed to create TMDB session');
+    return data.session_id;
+  }
+
+  async getTmdbAccount(sessionId: string): Promise<{ id: number; username: string }> {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/account?api_key=${this.apiKey}&session_id=${sessionId}`,
+    );
+    return res.json() as Promise<{ id: number; username: string }>;
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await fetch(
+      `https://api.themoviedb.org/3/authentication/session?api_key=${this.apiKey}`,
+      {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }),
+      },
     );
   }
 }

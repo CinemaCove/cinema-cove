@@ -27,6 +27,15 @@ export class User {
 
   @Prop({ type: [OAuthProviderSchema], default: [] })
   oauthProviders!: OAuthProvider[];
+
+  @Prop()
+  tmdbSessionId?: string;
+
+  @Prop()
+  tmdbAccountId?: number;
+
+  @Prop()
+  tmdbUsername?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

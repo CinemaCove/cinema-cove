@@ -30,4 +30,27 @@ export class UsersService {
       .updateOne({ _id: userId }, { $push: { oauthProviders: { provider, providerId } } })
       .exec();
   }
+
+  async saveTmdbSession(
+    userId: string,
+    sessionId: string,
+    accountId: number,
+    username: string,
+  ): Promise<void> {
+    await this.userModel
+      .updateOne(
+        { _id: userId },
+        { tmdbSessionId: sessionId, tmdbAccountId: accountId, tmdbUsername: username },
+      )
+      .exec();
+  }
+
+  async clearTmdbSession(userId: string): Promise<void> {
+    await this.userModel
+      .updateOne(
+        { _id: userId },
+        { $unset: { tmdbSessionId: '', tmdbAccountId: '', tmdbUsername: '' } },
+      )
+      .exec();
+  }
 }

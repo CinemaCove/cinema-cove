@@ -105,10 +105,17 @@
             <span class="int-logo int-tmdb" aria-label="TMDB logo">TMDB</span>
             <div class="int-info">
                 <span class="int-name">The Movie Database</span>
-                <span class="int-status int-status--off">
-                    <mat-icon aria-hidden="true">link_off</mat-icon>
-                    Not connected
-                </span>
+                @if (integrationsStore.tmdbConnected()) {
+                    <span class="int-status int-status--on">
+                        <mat-icon aria-hidden="true">link</mat-icon>
+                        {{ integrationsStore.tmdbUsername() }}
+                    </span>
+                } @else {
+                    <span class="int-status int-status--off">
+                        <mat-icon aria-hidden="true">link_off</mat-icon>
+                        Not connected
+                    </span>
+                }
             </div>
         </div>
         <div class="integration-status-card">

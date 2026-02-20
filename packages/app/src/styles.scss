@@ -1,20 +1,22 @@
-
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use './_theme-colors' as theme;
 
 html {
   height: 100%;
   @include mat.theme((
-    color: (
-      primary: mat.$red-palette,
-      tertiary: mat.$orange-palette,
-    ),
-    typography: Roboto,
-    density: 0,
+          color: (
+            //primary: mat.$red-palette,
+            //tertiary: mat.$orange-palette,
+                  primary: theme.$primary-palette,
+                  tertiary: theme.$tertiary-palette
+          ),
+          typography: Roboto,
+          density: 0,
   ));
 }
 
@@ -35,6 +37,7 @@ body {
   margin: 0;
   height: 100%;
 }
+
 /* Global styles */
 
 html,
@@ -43,3 +46,7 @@ body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+@include mat.toolbar-overrides((
+        container-background-color: var(--mat-sys-primary-container)
+));
