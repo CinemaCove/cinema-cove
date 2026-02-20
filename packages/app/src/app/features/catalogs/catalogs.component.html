@@ -1,5 +1,10 @@
 <div class="page-header">
     <h2 class="page-title">My Catalogs</h2>
+    @if (catalogsStore.status() === 'success') {
+        <span class="catalog-count" [class.at-limit]="catalogsStore.atLimit()">
+            {{ catalogsStore.items().length }} / 20
+        </span>
+    }
 </div>
 
 @if (catalogsStore.loading()) {
@@ -35,9 +40,15 @@
     </div>
 }
 
-<button mat-fab
-        class="fab"
-        aria-label="Create new catalog"
-        (click)="openFormDialog()">
-    <mat-icon>add</mat-icon>
-</button>
+@if (catalogsStore.atLimit()) {
+    <p class="limit-notice" role="status">
+        You've reached the 20-catalog limit. Delete an existing catalog to create a new one.
+    </p>
+} @else {
+    <button mat-fab
+            class="fab"
+            aria-label="Create new catalog"
+            (click)="openFormDialog()">
+        <mat-icon>add</mat-icon>
+    </button>
+}

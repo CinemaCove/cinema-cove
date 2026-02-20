@@ -48,6 +48,7 @@ export class CatalogsComponent implements OnInit {
   }
 
   openFormDialog(config?: AddonConfigItem): void {
+    if (!config && this.catalogsStore.atLimit()) return;
     this.dialog
       .open<CatalogFormDialogComponent, { config?: AddonConfigItem }, CatalogFormDialogResult>(
         CatalogFormDialogComponent,

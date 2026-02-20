@@ -167,24 +167,33 @@ export class IntegrationsController {
     if (body.kind === 'builtin') {
       const def = BUILTIN_LISTS.find((d) => d.listType === body.listType && d.type === body.type);
       if (!def) throw new BadRequestException('Invalid built-in list');
-      doc = await this.addonConfigsService.create(req.user.sub, {
-        name: body.label,
-        type: body.type,
-        languages: [],
-        sort: 'popularity.desc',
-        source: 'tmdb-list',
-        tmdbListType: body.listType,
-      });
+      doc =
+        (await this.addonConfigsService.findExistingTmdbList(req.user.sub, {
+          tmdbListType: body.listType,
+          type: body.type,
+        })) ??
+        (await this.addonConfigsService.create(req.user.sub, {
+          name: body.label,
+          type: body.type,
+          languages: [],
+          sort: 'popularity.desc',
+          source: 'tmdb-list',
+          tmdbListType: body.listType,
+        }));
     } else {
       if (!body.listId || !body.name) throw new BadRequestException('listId and name are required');
-      doc = await this.addonConfigsService.create(req.user.sub, {
-        name: body.name,
-        type: 'movie', // placeholder — ignored for custom list
-        languages: [],
-        sort: 'popularity.desc',
-        source: 'tmdb-list',
-        tmdbListId: body.listId,
-      });
+      doc =
+        (await this.addonConfigsService.findExistingTmdbList(req.user.sub, {
+          tmdbListId: body.listId,
+        })) ??
+        (await this.addonConfigsService.create(req.user.sub, {
+          name: body.name,
+          type: 'movie', // placeholder — ignored for custom list
+          languages: [],
+          sort: 'popularity.desc',
+          source: 'tmdb-list',
+          tmdbListId: body.listId,
+        }));
     }
 
     const host = req.get('X-Forwarded-Host') ?? req.get('host');

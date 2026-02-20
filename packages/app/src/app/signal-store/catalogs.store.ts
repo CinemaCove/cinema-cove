@@ -14,8 +14,9 @@ interface CatalogsState {
 export const CatalogsStore = signalStore(
   { providedIn: 'root' },
   withState<CatalogsState>({ items: [], status: 'idle', deletingId: null }),
-  withComputed(({ status }) => ({
+  withComputed(({ status, items }) => ({
     loading: computed(() => status() === 'loading'),
+    atLimit: computed(() => items().length >= 20),
   })),
   withMethods((store) => {
     const service = inject(AddonConfigsService);
