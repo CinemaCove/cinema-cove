@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
@@ -16,6 +17,16 @@ import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
 import { TmdbService } from '../tmdb/tmdb.service';
 import { UsersService } from '../users/users.service';
+import { AddonConfigsService } from '../addon-configs/addon-configs.service';
+
+const TMDB_LISTS = [
+  { listType: 'watchlist' as const, type: 'movie' as const, label: 'Movie Watchlist', icon: 'bookmark' },
+  { listType: 'watchlist' as const, type: 'tv' as const, label: 'TV Watchlist', icon: 'bookmark' },
+  { listType: 'favorites' as const, type: 'movie' as const, label: 'Favorite Movies', icon: 'favorite' },
+  { listType: 'favorites' as const, type: 'tv' as const, label: 'Favorite TV Shows', icon: 'favorite' },
+  { listType: 'rated' as const, type: 'movie' as const, label: 'Rated Movies', icon: 'star' },
+  { listType: 'rated' as const, type: 'tv' as const, label: 'Rated TV Shows', icon: 'star' },
+];
 
 @Controller('integrations')
 export class IntegrationsController {
@@ -24,6 +35,7 @@ export class IntegrationsController {
   constructor(
     private readonly tmdbService: TmdbService,
     private readonly usersService: UsersService,
+    private readonly addonConfigsService: AddonConfigsService,
     configService: ConfigService,
   ) {
     this.configureUrl = configService.getOrThrow<string>('CONFIGURE_URL');
@@ -94,5 +106,61 @@ export class IntegrationsController {
       await this.tmdbService.deleteSession(user.tmdbSessionId);
     }
     await this.usersService.clearTmdbSession(req.user.sub);
+  }
+
+  // ── TMDB Lists ────────────────────────────────────────────────────────────
+
+  @Get('tmdb/lists')
+  @UseGuards(AuthGuard('jwt'))
+  async getTmdbLists(@Req() req: Request & { user: { sub: string } }) {
+    const user = await this.usersService.findById(req.user.sub);
+    if (!user?.tmdbSessionId || !user?.tmdbAccountId) {
+      return { lists: [] };
+    }
+
+    const lists = await Promise.all(
+      TMDB_LISTS.map(async (def) => {
+        const data = await this.tmdbService.getTmdbUserList(
+          def.listType,
+          def.type,
+          user.tmdbAccountId!,
+          user.tmdbSessionId!,
+          1,
+        );
+        return {
+          listType: def.listType,
+          type: def.type,
+          label: def.label,
+          icon: def.icon,
+          totalResults: data.total_results ?? 0,
+        };
+      }),
+    );
+
+    return { lists };
+  }
+
+  @Post('tmdb/lists/install')
+  @UseGuards(AuthGuard('jwt'))
+  async installTmdbList(
+    @Req() req: Request & { user: { sub: string } },
+    @Body() body: { listType: 'watchlist' | 'favorites' | 'rated'; type: 'movie' | 'tv'; label: string },
+  ) {
+    const def = TMDB_LISTS.find((d) => d.listType === body.listType && d.type === body.type);
+    if (!def) throw new BadRequestException('Invalid list type');
+
+    const doc = await this.addonConfigsService.create(req.user.sub, {
+      name: body.label,
+      type: body.type,
+      languages: [],
+      sort: 'popularity.desc',
+      source: 'tmdb-list',
+      tmdbListType: body.listType,
+    });
+
+    const host = req.get('X-Forwarded-Host') ?? req.get('host');
+    const installUrl = `stremio://${host}/api/${doc._id}/manifest.json`;
+
+    return { id: doc._id, installUrl };
   }
 }

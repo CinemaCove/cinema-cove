@@ -9,6 +9,25 @@ export interface TmdbStatus {
   username: string | null;
 }
 
+export interface TmdbListInfo {
+  listType: 'watchlist' | 'favorites' | 'rated';
+  type: 'movie' | 'tv';
+  label: string;
+  icon: string;
+  totalResults: number;
+}
+
+export interface InstallTmdbListRequest {
+  listType: 'watchlist' | 'favorites' | 'rated';
+  type: 'movie' | 'tv';
+  label: string;
+}
+
+export interface InstallTmdbListResponse {
+  id: string;
+  installUrl: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class IntegrationsService {
   private readonly http = inject(HttpClient);
@@ -24,5 +43,13 @@ export class IntegrationsService {
 
   disconnectTmdb(): Observable<void> {
     return this.http.delete<void>(`${this.base}/tmdb/disconnect`);
+  }
+
+  getTmdbLists(): Observable<{ lists: TmdbListInfo[] }> {
+    return this.http.get<{ lists: TmdbListInfo[] }>(`${this.base}/tmdb/lists`);
+  }
+
+  installTmdbList(body: InstallTmdbListRequest): Observable<InstallTmdbListResponse> {
+    return this.http.post<InstallTmdbListResponse>(`${this.base}/tmdb/lists/install`, body);
   }
 }

@@ -37,6 +37,8 @@ export class StremioService {
     private readonly configService: ConfigService,
   ) {}
 
+  // ── Discover (existing) ────────────────────────────────────────────────────
+
   async buildManifest(config: AddonConfig): Promise<object> {
     const languages = await this.tmdbService.getLanguages();
     const genres =
@@ -225,6 +227,135 @@ export class StremioService {
     //       imdbRating: '8.5',
     //     }) as any,
     // );
+
+    return { metas };
+  }
+
+  // ── TMDB User Lists ────────────────────────────────────────────────────────
+
+  private readonly listTypeLabels: Record<string, string> = {
+    watchlist: 'Watchlist',
+    favorites: 'Favorites',
+    rated: 'Rated',
+  };
+
+  async buildTmdbListManifest(config: AddonConfig): Promise<object> {
+    const label = this.listTypeLabels[config.tmdbListType!] ?? config.tmdbListType;
+    const catalogType = config.type === 'movie' ? 'movie' : 'series';
+    const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
+
+    return {
+      id: `com.cinemacove.tmdb-${config.tmdbListType}-${config.type}-${config.owner}`,
+      version: '1.0.0',
+      name: `CinemaCove – TMDB ${label}`,
+      resources: ['catalog'],
+      types: [catalogType],
+      catalogs: [
+        {
+          type: catalogType,
+          id: `cinemacove-tmdb-${config.tmdbListType}-${config.type}`,
+          name: `TMDB ${label}`,
+          extra: [{ name: 'skip', isRequired: false }],
+        },
+      ],
+      behaviorHints: {
+        configurable: true,
+        configurationURL: configureUrl,
+      },
+    };
+  }
+
+  async buildTmdbListCatalog(
+    config: AddonConfig,
+    skip: number,
+    accountId: number,
+    sessionId: string,
+  ): Promise<object> {
+    const page = Math.floor(skip / 20) + 1;
+    const listType = config.tmdbListType!;
+    const type = config.type;
+
+    const data = await this.tmdbService.getTmdbUserList(listType, type, accountId, sessionId, page);
+    const results: any[] = data.results ?? [];
+
+    const limit = pLimit(5);
+    const metas: StremioMeta[] = await Promise.all(
+      results.map((item) =>
+        limit(async () => {
+          if (type === 'movie') {
+            const details = await this.tmdbService.getMovieDetails(item.id);
+            const directors = [...details.credits!.crew]
+              .filter((c) => c.job === 'Director')
+              .map((c) => c.name);
+            const topActors = [...details.credits!.cast]
+              .sort((a, b) => a.order - b.order)
+              .slice(0, 5)
+              .map((a) => a.name);
+
+            return {
+              id: details.imdbId || `tmdb:${details.id}`,
+              type: 'movie',
+              name: details.originalTitle,
+              poster: item.posterPath
+                ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
+                : undefined,
+              description: details.overview,
+              imdbId: details.imdbId,
+              genres: details.genres.map((g) => g.name),
+              releaseInfo: details.releaseDate?.slice(0, 4),
+              director: directors,
+              cast: topActors,
+              imdbRating: details.voteAverage.toFixed(1),
+              trailers: (details.videos?.results ?? [])
+                .filter((v) => v.site === 'YouTube' && v.type === 'Trailer')
+                .map((v) => ({ source: v.key, type: 'Trailer' })),
+              runtime: details.runtime
+                ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m`
+                    .replace(/0h /, '')
+                    .replace(/ 0m$/, 'h')
+                : 'N/A',
+              language: details.originalLanguage,
+              country: details.productionCountries.map((c) => c.name).join(', '),
+            } as StremioMeta;
+          } else {
+            const details = await this.tmdbService.getTvShowDetails(item.id);
+            const directors = [...details.credits!.crew]
+              .filter((c) => c.job === 'Director')
+              .map((c) => c.name);
+            const topActors = [...details.credits!.cast]
+              .sort((a, b) => a.order - b.order)
+              .slice(0, 5)
+              .map((a) => a.name);
+
+            return {
+              id: details.externalIds?.imdbId || `tmdb:${details.id}`,
+              type: 'series',
+              name: details.name,
+              poster: item.posterPath
+                ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
+                : undefined,
+              description: details.overview,
+              imdbId: details.externalIds?.imdbId,
+              genres: details.genres.map((g) => g.name),
+              releaseInfo: `${details.firstAirDate?.slice(0, 4)}-${details.lastAirDate?.slice(0, 4)}`,
+              director: directors,
+              cast: topActors,
+              imdbRating: details.voteAverage.toFixed(1),
+              trailers: (details.videos?.results ?? [])
+                .filter((v) => v.site === 'YouTube' && v.type === 'Trailer')
+                .map((v) => ({ source: v.key, type: 'Trailer' })),
+              runtime: details.episodeRunTime[0]
+                ? `${Math.floor(details.episodeRunTime[0] / 60)}h ${details.episodeRunTime[0] % 60}m`
+                    .replace(/0h /, '')
+                    .replace(/ 0m$/, 'h')
+                : 'N/A',
+              language: details.originalLanguage,
+              country: details.productionCountries.map((c) => c.name).join(', '),
+            } as StremioMeta;
+          }
+        }),
+      ),
+    );
 
     return { metas };
   }

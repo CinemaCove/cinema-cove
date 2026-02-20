@@ -83,3 +83,42 @@
     </mat-card>
 
 </div>
+
+<!-- TMDB Lists -->
+@if (store.tmdbConnected()) {
+    <section class="lists-section" aria-labelledby="tmdb-lists-heading">
+        <h3 class="section-title" id="tmdb-lists-heading">Your TMDB Lists</h3>
+        <p class="section-subtitle">Install these as Stremio addons to stream directly from your lists.</p>
+
+        @if (store.listsLoading()) {
+            <div class="lists-loading" aria-label="Loading TMDB lists">
+                <mat-spinner diameter="32"/>
+            </div>
+        } @else {
+            <div class="lists-grid">
+                @for (list of store.tmdbLists(); track list.listType + list.type) {
+                    <mat-card class="list-card" appearance="outlined">
+                        <div class="list-card-content">
+                            <mat-icon class="list-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                            <div class="list-info">
+                                <span class="list-label">{{ list.label }}</span>
+                                <span class="list-count">{{ list.totalResults }} {{ list.type === 'movie' ? 'movies' : 'shows' }}</span>
+                            </div>
+                            <button mat-icon-button
+                                    [disabled]="store.isInstalling()"
+                                    [attr.aria-label]="'Install ' + list.label + ' as Stremio addon'"
+                                    [matTooltip]="'Install on Stremio'"
+                                    (click)="store.installTmdbList({ listType: list.listType, type: list.type, label: list.label })">
+                                @if (isInstalling(list.listType, list.type)) {
+                                    <mat-spinner diameter="20"/>
+                                } @else {
+                                    <mat-icon>download</mat-icon>
+                                }
+                            </button>
+                        </div>
+                    </mat-card>
+                }
+            </div>
+        }
+    </section>
+}

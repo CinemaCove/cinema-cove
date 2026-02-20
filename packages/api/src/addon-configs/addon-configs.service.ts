@@ -8,6 +8,8 @@ interface CreateAddonConfigDto {
   type: 'movie' | 'tv';
   languages: string[];
   sort: string;
+  source?: 'discover' | 'tmdb-list';
+  tmdbListType?: 'watchlist' | 'favorites' | 'rated';
 }
 
 interface UpdateAddonConfigDto {

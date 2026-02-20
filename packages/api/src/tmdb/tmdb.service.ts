@@ -222,4 +222,23 @@ export class TmdbService {
       },
     );
   }
+
+  async getTmdbUserList(
+    listType: 'watchlist' | 'favorites' | 'rated',
+    mediaType: 'movie' | 'tv',
+    accountId: number,
+    sessionId: string,
+    page: number = 1,
+  ): Promise<{ results: any[]; total_results: number; total_pages: number }> {
+    const endpoint = listType === 'watchlist'
+      ? `watchlist/${mediaType === 'movie' ? 'movies' : 'tv'}`
+      : listType === 'favorites'
+        ? `favorite/${mediaType === 'movie' ? 'movies' : 'tv'}`
+        : `rated/${mediaType === 'movie' ? 'movies' : 'tv'}`;
+
+    const res = await fetch(
+      `https://api.themoviedb.org/3/account/${accountId}/${endpoint}?api_key=${this.apiKey}&session_id=${sessionId}&page=${page}`,
+    );
+    return res.json() as Promise<{ results: any[]; total_results: number; total_pages: number }>;
+  }
 }
