@@ -1,0 +1,52 @@
+.page-container {
+  min-height: 100vh;
+  background: var(--mat-sys-surface);
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.page-content {
+  max-width: 720px;
+  width: 100%;
+  color: var(--mat-sys-on-surface);
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 1rem 0 1.5rem;
+  }
+
+  section {
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--mat-sys-primary);
+    }
+
+    p {
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      line-height: 1.8;
+    }
+  }
+}
+
+.email {
+  font-size: 1.1rem;
+
+  a {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.back-btn {
+  margin-bottom: 0.5rem;
+}

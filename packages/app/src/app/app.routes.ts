@@ -64,4 +64,11 @@ export const routes: Routes = [
         (m) => m.PrivacyComponent,
       ),
   },
+  {
+    path: 'data-deletion',
+    loadComponent: () =>
+      import('./features/data-deletion/data-deletion.component').then(
+        (m) => m.DataDeletionComponent,
+      ),
+  },
 ];
