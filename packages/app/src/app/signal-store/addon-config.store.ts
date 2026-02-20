@@ -16,6 +16,11 @@ export interface SaveAddonConfigPayload {
   type: 'movie' | 'tv';
   languages: readonly string[];
   sort: string;
+  includeAdult?: boolean;
+  minVoteAverage?: number | null;
+  minVoteCount?: number | null;
+  releaseDateFrom?: number | null;
+  releaseDateTo?: number | null;
 }
 
 export const AddonConfigStore = signalStore(
@@ -27,8 +32,18 @@ export const AddonConfigStore = signalStore(
       save: rxMethod<SaveAddonConfigPayload>(
         pipe(
           tap(() => patchState(store, { status: 'saving', error: null })),
-          switchMap(({ name, type, languages, sort }) =>
-            addonConfigsService.create({ name, type, languages: [...languages], sort }).pipe(
+          switchMap((payload) =>
+            addonConfigsService.create({
+              name: payload.name,
+              type: payload.type,
+              languages: [...payload.languages],
+              sort: payload.sort,
+              includeAdult: payload.includeAdult,
+              minVoteAverage: payload.minVoteAverage,
+              minVoteCount: payload.minVoteCount,
+              releaseDateFrom: payload.releaseDateFrom,
+              releaseDateTo: payload.releaseDateTo,
+            }).pipe(
               tap(({ id }) => patchState(store, { savedId: id, status: 'saved' })),
               catchError(() => {
                 patchState(store, { status: 'error', error: 'Failed to save config. Are you logged in?' });

@@ -49,6 +49,58 @@
   gap: 4px;
 }
 
+.filters-divider {
+  margin: 4px 0 8px;
+}
+
+.filters-heading {
+  margin: 0;
+  font: var(--mat-sys-label-large);
+  font-weight: 600;
+}
+
+.filters-optional {
+  font-weight: 400;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.year-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.year-field {
+  width: 100%;
+}
+
+.range-error {
+  margin: -12px 0 0;
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-small);
+}
+
+.adult-row {
+  display: flex;
+  align-items: center;
+}
+
+.save-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.save-error {
+  margin: 0;
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-medium);
+}
+
+.btn-spinner {
+  display: inline-block;
+}
+
 .install-section {
   display: flex;
   flex-direction: column;

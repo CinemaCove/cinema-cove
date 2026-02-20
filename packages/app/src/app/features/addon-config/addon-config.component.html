@@ -89,6 +89,71 @@
                     </mat-chip-set>
                 }
 
+                <!-- Filters -->
+                <mat-divider class="filters-divider"/>
+                <p class="filters-heading">Filters <span class="filters-optional">(optional)</span></p>
+
+                <div class="year-range">
+                    <mat-form-field appearance="outline" class="year-field">
+                        <mat-label>From year</mat-label>
+                        <input matInput [matDatepicker]="fromPicker" formControlName="releaseDateFrom"
+                               placeholder="e.g. 2000" readonly/>
+                        @if (form.controls.releaseDateFrom.value) {
+                            <button matIconSuffix mat-icon-button type="button" aria-label="Clear from year"
+                                    (click)="form.controls.releaseDateFrom.setValue(null)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        } @else {
+                            <mat-datepicker-toggle matIconSuffix [for]="fromPicker"/>
+                        }
+                        <mat-datepicker #fromPicker startView="multi-year"
+                                        (yearSelected)="onYearSelected($event, fromPicker, 'releaseDateFrom')"/>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="year-field">
+                        <mat-label>To year</mat-label>
+                        <input matInput [matDatepicker]="toPicker" formControlName="releaseDateTo"
+                               placeholder="e.g. 2024" readonly/>
+                        @if (form.controls.releaseDateTo.value) {
+                            <button matIconSuffix mat-icon-button type="button" aria-label="Clear to year"
+                                    (click)="form.controls.releaseDateTo.setValue(null)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        } @else {
+                            <mat-datepicker-toggle matIconSuffix [for]="toPicker"/>
+                        }
+                        <mat-datepicker #toPicker startView="multi-year"
+                                        (yearSelected)="onYearSelected($event, toPicker, 'releaseDateTo')"/>
+                    </mat-form-field>
+                </div>
+                @if (form.hasError('dateRange')) {
+                    <p class="range-error" role="alert">"From" year must be before "To" year</p>
+                }
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Min rating</mat-label>
+                    <input matInput type="number" formControlName="minVoteAverage"
+                           min="0" max="10" step="0.5" placeholder="e.g. 7"/>
+                    <mat-hint>TMDB vote average 0–10</mat-hint>
+                    @if (form.controls.minVoteAverage.invalid && form.controls.minVoteAverage.dirty) {
+                        <mat-error>Must be between 0 and 10</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Min vote count</mat-label>
+                    <mat-select formControlName="minVoteCount">
+                        <mat-option [value]="null">Any</mat-option>
+                        @for (preset of voteCountPresets; track preset) {
+                            <mat-option [value]="preset">{{ preset }}+</mat-option>
+                        }
+                    </mat-select>
+                    <mat-hint>Recommended when sorting by Top Rated</mat-hint>
+                </mat-form-field>
+
+                <div class="adult-row">
+                    <mat-checkbox formControlName="includeAdult">Include adult content</mat-checkbox>
+                </div>
+
                 <!-- Save Button -->
                 <div class="save-section">
                     <button mat-raised-button color="primary"

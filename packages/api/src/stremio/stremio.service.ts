@@ -4,7 +4,7 @@ import {
   DiscoverMovieResultItem,
   DiscoverTvShowResultItem,
 } from '@cinemacove/tmdb-client/v3';
-import { SortBy, TmdbService } from '../tmdb/tmdb.service';
+import { DiscoverFilters, SortBy, TmdbService } from '../tmdb/tmdb.service';
 import { TraktService } from '../trakt/trakt.service';
 import { AddonConfig } from './types/addon-config.interface';
 
@@ -90,6 +90,7 @@ export class StremioService {
     sort: SortBy = 'popularity.desc',
     genreName?: string,
     search?: string,
+    filters: DiscoverFilters = {},
   ): Promise<object> {
     const lang = catalogId.split('-').pop()!;
     const page = Math.floor(skip / 20) + 1;
@@ -102,8 +103,8 @@ export class StremioService {
 
     const results: (DiscoverMovieResultItem | DiscoverTvShowResultItem)[] =
       type === 'movie'
-        ? (await this.tmdbService.discoverMovies(lang, page, sort, genreId, search)).results
-        : (await this.tmdbService.discoverTvShows(lang, page, sort, genreId, search)).results;
+        ? (await this.tmdbService.discoverMovies(lang, page, sort, genreId, search, filters)).results
+        : (await this.tmdbService.discoverTvShows(lang, page, sort, genreId, search, filters)).results;
 
     const limit = pLimit(5);
 

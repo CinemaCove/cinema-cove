@@ -17,6 +17,12 @@
             <mat-icon aria-hidden="true">tv</mat-icon>
             <span>{{ tvCount() }} TV show{{ tvCount() !== 1 ? 's' : '' }}</span>
         </div>
+        @if (mixedCount() > 0) {
+            <div class="stat-chip" role="listitem">
+                <mat-icon aria-hidden="true">shuffle</mat-icon>
+                <span>{{ mixedCount() }} mixed</span>
+            </div>
+        }
     </div>
 }
 
@@ -53,7 +59,7 @@
         <div class="preview-grid">
             @for (catalog of previewCatalogs(); track catalog.id) {
                 <div class="preview-tile" [style.background]="catalogGradient(catalog)">
-                    <span class="preview-type">{{ catalog.type === 'movie' ? 'Movies' : 'TV Shows' }}</span>
+                    <span class="preview-type">{{ catalogTypeLabel(catalog) }}</span>
                     <span class="preview-name">{{ catalog.name }}</span>
                 </div>
             }
@@ -76,16 +82,30 @@
             <mat-icon aria-hidden="true">local_library</mat-icon>
             Curated Lists
         </h3>
-        <span class="badge-soon" role="status">Coming soon</span>
+        <a mat-button routerLink="/curated" aria-label="View all curated lists">
+            View all
+            <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+        </a>
     </div>
-    <div class="preview-grid" aria-hidden="true">
-        @for (teaser of curatedTeasers; track teaser.title) {
-            <div class="preview-tile preview-teaser" [style.background]="teaser.gradient">
-                <mat-icon class="teaser-icon" aria-hidden="true">{{ teaser.icon }}</mat-icon>
-                <span class="preview-name">{{ teaser.title }}</span>
-            </div>
-        }
-    </div>
+
+    @if (curatedListsStore.loading()) {
+        <div class="state-center">
+            <mat-spinner diameter="32" aria-label="Loading curated lists"/>
+        </div>
+    } @else if (previewCurated().length === 0) {
+        <p class="empty-curated">No curated lists yet. Check back soon!</p>
+    } @else {
+        <div class="preview-grid">
+            @for (list of previewCurated(); track list.id) {
+                <button class="preview-tile preview-curated" type="button"
+                        (click)="openCuratedDetail(list)"
+                        [attr.aria-label]="list.name">
+                    <mat-icon class="teaser-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                    <span class="preview-name">{{ list.name }}</span>
+                </button>
+            }
+        </div>
+    }
 </section>
 
 <!-- Integrations -->

@@ -32,12 +32,33 @@ export class CatalogCardComponent {
   readonly editClicked = output<void>();
   readonly deleteClicked = output<void>();
 
-  readonly gradientStyle = computed(() => ({
-    background:
-      this.config().type === 'movie'
-        ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
-        : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)',
-  }));
+  readonly isMixed = computed(() => {
+    const c = this.config();
+    return (
+      (c.source === 'tmdb-list' && !c.tmdbListType) ||
+      (c.source === 'trakt-list' && !c.traktListType)
+    );
+  });
+
+  readonly typeLabel = computed(() => {
+    if (this.isMixed()) return 'Mixed';
+    return this.config().type === 'movie' ? 'Movies' : 'TV Shows';
+  });
+
+  readonly gradientStyle = computed(() => {
+    if (this.isMixed()) {
+      return {
+        background:
+          'linear-gradient(135deg, var(--mat-sys-on-tertiary-fixed) 0%, var(--mat-sys-tertiary-container) 100%)',
+      };
+    }
+    return {
+      background:
+        this.config().type === 'movie'
+          ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
+          : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)',
+    };
+  });
 
   readonly sortLabel = computed(() => {
     const opt = this.sortOptionsStore.items().find((o) => o.value === this.config().sort);

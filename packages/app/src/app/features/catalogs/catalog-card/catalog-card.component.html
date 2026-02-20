@@ -1,6 +1,6 @@
 <mat-card appearance="outlined" class="catalog-card">
     <div class="card-visual" [style]="gradientStyle()">
-        <span class="type-badge">{{ config().type === 'movie' ? 'Movies' : 'TV Shows' }}</span>
+        <span class="type-badge">{{ typeLabel() }}</span>
     </div>
 
     <mat-card-content>

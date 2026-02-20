@@ -3,27 +3,41 @@
     <p class="page-subtitle">Hand-picked movie &amp; TV collections, ready to install in one click.</p>
 </div>
 
-<div class="coming-soon-banner" role="status" aria-live="polite">
-    <mat-icon class="banner-icon" aria-hidden="true">auto_awesome</mat-icon>
-    <div>
-        <p class="banner-title">Launching soon</p>
-        <p class="banner-desc">
-            We're putting the finishing touches on our first curated collections.
-            Check back shortly!
-        </p>
+@if (store.loading()) {
+    <div class="state-center">
+        <mat-spinner diameter="48"/>
     </div>
-</div>
-
-<h3 class="preview-heading">Upcoming collections</h3>
-
-<div class="preview-grid" aria-hidden="true">
-    @for (list of upcomingLists; track list.title) {
-        <div class="preview-card" [style.background]="list.gradient">
-            <mat-icon class="card-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
-            <div class="card-text">
-                <span class="card-name">{{ list.title }}</span>
-                <span class="card-desc">{{ list.description }}</span>
-            </div>
-        </div>
-    }
-</div>
+} @else if (store.status() === 'error') {
+    <div class="state-center">
+        <mat-icon class="empty-icon">error_outline</mat-icon>
+        <p class="state-message">Failed to load curated lists.</p>
+        <button mat-stroked-button (click)="store.load()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+        </button>
+    </div>
+} @else if (store.items().length === 0) {
+    <div class="state-center">
+        <mat-icon class="empty-icon">auto_awesome</mat-icon>
+        <p class="state-message">No curated lists yet. Check back soon!</p>
+    </div>
+} @else {
+    <div class="curated-grid">
+        @for (list of store.items(); track list.id) {
+            <button class="curated-card" (click)="openDetail(list)" type="button"
+                    [attr.aria-label]="'View ' + list.name">
+                <div class="card-visual">
+                    @if (list.imagePath) {
+                        <img [src]="list.imagePath" [alt]="list.name" class="card-image"/>
+                    } @else {
+                        <mat-icon class="card-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                    }
+                </div>
+                <div class="card-body">
+                    <span class="card-name">{{ list.name }}</span>
+                    <span class="card-desc">{{ list.description }}</span>
+                </div>
+            </button>
+        }
+    </div>
+}

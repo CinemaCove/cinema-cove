@@ -135,15 +135,25 @@
   }
 }
 
-// Curated teasers
+// Curated tiles
 
-.preview-teaser {
-  opacity: 0.55;
-  filter: blur(0.8px);
-  pointer-events: none;
+.preview-curated {
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--mat-sys-primary-container), var(--mat-sys-secondary-container));
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
 
   &::before {
     display: none;
@@ -154,6 +164,12 @@
   font-size: 28px;
   width: 28px;
   height: 28px;
+}
+
+.empty-curated {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 // States

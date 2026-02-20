@@ -3,14 +3,22 @@ import type { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AddonConfigsService } from './addon-configs.service';
 
-interface CreateAddonConfigBody {
+interface DiscoverFilterBody {
+  includeAdult?: boolean;
+  minVoteAverage?: number | null;
+  minVoteCount?: number | null;
+  releaseDateFrom?: number | null;
+  releaseDateTo?: number | null;
+}
+
+interface CreateAddonConfigBody extends DiscoverFilterBody {
   name: string;
   type: 'movie' | 'tv';
   languages: string[];
   sort: string;
 }
 
-interface UpdateAddonConfigBody {
+interface UpdateAddonConfigBody extends DiscoverFilterBody {
   name?: string;
   type?: 'movie' | 'tv';
   languages?: string[];
@@ -35,8 +43,16 @@ export class AddonConfigsController {
       id: d._id,
       name: d.name,
       type: d.type,
+      source: d.source,
+      tmdbListType: d.tmdbListType ?? null,
+      traktListType: d.traktListType ?? null,
       languages: d.languages,
       sort: d.sort,
+      includeAdult: d.includeAdult ?? false,
+      minVoteAverage: d.minVoteAverage ?? null,
+      minVoteCount: d.minVoteCount ?? null,
+      releaseDateFrom: d.releaseDateFrom ?? null,
+      releaseDateTo: d.releaseDateTo ?? null,
       installUrl: `stremio://${req.get('host')}/api/${d._id}/manifest.json`,
     }));
   }

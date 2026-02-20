@@ -51,7 +51,7 @@ export class StremioController {
         token,
       );
     }
-    return this.stremioService.buildCatalog(config.type, id, 0, config.sort);
+    return this.stremioService.buildCatalog(config.type, id, 0, config.sort, undefined, undefined, this.discoverFilters(config));
   }
 
   /**
@@ -92,7 +92,7 @@ export class StremioController {
 
     const genre = params.get('genre') ?? undefined;
     const search = params.get('search') ?? undefined;
-    return this.stremioService.buildCatalog(config.type, id, skip, config.sort, genre, search);
+    return this.stremioService.buildCatalog(config.type, id, skip, config.sort, genre, search, this.discoverFilters(config));
   }
 
   private async resolveConfig(id: string): Promise<AddonConfig> {
@@ -109,6 +109,21 @@ export class StremioController {
       tmdbListType: doc.tmdbListType,
       traktListId: doc.traktListId,
       traktListType: doc.traktListType,
+      includeAdult: doc.includeAdult,
+      minVoteAverage: doc.minVoteAverage,
+      minVoteCount: doc.minVoteCount,
+      releaseDateFrom: doc.releaseDateFrom,
+      releaseDateTo: doc.releaseDateTo,
+    };
+  }
+
+  private discoverFilters(config: AddonConfig): import('../tmdb/tmdb.service').DiscoverFilters {
+    return {
+      includeAdult: config.includeAdult,
+      minVoteAverage: config.minVoteAverage,
+      minVoteCount: config.minVoteCount,
+      releaseDateFrom: config.releaseDateFrom,
+      releaseDateTo: config.releaseDateTo,
     };
   }
 

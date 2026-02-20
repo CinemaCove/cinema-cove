@@ -15,6 +15,15 @@ import { CacheService } from '../cache/cache.service';
 
 export type SortBy = 'popularity.desc' | 'release_date.desc' | 'vote_average.desc';
 
+export interface DiscoverFilters {
+  includeAdult?: boolean;
+  minVoteAverage?: number;
+  /** Explicit vote count floor. If omitted, defaults to 300/100 when sorting by vote_average. */
+  minVoteCount?: number;
+  releaseDateFrom?: number;
+  releaseDateTo?: number;
+}
+
 export interface TmdbGenre {
   id: number;
   name: string;
@@ -98,9 +107,11 @@ export class TmdbService {
     sortBy: SortBy = 'popularity.desc',
     genreId?: number,
     search?: string,
+    filters: DiscoverFilters = {},
   ): Promise<PaginatedResult<DiscoverMovieResultItem>> {
     const tmdbSort = sortBy === 'release_date.desc' ? 'primary_release_date.desc' : sortBy;
-    const key = `discover:movie:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}`;
+    const voteCountFloor = filters.minVoteCount ?? (sortBy === 'vote_average.desc' ? 300 : undefined);
+    const key = `discover:movie:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}:${JSON.stringify(filters)}`;
     return await this.cache.getOrSet(
       key,
       () =>
@@ -108,10 +119,14 @@ export class TmdbService {
           withOriginalLanguage: language,
           sortBy: tmdbSort,
           page,
-          ...(sortBy === 'vote_average.desc' ? { 'voteCount.gte': 300 } : {}),
+          ...(filters.includeAdult !== undefined ? { includeAdult: filters.includeAdult } : {}),
+          ...(voteCountFloor !== undefined ? { 'voteCount.gte': voteCountFloor } : {}),
+          ...(filters.minVoteAverage !== undefined ? { 'voteAverage.gte': filters.minVoteAverage } : {}),
+          ...(filters.releaseDateFrom !== undefined ? { 'primaryReleaseDate.gte': `${filters.releaseDateFrom}-01-01` } : {}),
+          ...(filters.releaseDateTo !== undefined ? { 'primaryReleaseDate.lte': `${filters.releaseDateTo}-12-31` } : {}),
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
-        }),
+        } as any),
       this.shortCacheTtl,
     );
   }
@@ -122,9 +137,11 @@ export class TmdbService {
     sortBy: SortBy = 'popularity.desc',
     genreId?: number,
     search?: string,
+    filters: DiscoverFilters = {},
   ): Promise<PaginatedResult<DiscoverTvShowResultItem>> {
     const tmdbSort = sortBy === 'release_date.desc' ? 'first_air_date.desc' : sortBy;
-    const key = `discover:tv:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}`;
+    const voteCountFloor = filters.minVoteCount ?? (sortBy === 'vote_average.desc' ? 100 : undefined);
+    const key = `discover:tv:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}:${JSON.stringify(filters)}`;
     return await this.cache.getOrSet(
       key,
       () =>
@@ -132,7 +149,11 @@ export class TmdbService {
           withOriginalLanguage: language,
           sortBy: tmdbSort,
           page,
-          ...(sortBy === 'vote_average.desc' ? { 'voteCount.gte': 100 } : {}),
+          ...(filters.includeAdult !== undefined ? { includeAdult: filters.includeAdult } : {}),
+          ...(voteCountFloor !== undefined ? { 'voteCount.gte': voteCountFloor } : {}),
+          ...(filters.minVoteAverage !== undefined ? { 'voteAverage.gte': filters.minVoteAverage } : {}),
+          ...(filters.releaseDateFrom !== undefined ? { 'firstAirDate.gte': `${filters.releaseDateFrom}-01-01` } : {}),
+          ...(filters.releaseDateTo !== undefined ? { 'firstAirDate.lte': `${filters.releaseDateTo}-12-31` } : {}),
           ...(genreId !== undefined ? { withGenres: String(genreId) } : {}),
           ...(search !== undefined ? { withTextQuery: search } : {}),
         } as any),

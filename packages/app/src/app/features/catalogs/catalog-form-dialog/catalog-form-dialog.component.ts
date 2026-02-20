@@ -20,13 +20,17 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { AddonConfigItem, AddonConfigsService } from '../../../core/services/addon-configs.service';
+import { MAT_DATE_FORMATS, MatDateFormats } from '@angular/material/core';
+import { MatDatepickerModule, MatDatepicker } from '@angular/material/datepicker';
+import { AddonConfigItem, AddonConfigPayload, AddonConfigsService } from '../../../core/services/addon-configs.service';
 import { LanguagesStore } from '../../../signal-store/languages.store';
 import { SortOptionsStore } from '../../../signal-store/sort-options.store';
 
@@ -38,6 +42,16 @@ export interface CatalogFormDialogResult {
   id: string;
 }
 
+const YEAR_FORMATS: MatDateFormats = {
+  parse: { dateInput: { year: 'numeric' } as Intl.DateTimeFormatOptions },
+  display: {
+    dateInput: { year: 'numeric' } as Intl.DateTimeFormatOptions,
+    monthYearLabel: { year: 'numeric', month: 'short' } as Intl.DateTimeFormatOptions,
+    dateA11yLabel: { year: 'numeric' } as Intl.DateTimeFormatOptions,
+    monthYearA11yLabel: { year: 'numeric', month: 'long' } as Intl.DateTimeFormatOptions,
+  },
+};
+
 function maxSelectionsValidator(max: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value as string[] | null;
@@ -46,20 +60,39 @@ function maxSelectionsValidator(max: number): ValidatorFn {
   };
 }
 
+function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
+  const from = group.get('releaseDateFrom')?.value as Date | null;
+  const to = group.get('releaseDateTo')?.value as Date | null;
+  if (from && to && from.getTime() > to.getTime()) {
+    return { dateRange: true };
+  }
+  return null;
+}
+
+const VOTE_COUNT_PRESETS = [50, 100, 200, 300, 500, 1000] as const;
+
+function yearToDate(year: number | null | undefined): Date | null {
+  return year != null ? new Date(year, 0, 1) : null;
+}
+
 @Component({
   selector: 'cc-catalog-form-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [{ provide: MAT_DATE_FORMATS, useValue: YEAR_FORMATS }],
   imports: [
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
     MatButtonToggleModule,
+    MatCheckboxModule,
     MatChipsModule,
+    MatDividerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatDatepickerModule,
   ],
   templateUrl: './catalog-form-dialog.component.html',
   styleUrl: './catalog-form-dialog.component.scss',
@@ -75,32 +108,45 @@ export class CatalogFormDialogComponent implements OnInit {
 
   readonly isEditMode = !!this.data.config;
   readonly title = this.isEditMode ? 'Edit Catalog' : 'New Catalog';
+  readonly voteCountPresets = VOTE_COUNT_PRESETS;
 
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
 
-  readonly form = new FormGroup({
-    name: new FormControl<string>(this.data.config?.name ?? '', {
-      validators: [
-        Validators.required,
-        Validators.maxLength(20),
-        Validators.pattern(/^[A-Za-z0-9_-]+$/),
-      ],
-      nonNullable: true,
-    }),
-    type: new FormControl<'movie' | 'tv'>(this.data.config?.type ?? 'movie', {
-      validators: [Validators.required],
-      nonNullable: true,
-    }),
-    languages: new FormControl<string[]>([...(this.data.config?.languages ?? [])], {
-      validators: [Validators.required, maxSelectionsValidator(10)],
-      nonNullable: true,
-    }),
-    sort: new FormControl<string>(this.data.config?.sort ?? 'popularity.desc', {
-      validators: [Validators.required],
-      nonNullable: true,
-    }),
-  });
+  readonly form = new FormGroup(
+    {
+      name: new FormControl<string>(this.data.config?.name ?? '', {
+        validators: [
+          Validators.required,
+          Validators.maxLength(20),
+          Validators.pattern(/^[A-Za-z0-9_-]+$/),
+        ],
+        nonNullable: true,
+      }),
+      type: new FormControl<'movie' | 'tv'>(this.data.config?.type ?? 'movie', {
+        validators: [Validators.required],
+        nonNullable: true,
+      }),
+      languages: new FormControl<string[]>([...(this.data.config?.languages ?? [])], {
+        validators: [Validators.required, maxSelectionsValidator(10)],
+        nonNullable: true,
+      }),
+      sort: new FormControl<string>(this.data.config?.sort ?? 'popularity.desc', {
+        validators: [Validators.required],
+        nonNullable: true,
+      }),
+      includeAdult: new FormControl<boolean>(this.data.config?.includeAdult ?? false, {
+        nonNullable: true,
+      }),
+      minVoteAverage: new FormControl<number | null>(this.data.config?.minVoteAverage ?? null, {
+        validators: [Validators.min(0), Validators.max(10)],
+      }),
+      minVoteCount: new FormControl<number | null>(this.data.config?.minVoteCount ?? null),
+      releaseDateFrom: new FormControl<Date | null>(yearToDate(this.data.config?.releaseDateFrom)),
+      releaseDateTo: new FormControl<Date | null>(yearToDate(this.data.config?.releaseDateTo)),
+    },
+    { validators: [dateRangeValidator] },
+  );
 
   protected readonly selectedLanguages = toSignal(
     this.form.controls.languages.valueChanges,
@@ -133,12 +179,30 @@ export class CatalogFormDialogComponent implements OnInit {
     this.form.controls.languages.setValue(current.filter((c) => c !== code));
   }
 
+  onYearSelected(year: Date, picker: MatDatepicker<Date>, controlName: 'releaseDateFrom' | 'releaseDateTo'): void {
+    this.form.controls[controlName].setValue(new Date(year.getFullYear(), 0, 1));
+    this.form.controls[controlName].markAsDirty();
+    picker.close();
+  }
+
   save(): void {
     if (this.form.invalid || this.saving()) return;
     this.saving.set(true);
     this.saveError.set(null);
 
-    const payload = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const payload: AddonConfigPayload = {
+      name: raw.name,
+      type: raw.type,
+      languages: raw.languages,
+      sort: raw.sort,
+      includeAdult: raw.includeAdult,
+      minVoteAverage: raw.minVoteAverage,
+      minVoteCount: raw.minVoteCount,
+      releaseDateFrom: raw.releaseDateFrom instanceof Date ? raw.releaseDateFrom.getFullYear() : null,
+      releaseDateTo: raw.releaseDateTo instanceof Date ? raw.releaseDateTo.getFullYear() : null,
+    };
+
     const request$ = this.isEditMode
       ? this.service.update(this.data.config!.id, payload)
       : this.service.create(payload);

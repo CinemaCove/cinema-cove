@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>{{ data.name }}</h2>
+
+<mat-dialog-content class="dialog-content">
+    @if (data.imagePath) {
+        <img [src]="data.imagePath" [alt]="data.name" class="cover-image"/>
+    } @else {
+        <div class="icon-banner">
+            <mat-icon class="banner-icon" aria-hidden="true">{{ data.icon }}</mat-icon>
+        </div>
+    }
+    <p class="description">{{ data.description }}</p>
+
+    @if (installUrl()) {
+        <div class="install-result">
+            <code class="install-url">{{ installUrl() }}</code>
+        </div>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Close</button>
+
+    @if (installUrl()) {
+        <a mat-flat-button [href]="installUrl()">
+            <mat-icon>open_in_new</mat-icon>
+            {{ alreadyInstalled() ? 'Open in Stremio' : 'Open in Stremio' }}
+        </a>
+    } @else {
+        <button mat-flat-button (click)="install()" [disabled]="installing()">
+            @if (installing()) {
+                <mat-spinner diameter="18" class="btn-spinner"/>
+            } @else {
+                <mat-icon>download</mat-icon>
+            }
+            Install
+        </button>
+    }
+</mat-dialog-actions>

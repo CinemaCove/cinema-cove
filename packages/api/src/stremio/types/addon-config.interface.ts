@@ -11,4 +11,10 @@ export interface AddonConfig {
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
   traktListId?: string;
   traktListType?: 'watchlist' | 'favorites' | 'rated';
+  // Discover filters
+  includeAdult?: boolean;
+  minVoteAverage?: number;
+  minVoteCount?: number;
+  releaseDateFrom?: number;
+  releaseDateTo?: number;
 }

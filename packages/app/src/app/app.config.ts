@@ -2,6 +2,7 @@ import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideStore } from '@ngrx/store';
 import { provideState } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
+    provideNativeDateAdapter(),
     provideStore({}, {
       runtimeChecks: {
         strictStateImmutability: true,

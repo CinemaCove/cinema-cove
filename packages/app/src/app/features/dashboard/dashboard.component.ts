@@ -1,29 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AddonConfigItem } from '../../core/services/addon-configs.service';
+import { CuratedListItem } from '../../core/services/curated-lists.service';
 import { CatalogsStore } from '../../signal-store/catalogs.store';
+import { CuratedListsStore } from '../../signal-store/curated-lists.store';
 import { IntegrationsStore } from '../../signal-store/integrations.store';
-
-const CURATED_TEASERS = [
-  {
-    title: "90's Slashers",
-    icon: 'movie_filter',
-    gradient: 'linear-gradient(135deg, #4A0000, #B71C1C)',
-  },
-  {
-    title: 'Classic Westerns',
-    icon: 'filter_vintage',
-    gradient: 'linear-gradient(135deg, #3E2000, #BF360C)',
-  },
-  {
-    title: 'Sci-Fi Essentials',
-    icon: 'rocket_launch',
-    gradient: 'linear-gradient(135deg, #001A33, #0277BD)',
-  },
-] as const;
+import { CuratedDetailDialogComponent } from '../curated/curated-detail-dialog/curated-detail-dialog.component';
 
 @Component({
   selector: 'cc-dashboard',
@@ -34,32 +20,57 @@ const CURATED_TEASERS = [
 })
 export class DashboardComponent implements OnInit {
   protected readonly catalogsStore = inject(CatalogsStore);
+  protected readonly curatedListsStore = inject(CuratedListsStore);
   protected readonly integrationsStore = inject(IntegrationsStore);
-  protected readonly curatedTeasers = CURATED_TEASERS;
+  private readonly dialog = inject(MatDialog);
 
   protected readonly previewCatalogs = computed(() => this.catalogsStore.items().slice(0, 3));
   protected readonly extraCount = computed(() =>
     Math.max(0, this.catalogsStore.items().length - 3),
   );
   protected readonly movieCount = computed(
-    () => this.catalogsStore.items().filter((c) => c.type === 'movie').length,
+    () => this.catalogsStore.items().filter((c) => c.type === 'movie' && !this.isMixed(c)).length,
   );
   protected readonly tvCount = computed(
-    () => this.catalogsStore.items().filter((c) => c.type === 'tv').length,
+    () => this.catalogsStore.items().filter((c) => c.type === 'tv' && !this.isMixed(c)).length,
   );
+  protected readonly mixedCount = computed(
+    () => this.catalogsStore.items().filter((c) => this.isMixed(c)).length,
+  );
+  protected readonly previewCurated = computed(() => this.curatedListsStore.items().slice(0, 3));
+
+  isMixed(catalog: AddonConfigItem): boolean {
+    return (
+      (catalog.source === 'tmdb-list' && !catalog.tmdbListType) ||
+      (catalog.source === 'trakt-list' && !catalog.traktListType)
+    );
+  }
 
   catalogGradient(catalog: AddonConfigItem): string {
-    // return catalog.type === 'movie'
-    //   ? 'linear-gradient(135deg, #0D1B3E 0%, #1A237E 60%, #4A148C 100%)'
-    //   : 'linear-gradient(135deg, #003832 0%, #004D40 60%, #0D47A1 100%)';
-
+    if (this.isMixed(catalog)) {
+      return 'linear-gradient(135deg, var(--mat-sys-on-tertiary-fixed) 0%, var(--mat-sys-tertiary-container) 100%)';
+    }
     return catalog.type === 'movie'
-        ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
-        : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)';
+      ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
+      : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)';
+  }
+
+  catalogTypeLabel(catalog: AddonConfigItem): string {
+    if (this.isMixed(catalog)) return 'Mixed';
+    return catalog.type === 'movie' ? 'Movies' : 'TV Shows';
+  }
+
+  openCuratedDetail(list: CuratedListItem): void {
+    this.dialog.open(CuratedDetailDialogComponent, {
+      data: list,
+      width: '480px',
+      maxWidth: '95vw',
+    });
   }
 
   ngOnInit(): void {
     this.catalogsStore.load();
+    this.curatedListsStore.load();
     this.integrationsStore.load();
   }
 }

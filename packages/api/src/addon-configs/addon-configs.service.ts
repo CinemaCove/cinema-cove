@@ -15,6 +15,11 @@ interface CreateAddonConfigDto {
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
   traktListId?: string;
   traktListType?: 'watchlist' | 'favorites' | 'rated';
+  includeAdult?: boolean;
+  minVoteAverage?: number | null;
+  minVoteCount?: number | null;
+  releaseDateFrom?: number | null;
+  releaseDateTo?: number | null;
 }
 
 interface UpdateAddonConfigDto {
@@ -22,6 +27,11 @@ interface UpdateAddonConfigDto {
   type?: 'movie' | 'tv';
   languages?: string[];
   sort?: string;
+  includeAdult?: boolean;
+  minVoteAverage?: number | null;
+  minVoteCount?: number | null;
+  releaseDateFrom?: number | null;
+  releaseDateTo?: number | null;
 }
 
 @Injectable()
@@ -36,7 +46,9 @@ export class AddonConfigsService {
     if (count >= MAX_CONFIGS_PER_USER) {
       throw new ForbiddenException(`You have reached the limit of ${MAX_CONFIGS_PER_USER} addon configurations.`);
     }
-    return this.addonConfigModel.create({ owner: new Types.ObjectId(userId), ...data });
+    // Strip null filter values — undefined fields are not stored in the document
+    const cleanData = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== null));
+    return this.addonConfigModel.create({ owner: new Types.ObjectId(userId), ...cleanData });
   }
 
   findByOwner(userId: string): Promise<AddonConfigDocument[]> {
@@ -76,10 +88,23 @@ export class AddonConfigsService {
   }
 
   updateByOwner(id: string, userId: string, data: UpdateAddonConfigDto): Promise<AddonConfigDocument | null> {
+    const $set: Record<string, unknown> = {};
+    const $unset: Record<string, 1> = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value === null) {
+        $unset[key] = 1;
+      } else if (value !== undefined) {
+        $set[key] = value;
+      }
+    }
+    const update: Record<string, unknown> = {};
+    if (Object.keys($set).length > 0) update['$set'] = $set;
+    if (Object.keys($unset).length > 0) update['$unset'] = $unset;
+
     return this.addonConfigModel
       .findOneAndUpdate(
         { _id: new Types.ObjectId(id), owner: new Types.ObjectId(userId) },
-        { $set: data },
+        update,
         { new: true },
       )
       .exec();

@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AddonConfigsModule } from './addon-configs/addon-configs.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { CuratedListsModule } from './curated-lists/curated-lists.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -22,6 +23,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     UsersModule,
     AddonConfigsModule,
     IntegrationsModule,
+    CuratedListsModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

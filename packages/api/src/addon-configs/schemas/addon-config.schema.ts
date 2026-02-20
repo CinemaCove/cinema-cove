@@ -34,6 +34,23 @@ export class AddonConfig {
 
   @Prop({ enum: ['watchlist', 'favorites', 'rated'] })
   traktListType?: 'watchlist' | 'favorites' | 'rated';
+
+  // ── Discover filters ───────────────────────────────────────────────────────
+
+  @Prop({ default: false })
+  includeAdult!: boolean;
+
+  @Prop({ min: 0, max: 10 })
+  minVoteAverage?: number;
+
+  @Prop({ min: 0 })
+  minVoteCount?: number;
+
+  @Prop({ min: 1888 })
+  releaseDateFrom?: number;
+
+  @Prop({ min: 1888 })
+  releaseDateTo?: number;
 }
 
 export const AddonConfigSchema = SchemaFactory.createForClass(AddonConfig);

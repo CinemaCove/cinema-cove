@@ -3,17 +3,28 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface AddonConfigPayload {
+export interface AddonConfigFilters {
+  includeAdult?: boolean;
+  minVoteAverage?: number | null;
+  minVoteCount?: number | null;
+  releaseDateFrom?: number | null;
+  releaseDateTo?: number | null;
+}
+
+export interface AddonConfigPayload extends AddonConfigFilters {
   name: string;
   type: 'movie' | 'tv';
   languages: string[];
   sort: string;
 }
 
-export interface AddonConfigItem {
+export interface AddonConfigItem extends AddonConfigFilters {
   id: string;
   name: string;
   type: 'movie' | 'tv';
+  source: 'discover' | 'tmdb-list' | 'trakt-list';
+  tmdbListType: 'watchlist' | 'favorites' | 'rated' | null;
+  traktListType: 'watchlist' | 'favorites' | 'rated' | null;
   languages: string[];
   sort: string;
   installUrl: string;
