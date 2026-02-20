@@ -15,6 +15,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
+import type { UserList } from '@cinemacove/trakt-client';
 import { TmdbService } from '../tmdb/tmdb.service';
 import { TraktService } from '../trakt/trakt.service';
 import { UsersService } from '../users/users.service';
@@ -326,7 +327,7 @@ export class IntegrationsController {
         }),
       ),
       this.traktService.getUserLists(token).then((lists) =>
-        lists.map((l) => ({
+        lists.map((l: UserList) => ({
           id: String(l.ids.trakt),
           slug: l.ids.slug,
           name: l.name,
