@@ -36,6 +36,13 @@ export const routes: Routes = [
             (m) => m.IntegrationsComponent,
           ),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(
+            (m) => m.ProfileComponent,
+          ),
+      },
     ],
   },
   {

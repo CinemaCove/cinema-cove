@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
 
 const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', route: '/', exact: true },
@@ -37,10 +38,12 @@ const NAV_ITEMS = [
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   readonly year = new Date().getFullYear();
   private readonly auth = inject(AuthService);
   private readonly breakpointObserver = inject(BreakpointObserver);
+
+  readonly userService = inject(UserService);
 
   readonly navItems = NAV_ITEMS;
 
@@ -52,6 +55,10 @@ export class ShellComponent {
   );
 
   readonly sidenavOpen = signal(false);
+
+  ngOnInit(): void {
+    this.userService.load().subscribe();
+  }
 
   toggleSidenav(): void {
     this.sidenavOpen.update((v) => !v);
