@@ -53,16 +53,20 @@ export class StremioService {
     const catalogType = `CC-${config.name}`;
     const genreOptions = genres.map((g) => g.name);
 
-    const catalogs = config.languages.map((lang) => ({
-      type: catalogType,
-      id: `cinemacove-${nameLower}-${lang}`,
-      name: langMap.get(lang) ?? lang,
-      extra: [
-        { name: 'search', isRequired: false },
-        { name: 'genre', isRequired: false, options: genreOptions },
-        { name: 'skip', isRequired: false },
-      ],
-    }));
+    const extra = [
+      { name: 'search', isRequired: false },
+      { name: 'genre', isRequired: false, options: genreOptions },
+      { name: 'skip', isRequired: false },
+    ];
+
+    const catalogs = config.languages.length > 0
+      ? config.languages.map((lang) => ({
+          type: catalogType,
+          id: `cinemacove-${nameLower}-${lang}`,
+          name: langMap.get(lang) ?? lang,
+          extra,
+        }))
+      : [{ type: catalogType, id: `cinemacove-${nameLower}-all`, name: config.name, extra }];
 
     const configureUrl = this.configService.get<string>(
       'CONFIGURE_URL',
@@ -76,10 +80,6 @@ export class StremioService {
       resources: ['catalog'],
       types: [catalogType],
       catalogs,
-      behaviorHints: {
-        configurable: true,
-        configurationURL: configureUrl,
-      },
     };
   }
 
@@ -92,7 +92,8 @@ export class StremioService {
     search?: string,
     filters: DiscoverFilters = {},
   ): Promise<object> {
-    const lang = catalogId.split('-').pop()!;
+    const rawLang = catalogId.split('-').pop()!;
+    const lang = rawLang === 'all' ? undefined : rawLang;
     const page = Math.floor(skip / 20) + 1;
 
     const genreId = genreName
@@ -267,11 +268,7 @@ export class StremioService {
       name: `CinemaCove – ${shortName}`,
       resources: ['catalog'],
       types: isBuiltin ? [catalogType!] : ['movie', 'series'],
-      catalogs,
-      behaviorHints: {
-        configurable: true,
-        configurationURL: configureUrl,
-      },
+      catalogs
     };
   }
 
@@ -436,10 +433,6 @@ export class StremioService {
       resources: ['catalog'],
       types: isBuiltin ? [catalogType!] : ['movie', 'series'],
       catalogs,
-      behaviorHints: {
-        configurable: true,
-        configurationURL: configureUrl,
-      },
     };
   }
 
