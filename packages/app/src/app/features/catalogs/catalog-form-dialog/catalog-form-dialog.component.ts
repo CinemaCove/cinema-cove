@@ -128,7 +128,7 @@ export class CatalogFormDialogComponent implements OnInit {
         nonNullable: true,
       }),
       languages: new FormControl<string[]>([...(this.data.config?.languages ?? [])], {
-        validators: [Validators.required, maxSelectionsValidator(10)],
+        validators: [maxSelectionsValidator(10)],
         nonNullable: true,
       }),
       sort: new FormControl<string>(this.data.config?.sort ?? 'popularity.desc', {
