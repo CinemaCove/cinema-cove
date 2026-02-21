@@ -119,7 +119,7 @@ export class CatalogFormDialogComponent implements OnInit {
         validators: [
           Validators.required,
           Validators.maxLength(20),
-          Validators.pattern(/^[A-Za-z0-9_-]+$/),
+          Validators.pattern(/^[A-Za-z0-9_ -]+$/),
         ],
         nonNullable: true,
       }),

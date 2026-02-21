@@ -43,6 +43,13 @@ export const routes: Routes = [
             (m) => m.ProfileComponent,
           ),
       },
+      {
+        path: 'set-password',
+        loadComponent: () =>
+          import('./features/set-password/set-password.component').then(
+            (m) => m.SetPasswordComponent,
+          ),
+      },
     ],
   },
   {

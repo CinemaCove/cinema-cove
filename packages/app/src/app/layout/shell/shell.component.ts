@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { map } from 'rxjs/operators';
@@ -44,6 +44,7 @@ export class ShellComponent implements OnInit {
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   readonly navItems = NAV_ITEMS;
 
@@ -57,7 +58,11 @@ export class ShellComponent implements OnInit {
   readonly sidenavOpen = signal(false);
 
   ngOnInit(): void {
-    this.userService.load().subscribe();
+    this.userService.load().subscribe((profile) => {
+      if (!profile.hasPassword) {
+        void this.router.navigate(['/set-password']);
+      }
+    });
   }
 
   toggleSidenav(): void {

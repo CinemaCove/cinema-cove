@@ -6,12 +6,12 @@
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Catalog Name</mat-label>
             <input matInput formControlName="name" placeholder="e.g. French"/>
-            <mat-hint>Letters, numbers, - and _ only (max 20)</mat-hint>
+            <mat-hint>Letters, numbers, spaces, - and _ only (max 20)</mat-hint>
             @if (form.controls.name.dirty) {
                 @if (form.controls.name.hasError('required')) {
                     <mat-error>Name is required</mat-error>
                 } @else if (form.controls.name.hasError('pattern')) {
-                    <mat-error>Only letters, numbers, - and _ allowed</mat-error>
+                    <mat-error>Only letters, numbers, spaces, - and _ allowed</mat-error>
                 } @else if (form.controls.name.hasError('maxlength')) {
                     <mat-error>Max 20 characters</mat-error>
                 }
