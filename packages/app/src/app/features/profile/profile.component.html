@@ -1,0 +1,91 @@
+<div class="profile-page">
+    <h1 class="page-title">Profile</h1>
+
+    @if (profile(); as p) {
+        @if (p.email) {
+            <p class="profile-email">{{ p.email }}</p>
+        }
+
+        <!-- Display Name -->
+        <section class="profile-section">
+            <h2>Display Name</h2>
+            <form [formGroup]="nameForm" (ngSubmit)="saveName()" class="profile-form">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Display name</mat-label>
+                    <input matInput formControlName="displayName" placeholder="Your name"/>
+                    @if (nameForm.controls.displayName.hasError('maxlength')) {
+                        <mat-error>Max 50 characters</mat-error>
+                    }
+                    @if (nameForm.controls.displayName.hasError('required')) {
+                        <mat-error>Name is required</mat-error>
+                    }
+                </mat-form-field>
+
+                @if (nameError()) {
+                    <p class="form-error" role="alert">{{ nameError() }}</p>
+                }
+                @if (nameSuccess()) {
+                    <p class="form-success" role="status">Name updated successfully.</p>
+                }
+
+                <button mat-flat-button type="submit" [disabled]="nameForm.invalid || savingName()">
+                    @if (savingName()) {
+                        <mat-spinner diameter="18" class="btn-spinner"/>
+                    } @else {
+                        Save Name
+                    }
+                </button>
+            </form>
+        </section>
+
+        <mat-divider/>
+
+        <!-- Password -->
+        <section class="profile-section">
+            <h2>{{ p.hasPassword ? 'Change Password' : 'Set Password' }}</h2>
+            @if (!p.hasPassword) {
+                <p class="section-hint">You signed in with a social account. You can set a password to also log in with email.</p>
+            }
+            <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" class="profile-form">
+                @if (p.hasPassword) {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Current password</mat-label>
+                        <input matInput type="password" formControlName="currentPassword" autocomplete="current-password"/>
+                    </mat-form-field>
+                }
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>New password</mat-label>
+                    <input matInput type="password" formControlName="newPassword" autocomplete="new-password"/>
+                    @if (passwordForm.controls.newPassword.hasError('minlength')) {
+                        <mat-error>Minimum 8 characters</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Confirm new password</mat-label>
+                    <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password"/>
+                </mat-form-field>
+
+                @if (passwordError()) {
+                    <p class="form-error" role="alert">{{ passwordError() }}</p>
+                }
+                @if (passwordSuccess()) {
+                    <p class="form-success" role="status">Password updated successfully.</p>
+                }
+
+                <button mat-flat-button type="submit" [disabled]="passwordForm.invalid || savingPassword()">
+                    @if (savingPassword()) {
+                        <mat-spinner diameter="18" class="btn-spinner"/>
+                    } @else {
+                        {{ p.hasPassword ? 'Change Password' : 'Set Password' }}
+                    }
+                </button>
+            </form>
+        </section>
+    } @else {
+        <div class="loading-row">
+            <mat-spinner diameter="32"/>
+        </div>
+    }
+</div>
