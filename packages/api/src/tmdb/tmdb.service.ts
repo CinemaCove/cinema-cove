@@ -102,7 +102,7 @@ export class TmdbService {
   }
 
   public async discoverMovies(
-    language: string,
+    language: string | undefined,
     page: number,
     sortBy: SortBy = 'popularity.desc',
     genreId?: number,
@@ -111,12 +111,12 @@ export class TmdbService {
   ): Promise<PaginatedResult<DiscoverMovieResultItem>> {
     const tmdbSort = sortBy === 'release_date.desc' ? 'primary_release_date.desc' : sortBy;
     const voteCountFloor = filters.minVoteCount ?? (sortBy === 'vote_average.desc' ? 300 : undefined);
-    const key = `discover:movie:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}:${JSON.stringify(filters)}`;
+    const key = `discover:movie:${language ?? 'all'}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}:${JSON.stringify(filters)}`;
     return await this.cache.getOrSet(
       key,
       () =>
         this.client.discover.searchMovies({
-          withOriginalLanguage: language,
+          ...(language ? { withOriginalLanguage: language } : {}),
           sortBy: tmdbSort,
           page,
           ...(filters.includeAdult !== undefined ? { includeAdult: filters.includeAdult } : {}),
@@ -132,7 +132,7 @@ export class TmdbService {
   }
 
   public async discoverTvShows(
-    language: string,
+    language: string | undefined,
     page: number,
     sortBy: SortBy = 'popularity.desc',
     genreId?: number,
@@ -141,12 +141,12 @@ export class TmdbService {
   ): Promise<PaginatedResult<DiscoverTvShowResultItem>> {
     const tmdbSort = sortBy === 'release_date.desc' ? 'first_air_date.desc' : sortBy;
     const voteCountFloor = filters.minVoteCount ?? (sortBy === 'vote_average.desc' ? 100 : undefined);
-    const key = `discover:tv:${language}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}:${JSON.stringify(filters)}`;
+    const key = `discover:tv:${language ?? 'all'}:${page}:${tmdbSort}:${genreId ?? 'none'}:${search ?? 'none'}:${JSON.stringify(filters)}`;
     return await this.cache.getOrSet(
       key,
       () =>
         this.client.discover.searchTvShows({
-          withOriginalLanguage: language,
+          ...(language ? { withOriginalLanguage: language } : {}),
           sortBy: tmdbSort,
           page,
           ...(filters.includeAdult !== undefined ? { includeAdult: filters.includeAdult } : {}),

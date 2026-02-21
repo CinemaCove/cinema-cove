@@ -62,13 +62,15 @@
     </mat-sidenav>
 
     <mat-sidenav-content>
-        <main class="main-content">
-            <router-outlet />
-        </main>
-        <footer class="app-footer">
-            <span>&copy; {{ year }} CinemaCove</span>
-            <a routerLink="/privacy">Privacy Policy</a>
-            <a href="https://github.com/orgs/CinemaCove/" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </footer>
+        <div class="content-wrapper">
+            <main class="main-content">
+                <router-outlet />
+            </main>
+            <footer class="app-footer">
+                <span>&copy; {{ year }} CinemaCove</span>
+                <a routerLink="/privacy">Privacy Policy</a>
+                <a href="https://github.com/orgs/CinemaCove/" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </footer>
+        </div>
     </mat-sidenav-content>
 </mat-sidenav-container>

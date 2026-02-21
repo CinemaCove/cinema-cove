@@ -97,7 +97,7 @@
                     <mat-form-field appearance="outline" class="year-field">
                         <mat-label>From year</mat-label>
                         <input matInput [matDatepicker]="fromPicker" formControlName="releaseDateFrom"
-                               placeholder="e.g. 2000" readonly/>
+                               placeholder="e.g. 2000"/>
                         @if (form.controls.releaseDateFrom.value) {
                             <button matIconSuffix mat-icon-button type="button" aria-label="Clear from year"
                                     (click)="form.controls.releaseDateFrom.setValue(null)">
@@ -112,7 +112,7 @@
                     <mat-form-field appearance="outline" class="year-field">
                         <mat-label>To year</mat-label>
                         <input matInput [matDatepicker]="toPicker" formControlName="releaseDateTo"
-                               placeholder="e.g. 2024" readonly/>
+                               placeholder="e.g. 2024"/>
                         @if (form.controls.releaseDateTo.value) {
                             <button matIconSuffix mat-icon-button type="button" aria-label="Clear to year"
                                     (click)="form.controls.releaseDateTo.setValue(null)">
