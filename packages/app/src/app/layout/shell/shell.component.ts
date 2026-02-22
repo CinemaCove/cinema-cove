@@ -12,6 +12,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
+import { environment } from '../../../environments/environment';
 
 const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', route: '/', exact: true },
@@ -40,6 +41,8 @@ const NAV_ITEMS = [
 })
 export class ShellComponent implements OnInit {
   readonly year = new Date().getFullYear();
+  readonly discordUrl = environment.discordUrl;
+  readonly donateUrl = environment.donateUrl;
   private readonly auth = inject(AuthService);
   private readonly breakpointObserver = inject(BreakpointObserver);
 

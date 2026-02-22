@@ -64,7 +64,7 @@
       <h2>6. Data Retention</h2>
       <p>
         Your account data is retained for as long as your account is active. You may request
-        deletion of your account and associated data at any time by contacting us.
+        deletion of your account and associated data at any time by reaching out to us on Discord.
       </p>
     </section>
 
@@ -77,15 +77,20 @@
         <li>Object to or restrict certain processing.</li>
         <li>Withdraw consent at any time (where processing is based on consent).</li>
       </ul>
-      <p>To exercise any of these rights, please contact us at the address below.</p>
+      <p>To exercise any of these rights, please reach out via our Discord server.</p>
     </section>
 
-<!--    <section>-->
-<!--      <h2>8. Contact</h2>-->
-<!--      <p>-->
-<!--        If you have any questions about this Privacy Policy, please contact us at-->
-<!--        <a href="mailto:privacy&#64;cinemacove.com">privacy&#64;cinemacove.com</a>.-->
-<!--      </p>-->
-<!--    </section>-->
+    <section>
+      <h2>8. Contact</h2>
+      <p>
+        If you have any questions about this Privacy Policy or want to exercise your data rights,
+        please reach out to us on our
+        @if (discordUrl) {
+          <a [href]="discordUrl" target="_blank" rel="noopener">Discord server</a>
+        } @else {
+          Discord server (link coming soon)
+        }.
+      </p>
+    </section>
   </div>
 </div>
