@@ -97,10 +97,15 @@
     } @else {
         <div class="preview-grid">
             @for (list of previewCurated(); track list.id) {
-                <button class="preview-tile preview-curated" type="button"
+                <button class="preview-tile preview-curated"
+                        [class.has-image]="!!list.imagePath"
+                        [style]="curatedTileStyle(list)"
+                        type="button"
                         (click)="openCuratedDetail(list)"
                         [attr.aria-label]="list.name">
-                    <mat-icon class="teaser-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                    @if (!list.imagePath) {
+                        <mat-icon class="teaser-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                    }
                     <span class="preview-name">{{ list.name }}</span>
                 </button>
             }
@@ -158,3 +163,5 @@
         </div>
     </div>
 </section>
+
+<cc-ad-unit />

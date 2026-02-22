@@ -10,11 +10,12 @@ import { CatalogsStore } from '../../signal-store/catalogs.store';
 import { CuratedListsStore } from '../../signal-store/curated-lists.store';
 import { IntegrationsStore } from '../../signal-store/integrations.store';
 import { CuratedDetailDialogComponent } from '../curated/curated-detail-dialog/curated-detail-dialog.component';
+import { AdUnitComponent } from '../../shared/ad-unit/ad-unit.component';
 
 @Component({
   selector: 'cc-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, AdUnitComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -66,6 +67,13 @@ export class DashboardComponent implements OnInit {
   catalogTypeLabel(catalog: AddonConfigItem): string {
     if (this.isMixed(catalog)) return 'Mixed';
     return catalog.type === 'movie' ? 'Movies' : 'TV Shows';
+  }
+
+  curatedTileStyle(list: CuratedListItem): Record<string, string> | null {
+    if (list.imagePath) {
+      return { backgroundImage: `url('${list.imagePath}')`, backgroundSize: 'cover', backgroundPosition: 'center' };
+    }
+    return null;
   }
 
   openCuratedDetail(list: CuratedListItem): void {

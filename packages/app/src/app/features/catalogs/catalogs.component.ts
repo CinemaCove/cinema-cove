@@ -7,7 +7,6 @@ import { AddonConfigItem } from '../../core/services/addon-configs.service';
 import { CatalogsStore } from '../../signal-store/catalogs.store';
 import { LanguagesStore } from '../../signal-store/languages.store';
 import { SortOptionsStore } from '../../signal-store/sort-options.store';
-import { AdUnitComponent } from '../../shared/ad-unit/ad-unit.component';
 import { CatalogCardComponent } from './catalog-card/catalog-card.component';
 import {
   CatalogFormDialogComponent,
@@ -23,7 +22,6 @@ import {ActivatedRoute} from "@angular/router";
   selector: 'cc-catalogs',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AdUnitComponent,
     CatalogCardComponent,
     MatButtonModule,
     MatIconModule,
