@@ -1,9 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AccountDetailsResult,
+  AccountFavoriteMovieResultItem,
+  AccountFavoriteTvShowResultItem,
+  AccountRatedMovieResultItem,
+  AccountRatedTvShowResultItem,
+  AccountWatchlistMovieResultItem,
+  AccountWatchlistTvShowResultItem,
   ConfigurationLanguage,
   DiscoverMovieResultItem,
   DiscoverTvShowResultItem,
+  ListDetailsResult,
   MovieDetailsWithAppends,
   MovieExternalIdsResult,
   PaginatedResult,
@@ -11,7 +19,16 @@ import {
   TvShowDetailsWithAppend,
   TvShowExternalIdsResult,
 } from '@cinemacove/tmdb-client/v3';
+
 import { CacheService } from '../cache/cache.service';
+
+export type TmdbAccountListItem =
+  | AccountWatchlistMovieResultItem
+  | AccountWatchlistTvShowResultItem
+  | AccountFavoriteMovieResultItem
+  | AccountFavoriteTvShowResultItem
+  | AccountRatedMovieResultItem
+  | AccountRatedTvShowResultItem;
 
 export type SortBy = 'popularity.desc' | 'release_date.desc' | 'vote_average.desc';
 
@@ -199,49 +216,24 @@ export class TmdbService {
 
   // ── TMDB User Auth ─────────────────────────────────────────────────────────
 
-  private get apiKey(): string {
-    return this.configService.getOrThrow<string>('TMDB_API_KEY');
-  }
-
   async createRequestToken(): Promise<string> {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/authentication/token/new?api_key=${this.apiKey}`,
-    );
-    const data = (await res.json()) as { success: boolean; request_token: string };
+    const data = await this.client.authentication.getRequestToken();
     if (!data.success) throw new Error('Failed to create TMDB request token');
-    return data.request_token;
+    return data.requestToken;
   }
 
   async createSession(requestToken: string): Promise<string> {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/authentication/session/new?api_key=${this.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ request_token: requestToken }),
-      },
-    );
-    const data = (await res.json()) as { success: boolean; session_id: string };
+    const data = await this.client.authentication.createSession({ requestToken });
     if (!data.success) throw new Error('Failed to create TMDB session');
-    return data.session_id;
+    return data.sessionId;
   }
 
-  async getTmdbAccount(sessionId: string): Promise<{ id: number; username: string }> {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/account?api_key=${this.apiKey}&session_id=${sessionId}`,
-    );
-    return res.json() as Promise<{ id: number; username: string }>;
+  async getTmdbAccount(sessionId: string): Promise<AccountDetailsResult> {
+    return this.client.account.getDetails(null, { sessionId });
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    await fetch(
-      `https://api.themoviedb.org/3/authentication/session?api_key=${this.apiKey}`,
-      {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId }),
-      },
-    );
+    await this.client.authentication.deleteSession({ sessionId });
   }
 
   async getTmdbUserList(
@@ -250,46 +242,32 @@ export class TmdbService {
     accountId: number,
     sessionId: string,
     page: number = 1,
-  ): Promise<{ results: any[]; total_results: number; total_pages: number }> {
-    const endpoint =
-      listType === 'watchlist'
-        ? `watchlist/${mediaType === 'movie' ? 'movies' : 'tv'}`
-        : listType === 'favorites'
-          ? `favorite/${mediaType === 'movie' ? 'movies' : 'tv'}`
-          : `rated/${mediaType === 'movie' ? 'movies' : 'tv'}`;
-
-    const res = await fetch(
-      `https://api.themoviedb.org/3/account/${accountId}/${endpoint}?api_key=${this.apiKey}&session_id=${sessionId}&page=${page}`,
-    );
-    return res.json() as Promise<{ results: any[]; total_results: number; total_pages: number }>;
+  ): Promise<PaginatedResult<TmdbAccountListItem>> {
+    const opts = { sessionId, page };
+    if (listType === 'watchlist') {
+      return mediaType === 'movie'
+        ? this.client.account.getWatchlistMovies(accountId, opts)
+        : this.client.account.getWatchlistTvShows(accountId, opts);
+    }
+    if (listType === 'favorites') {
+      return mediaType === 'movie'
+        ? this.client.account.getFavoriteMovies(accountId, opts)
+        : this.client.account.getFavoriteTvShows(accountId, opts);
+    }
+    return mediaType === 'movie'
+      ? this.client.account.getRatedMovies(accountId, opts)
+      : this.client.account.getRatedTvShows(accountId, opts);
   }
 
   async getUserCustomLists(
     accountId: number,
     sessionId: string,
     page: number = 1,
-  ): Promise<{
-    results: { id: number; name: string; description: string; item_count: number }[];
-    total_pages: number;
-    total_results: number;
-  }> {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/account/${accountId}/lists?api_key=${this.apiKey}&session_id=${sessionId}&page=${page}`,
-    );
-    return res.json() as Promise<{ results: { id: number; name: string; description: string; item_count: number }[]; total_pages: number; total_results: number }>;
+  ): Promise<PaginatedResult<{ id: number; name: string; description: string; itemCount: number }>> {
+    return this.client.account.getCustomLists(accountId, { sessionId, page }) as Promise<PaginatedResult<{ id: number; name: string; description: string; itemCount: number }>>;
   }
 
-  async getCustomListItems(
-    listId: string,
-    page: number = 1,
-  ): Promise<{
-    items: { id: number; media_type: string; title?: string; name?: string; poster_path?: string; overview: string }[];
-    total_pages: number;
-    total_results: number;
-  }> {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/list/${listId}?api_key=${this.apiKey}&page=${page}`,
-    );
-    return res.json() as Promise<{ items: any[]; total_pages: number; total_results: number }>;
+  async getCustomListItems(listId: string, page: number = 1): Promise<ListDetailsResult> {
+    return this.client.list.details(Number(listId), { page });
   }
 }

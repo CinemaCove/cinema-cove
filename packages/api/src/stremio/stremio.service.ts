@@ -4,11 +4,44 @@ import {
   DiscoverMovieResultItem,
   DiscoverTvShowResultItem,
 } from '@cinemacove/tmdb-client/v3';
+import type { FavoriteItem, RatingItem, WatchlistItem } from '@cinemacove/trakt-client';
 import { DiscoverFilters, SortBy, TmdbService } from '../tmdb/tmdb.service';
 import { TraktService } from '../trakt/trakt.service';
 import { AddonConfig } from './types/addon-config.interface';
 
 import pLimit from 'p-limit';
+
+interface StremioExtra {
+  name: string;
+  isRequired: boolean;
+  options?: string[];
+}
+
+interface StremroCatalog {
+  type: string;
+  id: string;
+  name: string;
+  extra: StremioExtra[];
+}
+
+export interface StremioManifest {
+  id: string;
+  version: string;
+  name: string;
+  resources: string[];
+  types: string[];
+  catalogs: StremroCatalog[];
+}
+
+export interface StremioResponse {
+  metas: StremioMeta[];
+}
+
+/** Minimal shape shared by all TMDB list-item types used in catalog building. */
+interface TmdbListItem {
+  id: number;
+  posterPath: string;
+}
 
 interface StremioMeta {
   id: string;
@@ -38,7 +71,7 @@ export class StremioService {
 
   // ── Discover (existing) ────────────────────────────────────────────────────
 
-  async buildManifest(config: AddonConfig): Promise<object> {
+  async buildManifest(config: AddonConfig): Promise<StremioManifest> {
     const languages = await this.tmdbService.getLanguages();
     const genres =
       config.type === 'movie'
@@ -91,7 +124,7 @@ export class StremioService {
     genreName?: string,
     search?: string,
     filters: DiscoverFilters = {},
-  ): Promise<object> {
+  ): Promise<StremioResponse> {
     const rawLang = catalogId.split('-').pop()!;
     const lang = rawLang === 'all' ? undefined : rawLang;
     const page = Math.floor(skip / 20) + 1;
@@ -224,7 +257,7 @@ export class StremioService {
     return name.length > max ? name.slice(0, max - 1) + '…' : name;
   }
 
-  async buildTmdbListManifest(config: AddonConfig): Promise<object> {
+  async buildTmdbListManifest(config: AddonConfig): Promise<StremioManifest> {
     const shortName = this.truncate(config.name);
     const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
     const addonId = config.tmdbListId
@@ -281,11 +314,11 @@ export class StremioService {
     stremioType: 'movie' | 'series',
     skip: number,
     creds?: { accountId: number; sessionId: string },
-  ): Promise<object> {
+  ): Promise<StremioResponse> {
     const page = Math.floor(skip / 20) + 1;
     const tmdbMediaType = stremioType === 'movie' ? 'movie' : 'tv';
 
-    let items: any[];
+    let items: TmdbListItem[];
 
     if (config.tmdbListType) {
       // Built-in list — needs user credentials
@@ -299,11 +332,11 @@ export class StremioService {
       );
       // Only return items when the requested Stremio type matches the list's content type
       if (tmdbMediaType !== config.type) return { metas: [] };
-      items = data.results ?? [];
+      items = [...(data.results ?? [])];
     } else {
       // Custom list — public endpoint, no credentials needed
       const data = await this.tmdbService.getCustomListItems(config.tmdbListId!, page);
-      items = (data.items ?? []).filter((item: any) => item.media_type === tmdbMediaType);
+      items = [...data.items].filter((item) => item.mediaType === tmdbMediaType);
     }
 
     const limit = pLimit(5);
@@ -324,8 +357,8 @@ export class StremioService {
               id: details.imdbId || `tmdb:${details.id}`,
               type: 'movie',
               name: details.originalTitle,
-              poster: item.poster_path
-                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+              poster: item.posterPath
+                ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
                 : undefined,
               description: details.overview,
               imdbId: details.imdbId,
@@ -359,8 +392,8 @@ export class StremioService {
               id: details.externalIds?.imdbId || `tmdb:${details.id}`,
               type: 'series',
               name: details.name,
-              poster: item.poster_path
-                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+              poster: item.posterPath
+                ? `https://image.tmdb.org/t/p/w500${item.posterPath}`
                 : undefined,
               description: details.overview,
               imdbId: details.externalIds?.imdbId,
@@ -390,7 +423,7 @@ export class StremioService {
 
   // ── Trakt Lists ────────────────────────────────────────────────────────────
 
-  async buildTraktListManifest(config: AddonConfig): Promise<object> {
+  async buildTraktListManifest(config: AddonConfig): Promise<StremioManifest> {
     const shortName = this.truncate(config.name);
     const configureUrl = this.configService.get<string>('CONFIGURE_URL', 'http://localhost:4200');
     const addonId = config.traktListId
@@ -445,7 +478,7 @@ export class StremioService {
     stremioType: 'movie' | 'series',
     skip: number,
     accessToken: string,
-  ): Promise<object> {
+  ): Promise<StremioResponse> {
     const page = Math.floor(skip / 20) + 1;
     const tmdbMediaType = stremioType === 'movie' ? 'movie' : 'tv';
     const traktType = stremioType === 'movie' ? 'movies' : 'shows';
@@ -455,16 +488,16 @@ export class StremioService {
     if (config.traktListType) {
       // Built-in list — only matches the catalog's own type
       if (tmdbMediaType !== config.type) return { metas: [] };
-      const items =
+      const items: Array<WatchlistItem | FavoriteItem | RatingItem> =
         config.traktListType === 'watchlist'
           ? await this.traktService.getWatchlist(accessToken, traktType, page)
           : config.traktListType === 'favorites'
             ? await this.traktService.getFavorites(accessToken, traktType, page)
             : await this.traktService.getRatings(accessToken, traktType, page);
 
-      tmdbIds = (items as any[])
-        .map((item) => (tmdbMediaType === 'movie' ? item.movie?.ids?.tmdb : item.show?.ids?.tmdb))
-        .filter((id): id is number => !!id);
+      tmdbIds = items
+        .map((item) => (tmdbMediaType === 'movie' ? item.movie?.ids.tmdb : item.show?.ids.tmdb))
+        .filter((id): id is number => id !== undefined);
     } else {
       // Custom list — filter by requested type
       const items = await this.traktService.getUserListItems(
@@ -473,9 +506,9 @@ export class StremioService {
         stremioType === 'movie' ? 'movie' : 'show',
         page,
       );
-      tmdbIds = (items as any[])
-        .map((item) => (tmdbMediaType === 'movie' ? item.movie?.ids?.tmdb : item.show?.ids?.tmdb))
-        .filter((id): id is number => !!id);
+      tmdbIds = items
+        .map((item) => (tmdbMediaType === 'movie' ? item.movie?.ids.tmdb : item.show?.ids.tmdb))
+        .filter((id): id is number => id !== undefined);
     }
 
     const limit = pLimit(5);

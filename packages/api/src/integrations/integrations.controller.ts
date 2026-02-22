@@ -146,7 +146,7 @@ export class IntegrationsController {
             type: def.type,
             label: def.label,
             icon: def.icon,
-            itemCount: data.total_results ?? 0,
+            itemCount: data.totalResults ?? 0,
           };
         }),
       ),
@@ -159,9 +159,9 @@ export class IntegrationsController {
         id: String(l.id),
         name: l.name,
         description: l.description,
-        itemCount: l.item_count,
+        itemCount: l.itemCount,
       })),
-      totalPages: customData.total_pages,
+      totalPages: customData.totalPages,
       page,
     };
   }
