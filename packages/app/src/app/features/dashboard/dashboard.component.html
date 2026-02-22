@@ -58,7 +58,7 @@
     } @else {
         <div class="preview-grid">
             @for (catalog of previewCatalogs(); track catalog.id) {
-                <div class="preview-tile" [style.background]="catalogGradient(catalog)">
+                <div class="preview-tile" [style]="catalogTileStyle(catalog)">
                     <span class="preview-type">{{ catalogTypeLabel(catalog) }}</span>
                     <span class="preview-name">{{ catalog.name }}</span>
                 </div>

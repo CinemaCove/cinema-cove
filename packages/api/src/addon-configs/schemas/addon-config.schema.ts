@@ -35,6 +35,9 @@ export class AddonConfig {
   @Prop({ enum: ['watchlist', 'favorites', 'rated'] })
   traktListType?: 'watchlist' | 'favorites' | 'rated';
 
+  @Prop()
+  imagePath?: string;
+
   // ── Discover filters ───────────────────────────────────────────────────────
 
   @Prop({ default: false })

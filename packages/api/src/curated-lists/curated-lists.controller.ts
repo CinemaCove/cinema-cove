@@ -13,15 +13,6 @@ import { CuratedListsService } from './curated-lists.service';
 import { AddonConfigsService } from '../addon-configs/addon-configs.service';
 import { UsersService } from '../users/users.service';
 
-function sanitizeName(name: string): string {
-  return (
-    name
-      .replace(/\s+/g, '-')
-      .replace(/[^A-Za-z0-9_-]/g, '')
-      .slice(0, 20) || 'curated'
-  );
-}
-
 @Controller('curated-lists')
 export class CuratedListsController {
   constructor(
@@ -64,11 +55,12 @@ export class CuratedListsController {
       (await this.addonConfigsService.create(req.user.sub, {
         source: 'tmdb-list',
         tmdbListId: curatedList.tmdbListId,
-        name: sanitizeName(curatedList.name),
+        name: curatedList.name.slice(0, 20),
         type: 'movie',
         languages: ['en'],
         sort: 'popularity.desc',
         includeAdult: false,
+        imagePath: curatedList.imagePath,
       }, user?.maxAllowedConfigs ?? 20));
 
     const installUrl = `stremio://${req.get('host')}/api/${doc._id}/manifest.json`;

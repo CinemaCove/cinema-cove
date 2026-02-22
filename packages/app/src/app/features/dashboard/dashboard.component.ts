@@ -49,13 +49,18 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-  catalogGradient(catalog: AddonConfigItem): string {
-    if (this.isMixed(catalog)) {
-      return 'linear-gradient(135deg, var(--mat-sys-on-tertiary-fixed) 0%, var(--mat-sys-tertiary-container) 100%)';
+  catalogTileStyle(catalog: AddonConfigItem): Record<string, string> {
+    if (catalog.imagePath) {
+      return { backgroundImage: `url('${catalog.imagePath}')`, backgroundSize: 'cover', backgroundPosition: 'center' };
     }
-    return catalog.type === 'movie'
-      ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
-      : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)';
+    if (this.isMixed(catalog)) {
+      return { background: 'linear-gradient(135deg, var(--mat-sys-on-tertiary-fixed) 0%, var(--mat-sys-tertiary-container) 100%)' };
+    }
+    return {
+      background: catalog.type === 'movie'
+        ? 'linear-gradient(135deg, var(--mat-sys-on-primary-fixed) 0%, var(--mat-sys-primary-container) 100%)'
+        : 'linear-gradient(135deg, var(--mat-sys-on-secondary-fixed) 0%, var(--mat-sys-secondary-container) 100%)',
+    };
   }
 
   catalogTypeLabel(catalog: AddonConfigItem): string {
