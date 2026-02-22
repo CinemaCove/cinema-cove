@@ -19,7 +19,7 @@ export class CuratedComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   ngOnInit(): void {
-    this.store.load();
+    this.store.load(true);
   }
 
   openDetail(list: CuratedListItem): void {

@@ -38,6 +38,9 @@ export class DashboardComponent implements OnInit {
     () => this.catalogsStore.items().filter((c) => this.isMixed(c)).length,
   );
   protected readonly previewCurated = computed(() => this.curatedListsStore.items().slice(0, 3));
+  protected readonly extraCuratedCount = computed(() =>
+    Math.max(0, this.curatedListsStore.items().length - 3),
+  );
 
   isMixed(catalog: AddonConfigItem): boolean {
     return (
@@ -70,7 +73,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.catalogsStore.load();
-    this.curatedListsStore.load();
+    this.curatedListsStore.load(true);
     this.integrationsStore.load();
   }
 }

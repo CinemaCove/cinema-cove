@@ -104,6 +104,14 @@
                     <span class="preview-name">{{ list.name }}</span>
                 </button>
             }
+            @if (extraCuratedCount() > 0) {
+                <a class="preview-tile preview-more"
+                   routerLink="/curated"
+                   [attr.aria-label]="'+' + extraCuratedCount() + ' more curated lists'">
+                    <mat-icon aria-hidden="true">more_horiz</mat-icon>
+                    <span>+{{ extraCuratedCount() }} more</span>
+                </a>
+            }
         </div>
     }
 </section>
