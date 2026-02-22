@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Patch, Post, Req, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Patch, Post, Req, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
 import type { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AddonConfigsService } from './addon-configs.service';
+import { UsersService } from '../users/users.service';
 
 interface DiscoverFilterBody {
   includeAdult?: boolean;
@@ -28,11 +29,16 @@ interface UpdateAddonConfigBody extends DiscoverFilterBody {
 @UseGuards(AuthGuard('jwt'))
 @Controller('addon-configs')
 export class AddonConfigsController {
-  constructor(private readonly addonConfigsService: AddonConfigsService) {}
+  constructor(
+    private readonly addonConfigsService: AddonConfigsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
   async create(@Request() req: { user: { sub: string } }, @Body() body: CreateAddonConfigBody) {
-    const doc = await this.addonConfigsService.create(req.user.sub, body);
+    const user = await this.usersService.findById(req.user.sub);
+    if (!user) throw new UnauthorizedException();
+    const doc = await this.addonConfigsService.create(req.user.sub, body, user.maxAllowedConfigs ?? 20);
     return { id: doc._id };
   }
 

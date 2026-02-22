@@ -3,8 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { AddonConfig, AddonConfigDocument } from './schemas/addon-config.schema';
 
-const MAX_CONFIGS_PER_USER = 20;
-
 interface CreateAddonConfigDto {
   name: string;
   type: 'movie' | 'tv';
@@ -41,10 +39,10 @@ export class AddonConfigsService {
     private readonly addonConfigModel: Model<AddonConfigDocument>,
   ) {}
 
-  async create(userId: string, data: CreateAddonConfigDto): Promise<AddonConfigDocument> {
+  async create(userId: string, data: CreateAddonConfigDto, maxAllowed: number): Promise<AddonConfigDocument> {
     const count = await this.addonConfigModel.countDocuments({ owner: new Types.ObjectId(userId) });
-    if (count >= MAX_CONFIGS_PER_USER) {
-      throw new ForbiddenException(`You have reached the limit of ${MAX_CONFIGS_PER_USER} addon configurations.`);
+    if (count >= maxAllowed) {
+      throw new ForbiddenException(`You have reached the limit of ${maxAllowed} addon configurations.`);
     }
     // Strip null filter values — undefined fields are not stored in the document
     const cleanData = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== null));

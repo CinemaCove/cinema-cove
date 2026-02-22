@@ -48,6 +48,9 @@ export class User {
 
   @Prop()
   traktExpiresAt?: number;
+
+  @Prop({ default: 20 })
+  maxAllowedConfigs!: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

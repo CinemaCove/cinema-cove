@@ -175,6 +175,8 @@ export class IntegrationsController {
       | { kind: 'builtin'; listType: 'watchlist' | 'favorites' | 'rated'; type: 'movie' | 'tv'; label: string }
       | { kind: 'custom'; listId: string; name: string },
   ) {
+    const user = await this.usersService.findById(req.user.sub);
+    const maxAllowed = user?.maxAllowedConfigs ?? 20;
     let doc;
     if (body.kind === 'builtin') {
       const def = BUILTIN_LISTS.find((d) => d.listType === body.listType && d.type === body.type);
@@ -191,7 +193,7 @@ export class IntegrationsController {
           sort: 'popularity.desc',
           source: 'tmdb-list',
           tmdbListType: body.listType,
-        }));
+        }, maxAllowed));
     } else {
       if (!body.listId || !body.name) throw new BadRequestException('listId and name are required');
       doc =
@@ -205,7 +207,7 @@ export class IntegrationsController {
           sort: 'popularity.desc',
           source: 'tmdb-list',
           tmdbListId: body.listId,
-        }));
+        }, maxAllowed));
     }
 
     const host = req.get('X-Forwarded-Host') ?? req.get('host');
@@ -349,6 +351,8 @@ export class IntegrationsController {
       | { kind: 'builtin'; listType: 'watchlist' | 'favorites' | 'rated'; type: 'movie' | 'tv'; label: string }
       | { kind: 'custom'; listId: string; slug: string; name: string },
   ) {
+    const user = await this.usersService.findById(req.user.sub);
+    const maxAllowed = user?.maxAllowedConfigs ?? 20;
     let doc;
     if (body.kind === 'builtin') {
       const def = TRAKT_BUILTIN_LISTS.find((d) => d.listType === body.listType && d.type === body.type);
@@ -365,7 +369,7 @@ export class IntegrationsController {
           sort: 'popularity.desc',
           source: 'trakt-list',
           traktListType: body.listType,
-        }));
+        }, maxAllowed));
     } else {
       if (!body.listId || !body.name) throw new BadRequestException('listId and name are required');
       doc =
@@ -379,7 +383,7 @@ export class IntegrationsController {
           sort: 'popularity.desc',
           source: 'trakt-list',
           traktListId: body.listId,
-        }));
+        }, maxAllowed));
     }
 
     const host = req.get('X-Forwarded-Host') ?? req.get('host');

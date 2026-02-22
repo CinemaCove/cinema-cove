@@ -11,6 +11,7 @@ import type { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { CuratedListsService } from './curated-lists.service';
 import { AddonConfigsService } from '../addon-configs/addon-configs.service';
+import { UsersService } from '../users/users.service';
 
 function sanitizeName(name: string): string {
   return (
@@ -26,6 +27,7 @@ export class CuratedListsController {
   constructor(
     private readonly curatedListsService: CuratedListsService,
     private readonly addonConfigsService: AddonConfigsService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Get()
@@ -56,6 +58,7 @@ export class CuratedListsController {
       { tmdbListId: curatedList.tmdbListId },
     );
 
+    const user = await this.usersService.findById(req.user.sub);
     const doc =
       existing ??
       (await this.addonConfigsService.create(req.user.sub, {
@@ -66,7 +69,7 @@ export class CuratedListsController {
         languages: ['en'],
         sort: 'popularity.desc',
         includeAdult: false,
-      }));
+      }, user?.maxAllowedConfigs ?? 20));
 
     const installUrl = `stremio://${req.get('host')}/api/${doc._id}/manifest.json`;
     return { id: doc._id, installUrl, alreadyInstalled: !!existing };
