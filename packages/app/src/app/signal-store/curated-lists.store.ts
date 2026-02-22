@@ -19,9 +19,9 @@ export const CuratedListsStore = signalStore(
   withMethods((store) => {
     const service = inject(CuratedListsService);
     return {
-      load: rxMethod<void>(
+      load: rxMethod<boolean>(
         pipe(
-          filter(() => store.status() !== 'loading' && store.status() !== 'success'),
+          filter((force) => store.status() !== 'loading' && (force || store.status() !== 'success')),
           tap(() => patchState(store, { status: 'loading' })),
           switchMap(() =>
             service.list().pipe(

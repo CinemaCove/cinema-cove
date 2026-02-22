@@ -49,7 +49,7 @@ export class StremioService {
       languages.map((l) => [l.iso639_1, l.englishName || l.name]),
     );
 
-    const nameLower = config.name.toLowerCase();
+    const nameSlug = config.name.toLowerCase().replace(/\s+/g, '-');
     const catalogType = `CC-${config.name}`;
     const genreOptions = genres.map((g) => g.name);
 
@@ -62,11 +62,11 @@ export class StremioService {
     const catalogs = config.languages.length > 0
       ? config.languages.map((lang) => ({
           type: catalogType,
-          id: `cinemacove-${nameLower}-${lang}`,
+          id: `cinemacove-${nameSlug}-${lang}`,
           name: langMap.get(lang) ?? lang,
           extra,
         }))
-      : [{ type: catalogType, id: `cinemacove-${nameLower}-all`, name: config.name, extra }];
+      : [{ type: catalogType, id: `cinemacove-${nameSlug}-all`, name: config.name, extra }];
 
     const configureUrl = this.configService.get<string>(
       'CONFIGURE_URL',
@@ -74,7 +74,7 @@ export class StremioService {
     );
 
     return {
-      id: `com.cinemacove.${nameLower}`,
+      id: `com.cinemacove.${nameSlug}`,
       version: '1.0.0',
       name: `CinemaCove-${config.name}`,
       resources: ['catalog'],

@@ -11,7 +11,7 @@
     <div class="state-center">
         <mat-icon class="empty-icon">error_outline</mat-icon>
         <p class="state-message">Failed to load curated lists.</p>
-        <button mat-stroked-button (click)="store.load()">
+        <button mat-stroked-button (click)="store.load(true)">
             <mat-icon>refresh</mat-icon>
             Retry
         </button>
