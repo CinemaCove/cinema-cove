@@ -13,6 +13,7 @@ interface CreateAddonConfigDto {
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
   traktListId?: string;
   traktListType?: 'watchlist' | 'favorites' | 'rated';
+  imagePath?: string;
   includeAdult?: boolean;
   minVoteAverage?: number | null;
   minVoteCount?: number | null;

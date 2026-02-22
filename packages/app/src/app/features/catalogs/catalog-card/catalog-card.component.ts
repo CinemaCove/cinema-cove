@@ -46,6 +46,10 @@ export class CatalogCardComponent {
   });
 
   readonly gradientStyle = computed(() => {
+    const imagePath = this.config().imagePath;
+    if (imagePath) {
+      return { backgroundImage: `url('${imagePath}')`, backgroundSize: 'cover', backgroundPosition: 'center' };
+    }
     if (this.isMixed()) {
       return {
         background:

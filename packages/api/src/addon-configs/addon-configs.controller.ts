@@ -52,6 +52,7 @@ export class AddonConfigsController {
       source: d.source,
       tmdbListType: d.tmdbListType ?? null,
       traktListType: d.traktListType ?? null,
+      imagePath: d.imagePath ?? null,
       languages: d.languages,
       sort: d.sort,
       includeAdult: d.includeAdult ?? false,

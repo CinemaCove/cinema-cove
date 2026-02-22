@@ -25,6 +25,7 @@ export interface AddonConfigItem extends AddonConfigFilters {
   source: 'discover' | 'tmdb-list' | 'trakt-list';
   tmdbListType: 'watchlist' | 'favorites' | 'rated' | null;
   traktListType: 'watchlist' | 'favorites' | 'rated' | null;
+  imagePath: string | null;
   languages: string[];
   sort: string;
   installUrl: string;
