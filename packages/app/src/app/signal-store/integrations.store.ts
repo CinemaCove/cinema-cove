@@ -1,7 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, pipe } from 'rxjs';
+import { EMPTY, forkJoin, pipe } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import {
   IntegrationsService,
@@ -101,12 +101,17 @@ export const IntegrationsStore = signalStore(
     return {
       load: rxMethod<void>(
         pipe(
-          tap(() => patchState(store, { status: 'loading' })),
+          tap(() => patchState(store, { status: 'loading', traktStatus: 'loading' })),
           switchMap(() =>
-            service.getTmdbStatus().pipe(
-              tap((tmdb) => patchState(store, { tmdb, status: 'success' })),
+            forkJoin({
+              tmdb: service.getTmdbStatus(),
+              trakt: service.getTraktStatus(),
+            }).pipe(
+              tap(({ tmdb, trakt }) =>
+                patchState(store, { tmdb, status: 'success', trakt, traktStatus: 'success' }),
+              ),
               catchError(() => {
-                patchState(store, { status: 'error' });
+                patchState(store, { status: 'error', traktStatus: 'error' });
                 return EMPTY;
               }),
             ),

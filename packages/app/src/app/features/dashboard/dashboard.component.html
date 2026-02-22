@@ -155,10 +155,17 @@
             <span class="int-logo int-trakt" aria-label="Trakt logo">trakt</span>
             <div class="int-info">
                 <span class="int-name">Trakt</span>
-                <span class="int-status int-status--off">
-                    <mat-icon aria-hidden="true">link_off</mat-icon>
-                    Not connected
-                </span>
+                @if (integrationsStore.traktConnected()) {
+                    <span class="int-status int-status--on">
+                        <mat-icon aria-hidden="true">link</mat-icon>
+                        {{ integrationsStore.traktUsername() }}
+                    </span>
+                } @else {
+                    <span class="int-status int-status--off">
+                        <mat-icon aria-hidden="true">link_off</mat-icon>
+                        Not connected
+                    </span>
+                }
             </div>
         </div>
     </div>
