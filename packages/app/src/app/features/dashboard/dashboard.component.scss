@@ -165,6 +165,14 @@
   &::before {
     display: none;
   }
+
+  &.has-image {
+    justify-content: flex-end;
+
+    &::before {
+      display: block;
+    }
+  }
 }
 
 .teaser-icon {
