@@ -97,4 +97,55 @@ mat-sidenav {
       text-decoration: underline;
     }
   }
+
+  .donate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--mat-sys-tertiary);
+    color: var(--mat-sys-tertiary) !important;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: background 0.15s;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-tertiary) 10%, transparent);
+      text-decoration: none !important;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-tertiary);
+      outline-offset: 2px;
+    }
+  }
+
+  .discord-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--mat-sys-primary);
+    transition: background 0.15s;
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+      text-decoration: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
 }
