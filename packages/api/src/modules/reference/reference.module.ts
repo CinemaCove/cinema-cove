@@ -1,15 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ReferenceController } from './reference.controller';
-import { CacheModule, TmdbModule } from '../shared';
-import { GetLanguagesQueryHandler } from './get-languages';
+import { TmdbModule } from '../shared';
+import {
+  GetSortOptionsQueryHandler,
+  GetLanguagesQueryHandler,
+} from './application';
 import { ConfigService } from '@nestjs/config';
 import { REFERENCE_CACHE_CONFIG } from './reference.constants';
 import { CqrsModule } from '@nestjs/cqrs';
-import { GetSortOptionsQueryHandler } from './get-sort-options';
+import { CacheModule } from '../shared/infrastructure/cache/cache.module';
 
 @Module({
   controllers: [ReferenceController],
-  imports: [CqrsModule, CacheModule, TmdbModule],
+  imports: [CqrsModule, TmdbModule, CacheModule],
   providers: [
     GetLanguagesQueryHandler,
     GetSortOptionsQueryHandler,

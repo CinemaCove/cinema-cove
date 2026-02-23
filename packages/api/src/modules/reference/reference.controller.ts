@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { GetLanguagesQuery } from './get-languages';
-import { GetSortOptionsQuery } from './get-sort-options';
+import { GetLanguagesQuery, GetSortOptionsQuery } from './application';
 
 @Controller('reference')
 export class ReferenceController {
