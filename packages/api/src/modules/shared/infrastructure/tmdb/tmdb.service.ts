@@ -20,7 +20,7 @@ import {
   TvShowExternalIdsResult,
 } from '@cinemacove/tmdb-client/v3';
 
-import { CacheService } from '../../../../cache/cache.service';
+import { CacheService } from '../../domain/services/cache.service';
 
 export type TmdbAccountListItem =
   | AccountWatchlistMovieResultItem
