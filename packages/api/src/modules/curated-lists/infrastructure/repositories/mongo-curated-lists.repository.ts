@@ -33,6 +33,7 @@ export class MongoCuratedListsRepository extends CuratedListsRepository {
     entity.imagePath = doc.imagePath ?? null;
     entity.icon = doc.icon;
     entity.order = doc.order;
+    entity.unified = doc.unified ?? false;
     return entity;
   }
 }

@@ -20,8 +20,8 @@ export class AddonConfig {
   @Prop({ required: true })
   sort!: string;
 
-  @Prop({ required: true, enum: ['discover', 'tmdb-list', 'trakt-list'], default: 'discover' })
-  source!: 'discover' | 'tmdb-list' | 'trakt-list';
+  @Prop({ required: true, enum: ['discover', 'tmdb-list', 'trakt-list', 'curated-list'], default: 'discover' })
+  source!: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list';
 
   @Prop()
   tmdbListId?: string;

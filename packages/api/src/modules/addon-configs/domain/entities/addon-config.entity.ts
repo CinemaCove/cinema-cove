@@ -6,7 +6,7 @@ export class AddonConfigEntity {
     public readonly type: 'movie' | 'tv',
     public readonly languages: readonly string[],
     public readonly sort: string,
-    public readonly source: 'discover' | 'tmdb-list' | 'trakt-list',
+    public readonly source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list',
     public readonly tmdbListId: string | null,
     public readonly tmdbListType: 'watchlist' | 'favorites' | 'rated' | null,
     public readonly traktListId: string | null,

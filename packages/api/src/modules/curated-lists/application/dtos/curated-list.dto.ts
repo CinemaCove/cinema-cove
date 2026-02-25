@@ -8,6 +8,7 @@ export class CuratedListDto {
   public readonly imagePath: string | null;
   public readonly icon: string;
   public readonly order: number;
+  public readonly unified: boolean;
 
   constructor(entity: CuratedListEntity) {
     this.id = entity.id!;
@@ -17,5 +18,6 @@ export class CuratedListDto {
     this.imagePath = entity.imagePath;
     this.icon = entity.icon;
     this.order = entity.order;
+    this.unified = entity.unified;
   }
 }
