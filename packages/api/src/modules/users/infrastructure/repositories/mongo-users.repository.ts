@@ -22,6 +22,7 @@ export class MongoUsersRepository implements UsersRepository {
       doc.email,
       doc.displayName!,
       doc.passwordHash!,
+      doc.maxAllowedConfigs,
       doc.oauthProviders.map(
         (p) => new OauthProviderEntity(p.provider, p.providerId),
       ),
@@ -38,6 +39,7 @@ export class MongoUsersRepository implements UsersRepository {
       doc.email,
       doc.displayName!,
       doc.passwordHash!,
+      doc.maxAllowedConfigs,
       doc.oauthProviders.map(
         (p) => new OauthProviderEntity(p.provider, p.providerId),
       ),
@@ -60,6 +62,7 @@ export class MongoUsersRepository implements UsersRepository {
       doc.email,
       doc.displayName!,
       doc.passwordHash!,
+      doc.maxAllowedConfigs,
       doc.oauthProviders.map(
         (p) => new OauthProviderEntity(p.provider, p.providerId),
       ),
@@ -91,6 +94,7 @@ export class MongoUsersRepository implements UsersRepository {
       doc.email,
       doc.displayName!,
       doc.passwordHash!,
+      doc.maxAllowedConfigs,
       doc.oauthProviders.map(
         (p) => new OauthProviderEntity(p.provider, p.providerId),
       ),
@@ -125,6 +129,7 @@ export class MongoUsersRepository implements UsersRepository {
         email: user.email!,
         displayName: user.displayName!,
         passwordHash: user.passwordHash!,
+        maxAllowedConfigs: user.maxAllowedConfigs,
         oauthProviders: user.oauthProviders,
       });
 
@@ -133,6 +138,7 @@ export class MongoUsersRepository implements UsersRepository {
         created.email,
         created.displayName!,
         created.passwordHash!,
+        created.maxAllowedConfigs,
         [...created.oauthProviders],
       );
   }

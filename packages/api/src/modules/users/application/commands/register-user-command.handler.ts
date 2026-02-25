@@ -28,6 +28,7 @@ export class RegisterUserCommandHandler implements ICommandHandler<
       command.dto.email,
       command.dto.displayName!,
       command.dto.password,
+      20,
       [],
       this.passwordHasher,
     );

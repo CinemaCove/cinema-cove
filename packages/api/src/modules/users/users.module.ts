@@ -6,7 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   AddOAuthProviderCommandHandler,
   GetProfileQueryHandler,
-  GetUserByEmailQueryHandler,
+  GetUserByEmailQueryHandler, GetUserByIdQueryHandler,
   GetUserByOauthQueryHandler,
   RegisterUserCommandHandler,
   RegisterUserWithOAuthCommand,
@@ -20,6 +20,7 @@ const HANDLERS = [
   RegisterUserWithOAuthCommand,
   UpdateProfileCommandHandler,
   GetProfileQueryHandler,
+  GetUserByIdQueryHandler,
   GetUserByEmailQueryHandler,
   GetUserByOauthQueryHandler,
 ];

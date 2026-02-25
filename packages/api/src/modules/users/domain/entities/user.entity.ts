@@ -7,6 +7,7 @@ export class UserEntity {
     public email: string | null,
     public displayName: string | null,
     public passwordHash: string | null,
+    public maxAllowedConfigs: number,
     public oauthProviders: OauthProviderEntity[],
   ) {}
 
@@ -55,6 +56,7 @@ export class UserEntity {
     email: string | null,
     displayName: string | null,
     password: string | null,
+    maxAllowedConfigs: number,
     oauthProviders: OauthProviderEntity[],
     passwordHasher: PasswordHasher,
   ): Promise<UserEntity> {
@@ -68,6 +70,7 @@ export class UserEntity {
       email,
       displayName,
       hashedPassword,
+      maxAllowedConfigs,
       oauthProviders,
     );
   }

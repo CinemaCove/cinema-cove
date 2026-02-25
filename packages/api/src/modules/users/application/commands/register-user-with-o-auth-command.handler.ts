@@ -40,6 +40,7 @@ export class RegisterUserWithOAuthCommandHandler implements ICommandHandler<
       command.email,
       command.displayName!,
       null,
+      20,
       command.providers.map((p) => {
         return new OauthProviderEntity(p.provider, p.providerId);
       }),

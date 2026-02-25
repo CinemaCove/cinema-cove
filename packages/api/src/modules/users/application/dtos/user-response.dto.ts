@@ -6,6 +6,7 @@ export class UserResponseDto {
   public readonly displayName: string | null;
   public readonly passwordHash: string | null;
   public readonly hasPassword: boolean;
+  public readonly maxAllowedConfigs: number;
 
   constructor(user: UserEntity) {
     this.id = user.id!;
@@ -13,5 +14,6 @@ export class UserResponseDto {
     this.displayName = user.displayName;
     this.passwordHash = user.passwordHash;
     this.hasPassword = user.hasPassword();
+    this.maxAllowedConfigs = user.maxAllowedConfigs;
   }
 }

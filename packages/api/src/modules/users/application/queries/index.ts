@@ -3,5 +3,7 @@ export * from './get-profile-query.handler';
 export * from './get-profile.query';
 export * from './get-user-by-email-query.handler';
 export * from './get-user-by-email.query';
+export * from './get-user-by-id-query.handler';
+export * from './get-user-by-id.query';
 export * from './get-user-by-oauth-query-handler';
 export * from './get-user-by-oauth.query';
