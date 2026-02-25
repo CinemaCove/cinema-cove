@@ -1,36 +1,37 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { CacheModule } from './cache/cache.module';
-import { TmdbModule } from './tmdb/tmdb.module';
-import { ReferenceModule } from './reference/reference.module';
-import { StremioModule } from './stremio/stremio.module';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { AddonConfigsModule } from './addon-configs/addon-configs.module';
-import { IntegrationsModule } from './integrations/integrations.module';
-import { CuratedListsModule } from './curated-lists/curated-lists.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CqrsModule } from '@nestjs/cqrs';
+import { AppController } from './app.controller';
+import { AuthModule } from './modules/auth';
+import { UsersModule } from './modules/users';
+import { AddonConfigsModule } from './modules/addon-configs/addon-configs.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { ReferenceModule } from './modules/reference';
+import { StremioModule } from './modules/stremio/stremio.module';
+import { CuratedListsModule } from './modules/curated-lists/curated-lists.module';
+import { CacheModule } from './modules/shared/infrastructure/cache/cache.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CqrsModule.forRoot(),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('DATABASE_URL'),
+      }),
+      inject: [ConfigService],
+    }),
+
     CacheModule,
-    TmdbModule,
-    ReferenceModule,
-    StremioModule,
     AuthModule,
     UsersModule,
     AddonConfigsModule,
     IntegrationsModule,
+    ReferenceModule,
+    StremioModule,
     CuratedListsModule,
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('DATABASE_URL')
-      }),
-      inject: [ConfigService],
-    }),
   ],
   controllers: [AppController],
 })
