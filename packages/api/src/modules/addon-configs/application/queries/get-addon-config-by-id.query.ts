@@ -1,7 +1,7 @@
 import { Query } from '@nestjs/cqrs';
-import { AddonConfigEntity } from '../../domain/entities';
+import { AddonConfigResponseDto } from '../dtos';
 
-export class GetAddonConfigByIdQuery extends Query<AddonConfigEntity | null> {
+export class GetAddonConfigByIdQuery extends Query<AddonConfigResponseDto | null> {
   constructor(public readonly id: string) {
     super();
   }

@@ -1,8 +1,8 @@
 import { Query } from '@nestjs/cqrs';
-import { AddonConfigEntity } from '../../domain/entities';
+import { AddonConfigResponseDto } from '../dtos';
 import { FindExistingTraktListQuery as FindQuery } from '../../domain/repositories';
 
-export class FindExistingTraktListQuery extends Query<AddonConfigEntity | null> {
+export class FindExistingTraktListQuery extends Query<AddonConfigResponseDto | null> {
   constructor(
     public readonly userId: string,
     public readonly filter: FindQuery,

@@ -2,14 +2,15 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenException } from '@nestjs/common';
 import { CreateAddonConfigCommand } from './create-addon-config.command';
 import { AddonConfigEntity, AddonConfigsRepository } from '../../domain';
+import { AddonConfigResponseDto } from '../dtos';
 
 @CommandHandler(CreateAddonConfigCommand)
 export class CreateAddonConfigCommandHandler
-  implements ICommandHandler<CreateAddonConfigCommand, AddonConfigEntity>
+  implements ICommandHandler<CreateAddonConfigCommand, AddonConfigResponseDto>
 {
   constructor(private readonly repository: AddonConfigsRepository) {}
 
-  async execute(command: CreateAddonConfigCommand): Promise<AddonConfigEntity> {
+  async execute(command: CreateAddonConfigCommand): Promise<AddonConfigResponseDto> {
     const count = await this.repository.countByOwner(command.userId);
     if (count >= command.maxAllowed) {
       throw new ForbiddenException(
@@ -38,6 +39,7 @@ export class CreateAddonConfigCommandHandler
       dto.releaseDateTo ?? null,
     );
 
-    return this.repository.create(entity);
+    const created = await this.repository.create(entity);
+    return new AddonConfigResponseDto(created);
   }
 }

@@ -1,8 +1,8 @@
 import { Command } from '@nestjs/cqrs';
-import { AddonConfigEntity } from '../../domain/entities';
+import { AddonConfigResponseDto } from '../dtos';
 import { UpdateAddonConfigDto } from '../dtos';
 
-export class UpdateAddonConfigCommand extends Command<AddonConfigEntity | null> {
+export class UpdateAddonConfigCommand extends Command<AddonConfigResponseDto> {
   constructor(
     public readonly id: string,
     public readonly userId: string,
