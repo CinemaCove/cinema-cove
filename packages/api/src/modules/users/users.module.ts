@@ -5,11 +5,16 @@ import { MongoUsersRepository, User, UserSchema } from './infrastructure';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   AddOAuthProviderCommandHandler,
+  ClearTmdbSessionCommandHandler,
+  ClearTraktTokensCommandHandler,
   GetProfileQueryHandler,
-  GetUserByEmailQueryHandler, GetUserByIdQueryHandler,
+  GetUserByEmailQueryHandler,
+  GetUserByIdQueryHandler,
   GetUserByOauthQueryHandler,
   RegisterUserCommandHandler,
   RegisterUserWithOAuthCommand,
+  SaveTmdbSessionCommandHandler,
+  SaveTraktTokensCommandHandler,
   UpdateProfileCommandHandler,
 } from './application';
 import { PasswordHasherModule } from '../shared/infrastructure/password-hasher/password-hasher.module';
@@ -19,6 +24,10 @@ const HANDLERS = [
   RegisterUserCommandHandler,
   RegisterUserWithOAuthCommand,
   UpdateProfileCommandHandler,
+  SaveTmdbSessionCommandHandler,
+  ClearTmdbSessionCommandHandler,
+  SaveTraktTokensCommandHandler,
+  ClearTraktTokensCommandHandler,
   GetProfileQueryHandler,
   GetUserByIdQueryHandler,
   GetUserByEmailQueryHandler,

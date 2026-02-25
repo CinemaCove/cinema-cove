@@ -2,6 +2,14 @@ import { OauthProviderEntity } from './oauth-provider.entity';
 import { PasswordHasher } from '../../../shared/domain/services/password-hasher';
 
 export class UserEntity {
+  public tmdbSessionId: string | null = null;
+  public tmdbAccountId: number | null = null;
+  public tmdbUsername: string | null = null;
+  public traktAccessToken: string | null = null;
+  public traktRefreshToken: string | null = null;
+  public traktUsername: string | null = null;
+  public traktExpiresAt: number | null = null;
+
   constructor(
     public id: string | null,
     public email: string | null,

@@ -4,15 +4,15 @@ import { AppController } from './app.controller';
 import { CacheModule } from './cache/cache.module';
 import { TmdbModule } from './tmdb/tmdb.module';
 import { StremioModule } from './stremio/stremio.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { AuthModule } from './modules/auth';
 import { UsersModule } from './modules/users';
-import { AddonConfigsModule } from './addon-configs/addon-configs.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { CuratedListsModule } from './curated-lists/curated-lists.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ReferenceModule } from './modules/reference';
 import { CqrsModule } from '@nestjs/cqrs';
 import { Users2Module } from './users/users.module';
+import { AddonConfigsModule } from './modules/addon-configs/addon-configs.module';
 
 @Module({
   imports: [

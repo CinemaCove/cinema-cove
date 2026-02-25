@@ -12,38 +12,33 @@ export class MongoUsersRepository implements UsersRepository {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  public async findById(id: string): Promise<UserEntity | null> {
-    const doc = await this.userModel.findOne({ _id: id }).exec();
-    if (!doc) {
-      return null;
-    }
-    return new UserEntity(
+  private toEntity(doc: UserDocument): UserEntity {
+    const entity = new UserEntity(
       doc.id,
       doc.email,
-      doc.displayName!,
-      doc.passwordHash!,
+      doc.displayName ?? null,
+      doc.passwordHash ?? null,
       doc.maxAllowedConfigs,
-      doc.oauthProviders.map(
-        (p) => new OauthProviderEntity(p.provider, p.providerId),
-      ),
+      doc.oauthProviders.map((p) => new OauthProviderEntity(p.provider, p.providerId)),
     );
+    entity.tmdbSessionId = doc.tmdbSessionId ?? null;
+    entity.tmdbAccountId = doc.tmdbAccountId ?? null;
+    entity.tmdbUsername = doc.tmdbUsername ?? null;
+    entity.traktAccessToken = doc.traktAccessToken ?? null;
+    entity.traktRefreshToken = doc.traktRefreshToken ?? null;
+    entity.traktUsername = doc.traktUsername ?? null;
+    entity.traktExpiresAt = doc.traktExpiresAt ?? null;
+    return entity;
+  }
+
+  public async findById(id: string): Promise<UserEntity | null> {
+    const doc = await this.userModel.findOne({ _id: id }).exec();
+    return doc ? this.toEntity(doc) : null;
   }
 
   public async findByEmail(email: string): Promise<UserEntity | null> {
     const doc = await this.userModel.findOne({ email }).exec();
-    if (!doc) {
-      return null;
-    }
-    return new UserEntity(
-      doc.id,
-      doc.email,
-      doc.displayName!,
-      doc.passwordHash!,
-      doc.maxAllowedConfigs,
-      doc.oauthProviders.map(
-        (p) => new OauthProviderEntity(p.provider, p.providerId),
-      ),
-    );
+    return doc ? this.toEntity(doc) : null;
   }
 
   public async findByOAuth(
@@ -53,52 +48,20 @@ export class MongoUsersRepository implements UsersRepository {
     const doc = await this.userModel
       .findOne({ oauthProviders: { $elemMatch: { provider, providerId } } })
       .exec();
-
-    if (!doc) {
-      return null;
-    }
-    return new UserEntity(
-      doc.id,
-      doc.email,
-      doc.displayName!,
-      doc.passwordHash!,
-      doc.maxAllowedConfigs,
-      doc.oauthProviders.map(
-        (p) => new OauthProviderEntity(p.provider, p.providerId),
-      ),
-    );
+    return doc ? this.toEntity(doc) : null;
   }
 
   public async findByEmailOrOAuthProviders(
     email: string,
-    providers: {
-      provider: string;
-      providerId: string;
-    }[],
+    providers: { provider: string; providerId: string }[],
   ): Promise<UserEntity | null> {
     const providerQueries = providers.map((p) => ({
-      oauthProviders: {
-        $elemMatch: { provider: p.provider, providerId: p.providerId },
-      },
+      oauthProviders: { $elemMatch: { provider: p.provider, providerId: p.providerId } },
     }));
-
     const doc = await this.userModel
       .findOne({ $or: [{ email }, ...providerQueries] })
       .exec();
-
-    if (!doc) {
-      return null;
-    }
-    return new UserEntity(
-      doc.id,
-      doc.email,
-      doc.displayName!,
-      doc.passwordHash!,
-      doc.maxAllowedConfigs,
-      doc.oauthProviders.map(
-        (p) => new OauthProviderEntity(p.provider, p.providerId),
-      ),
-    );
+    return doc ? this.toEntity(doc) : null;
   }
 
   public async save(user: UserEntity): Promise<void> {
@@ -124,22 +87,37 @@ export class MongoUsersRepository implements UsersRepository {
   }
 
   public async create(user: UserEntity): Promise<UserEntity> {
-    const created = await this.userModel
-      .create({
-        email: user.email!,
-        displayName: user.displayName!,
-        passwordHash: user.passwordHash!,
-        maxAllowedConfigs: user.maxAllowedConfigs,
-        oauthProviders: user.oauthProviders,
-      });
+    const created = await this.userModel.create({
+      email: user.email!,
+      displayName: user.displayName!,
+      passwordHash: user.passwordHash!,
+      maxAllowedConfigs: user.maxAllowedConfigs,
+      oauthProviders: user.oauthProviders,
+    });
+    return this.toEntity(created);
+  }
 
-      return new UserEntity(
-        created.id,
-        created.email,
-        created.displayName!,
-        created.passwordHash!,
-        created.maxAllowedConfigs,
-        [...created.oauthProviders],
-      );
+  public async saveTmdbSession(userId: string, sessionId: string, accountId: number, username: string): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: userId }, { tmdbSessionId: sessionId, tmdbAccountId: accountId, tmdbUsername: username })
+      .exec();
+  }
+
+  public async clearTmdbSession(userId: string): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: userId }, { $unset: { tmdbSessionId: '', tmdbAccountId: '', tmdbUsername: '' } })
+      .exec();
+  }
+
+  public async saveTraktTokens(userId: string, accessToken: string, refreshToken: string, username: string, expiresAt: number): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: userId }, { traktAccessToken: accessToken, traktRefreshToken: refreshToken, traktUsername: username, traktExpiresAt: expiresAt })
+      .exec();
+  }
+
+  public async clearTraktTokens(userId: string): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: userId }, { $unset: { traktAccessToken: '', traktRefreshToken: '', traktUsername: '', traktExpiresAt: '' } })
+      .exec();
   }
 }

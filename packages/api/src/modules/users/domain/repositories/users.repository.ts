@@ -16,4 +16,8 @@ export abstract class UsersRepository {
       providerId: string;
     }[],
   ): Promise<UserEntity | null>;
+  abstract saveTmdbSession(userId: string, sessionId: string, accountId: number, username: string): Promise<void>;
+  abstract clearTmdbSession(userId: string): Promise<void>;
+  abstract saveTraktTokens(userId: string, accessToken: string, refreshToken: string, username: string, expiresAt: number): Promise<void>;
+  abstract clearTraktTokens(userId: string): Promise<void>;
 }
