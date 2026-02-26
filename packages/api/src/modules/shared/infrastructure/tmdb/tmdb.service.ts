@@ -51,6 +51,7 @@ export class TmdbService {
   private readonly client: TmdbClient;
   private readonly shortCacheTtl: number;
   private readonly longCacheTtl: number;
+  private readonly listCacheTtl: number;
 
   constructor(
     private readonly configService: ConfigService,
@@ -70,6 +71,13 @@ export class TmdbService {
       this.configService.get(
         'TMDB_LONG_CACHE_TTL',
         String(30 * 24 * 60 * 60 * 1000),
+      ),
+      10,
+    );
+    this.listCacheTtl = parseInt(
+      this.configService.get(
+        'TMDB_LIST_CACHE_TTL',
+        String(5 * 60 * 1000),
       ),
       10,
     );
@@ -268,6 +276,10 @@ export class TmdbService {
   }
 
   async getCustomListItems(listId: string, page: number = 1): Promise<ListDetailsResult> {
-    return this.client.list.details(Number(listId), { page });
+    return this.cache.getOrSet(
+      `list:${listId}:${page}`,
+      () => this.client.list.details(Number(listId), { page }),
+      this.listCacheTtl,
+    );
   }
 }
