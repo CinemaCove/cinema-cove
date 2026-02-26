@@ -17,7 +17,7 @@ interface StremioExtra {
   options?: string[];
 }
 
-interface StremroCatalog {
+interface StremioCatalog {
   type: string;
   id: string;
   name: string;
@@ -30,7 +30,7 @@ export interface StremioManifest {
   name: string;
   resources: string[];
   types: string[];
-  catalogs: StremroCatalog[];
+  catalogs: StremioCatalog[];
 }
 
 export interface StremioResponse {

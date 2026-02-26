@@ -30,6 +30,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'curated-groups',
+        loadComponent: () =>
+          import('./features/curated-groups/curated-groups.component').then(
+            (m) => m.CuratedGroupsComponent,
+          ),
+      },
+      {
         path: 'integrations',
         loadComponent: () =>
           import('./features/integrations/integrations.component').then(

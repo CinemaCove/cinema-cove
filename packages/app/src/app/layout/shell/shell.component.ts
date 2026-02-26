@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', route: '/', exact: true },
   { icon: 'video_library', label: 'My Catalogs', route: '/catalogs', exact: false },
   { icon: 'local_library', label: 'Curated Lists', route: '/curated', exact: false },
+  { icon: 'movie_filter', label: 'Groups', route: '/curated-groups', exact: false },
   { icon: 'extension', label: 'Integrations', route: '/integrations', exact: false },
 ] as const;
 
