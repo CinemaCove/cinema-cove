@@ -10,6 +10,7 @@ import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { ReferenceModule } from './modules/reference';
 import { StremioModule } from './modules/stremio/stremio.module';
 import { CuratedListsModule } from './modules/curated-lists/curated-lists.module';
+import { CuratedGroupsModule } from './modules/curated-groups/curated-groups.module';
 import { CacheModule } from './modules/shared/infrastructure/cache/cache.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { CacheModule } from './modules/shared/infrastructure/cache/cache.module'
     ReferenceModule,
     StremioModule,
     CuratedListsModule,
+    CuratedGroupsModule,
   ],
   controllers: [AppController],
 })

@@ -6,7 +6,7 @@ export class AddonConfigEntity {
     public readonly type: 'movie' | 'tv',
     public readonly languages: readonly string[],
     public readonly sort: string,
-    public readonly source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list',
+    public readonly source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list' | 'franchise-group',
     public readonly tmdbListId: string | null,
     public readonly tmdbListType: 'watchlist' | 'favorites' | 'rated' | null,
     public readonly traktListId: string | null,
@@ -17,5 +17,6 @@ export class AddonConfigEntity {
     public readonly minVoteCount: number | null,
     public readonly releaseDateFrom: number | null,
     public readonly releaseDateTo: number | null,
+    public readonly curatedGroupId: string | null = null,
   ) {}
 }

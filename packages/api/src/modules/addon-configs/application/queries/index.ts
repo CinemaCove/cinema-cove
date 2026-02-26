@@ -6,3 +6,5 @@ export { FindExistingTmdbListQuery } from './find-existing-tmdb-list.query';
 export { FindExistingTmdbListQueryHandler } from './find-existing-tmdb-list-query.handler';
 export { FindExistingTraktListQuery } from './find-existing-trakt-list.query';
 export { FindExistingTraktListQueryHandler } from './find-existing-trakt-list-query.handler';
+export { FindExistingFranchiseGroupQuery } from './find-existing-franchise-group.query';
+export { FindExistingFranchiseGroupQueryHandler } from './find-existing-franchise-group-query.handler';

@@ -43,4 +43,8 @@ export abstract class AddonConfigsRepository {
     userId: string,
     query: FindExistingTraktListQuery,
   ): Promise<AddonConfigEntity | null>;
+  abstract findExistingFranchiseGroup(
+    userId: string,
+    curatedGroupId: string,
+  ): Promise<AddonConfigEntity | null>;
 }

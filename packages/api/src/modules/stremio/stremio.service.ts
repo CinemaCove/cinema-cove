@@ -575,6 +575,172 @@ export class StremioService {
     return { metas };
   }
 
+  // ── Franchise Groups ───────────────────────────────────────────────────────
+
+  async buildFranchiseGroupManifest(
+    config: AddonConfig,
+    group: { name: string; lists: { name: string }[] },
+  ): Promise<StremioManifest> {
+    const shortName = this.truncate(config.name);
+    const catalogType = `CC-${config.name}`;
+    const addonId = `com.cinemacove.group.${config.owner}.${config.curatedGroupId}`;
+
+    return {
+      id: addonId,
+      version: '1.0.0',
+      name: `CinemaCove – ${shortName}`,
+      resources: ['catalog'],
+      types: [catalogType],
+      catalogs: [
+        {
+          type: catalogType,
+          id: `cinemacove-group-${config.curatedGroupId}`,
+          name: shortName,
+          extra: [
+            {
+              name: 'genre',
+              isRequired: false,
+              options: group.lists.map((l) => l.name),
+            },
+            { name: 'skip', isRequired: false },
+          ],
+        },
+      ],
+    };
+  }
+
+  async buildFranchiseGroupCatalog(
+    config: AddonConfig,
+    group: { lists: { name: string; tmdbListId: string }[] },
+    genre: string | undefined,
+    skip: number,
+  ): Promise<StremioResponse> {
+    const page = Math.floor(skip / 20) + 1;
+
+    // With genre: fetch that franchise's list items in order (all types, chronological)
+    if (genre) {
+      const franchise = group.lists.find((l) => l.name === genre);
+      if (!franchise) return { metas: [] };
+
+      const data = await this.tmdbService.getCustomListItems(franchise.tmdbListId, page);
+      const limit = pLimit(5);
+
+      const metas: StremioMeta[] = await Promise.all(
+        data.items.map((item) =>
+          limit(async () => {
+            if (item.mediaType === 'movie') {
+              const details = await this.tmdbService.getMovieDetails(item.id);
+              const directors = [...details.credits!.crew].filter((c) => c.job === 'Director').map((c) => c.name);
+              const topActors = [...details.credits!.cast].sort((a, b) => a.order - b.order).slice(0, 5).map((a) => a.name);
+              return {
+                id: details.imdbId || `tmdb:${details.id}`,
+                type: 'movie',
+                name: details.originalTitle,
+                poster: item.posterPath ? `https://image.tmdb.org/t/p/w500${item.posterPath}` : undefined,
+                description: details.overview,
+                imdbId: details.imdbId,
+                genres: details.genres.map((g) => g.name),
+                releaseInfo: details.releaseDate?.slice(0, 4),
+                director: directors,
+                cast: topActors,
+                imdbRating: details.voteAverage.toFixed(1),
+                trailers: (details.videos?.results ?? []).filter((v) => v.site === 'YouTube' && v.type === 'Trailer').map((v) => ({ source: v.key, type: 'Trailer' })),
+                runtime: details.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m`.replace(/0h /, '').replace(/ 0m$/, 'h') : 'N/A',
+                language: details.originalLanguage,
+                country: details.productionCountries.map((c) => c.name).join(', '),
+              } as StremioMeta;
+            } else {
+              const details = await this.tmdbService.getTvShowDetails(item.id);
+              const directors = [...details.credits!.crew].filter((c) => c.job === 'Director').map((c) => c.name);
+              const topActors = [...details.credits!.cast].sort((a, b) => a.order - b.order).slice(0, 5).map((a) => a.name);
+              return {
+                id: details.externalIds?.imdbId || `tmdb:${details.id}`,
+                type: 'series',
+                name: details.name,
+                poster: item.posterPath ? `https://image.tmdb.org/t/p/w500${item.posterPath}` : undefined,
+                description: details.overview,
+                imdbId: details.externalIds?.imdbId,
+                genres: details.genres.map((g) => g.name),
+                releaseInfo: `${details.firstAirDate?.slice(0, 4)}-${details.lastAirDate?.slice(0, 4)}`,
+                director: directors,
+                cast: topActors,
+                imdbRating: details.voteAverage.toFixed(1),
+                trailers: (details.videos?.results ?? []).filter((v) => v.site === 'YouTube' && v.type === 'Trailer').map((v) => ({ source: v.key, type: 'Trailer' })),
+                runtime: details.episodeRunTime[0] ? `${Math.floor(details.episodeRunTime[0] / 60)}h ${details.episodeRunTime[0] % 60}m`.replace(/0h /, '').replace(/ 0m$/, 'h') : 'N/A',
+                language: details.originalLanguage,
+                country: details.productionCountries.map((c) => c.name).join(', '),
+              } as StremioMeta;
+            }
+          }),
+        ),
+      );
+
+      return { metas };
+    }
+
+    // No genre: page 1 sampler from every franchise, combined in list order
+    const limit = pLimit(3);
+    const allItems = (
+      await Promise.all(
+        group.lists.map((franchise) =>
+          limit(async () => {
+            const data = await this.tmdbService.getCustomListItems(franchise.tmdbListId, 1);
+            return data.items;
+          }),
+        ),
+      )
+    ).flat();
+
+    const itemLimit = pLimit(5);
+    const metas: StremioMeta[] = await Promise.all(
+      allItems.map((item) =>
+        itemLimit(async () => {
+          if (item.mediaType === 'movie') {
+            const details = await this.tmdbService.getMovieDetails(item.id);
+            return {
+              id: details.imdbId || `tmdb:${details.id}`,
+              type: 'movie',
+              name: details.originalTitle,
+              poster: item.posterPath ? `https://image.tmdb.org/t/p/w500${item.posterPath}` : undefined,
+              description: details.overview,
+              imdbId: details.imdbId,
+              genres: details.genres.map((g) => g.name),
+              releaseInfo: details.releaseDate?.slice(0, 4),
+              director: [],
+              cast: [],
+              imdbRating: details.voteAverage.toFixed(1),
+              trailers: [],
+              runtime: 'N/A',
+              language: details.originalLanguage,
+              country: '',
+            } as StremioMeta;
+          } else {
+            const details = await this.tmdbService.getTvShowDetails(item.id);
+            return {
+              id: details.externalIds?.imdbId || `tmdb:${details.id}`,
+              type: 'series',
+              name: details.name,
+              poster: item.posterPath ? `https://image.tmdb.org/t/p/w500${item.posterPath}` : undefined,
+              description: details.overview,
+              imdbId: details.externalIds?.imdbId,
+              genres: details.genres.map((g) => g.name),
+              releaseInfo: `${details.firstAirDate?.slice(0, 4)}-${details.lastAirDate?.slice(0, 4)}`,
+              director: [],
+              cast: [],
+              imdbRating: details.voteAverage.toFixed(1),
+              trailers: [],
+              runtime: 'N/A',
+              language: details.originalLanguage,
+              country: '',
+            } as StremioMeta;
+          }
+        }),
+      ),
+    );
+
+    return { metas };
+  }
+
   // ── Curated Lists (unified chronological) ──────────────────────────────────
 
   async buildCuratedListManifest(config: AddonConfig): Promise<StremioManifest> {
