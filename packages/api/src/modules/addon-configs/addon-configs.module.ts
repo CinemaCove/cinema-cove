@@ -11,6 +11,7 @@ import {
   GetAddonConfigByIdQueryHandler,
   FindExistingTmdbListQueryHandler,
   FindExistingTraktListQueryHandler,
+  FindExistingFranchiseGroupQueryHandler,
 } from './application';
 
 const HANDLERS = [
@@ -21,6 +22,7 @@ const HANDLERS = [
   GetAddonConfigByIdQueryHandler,
   FindExistingTmdbListQueryHandler,
   FindExistingTraktListQueryHandler,
+  FindExistingFranchiseGroupQueryHandler,
 ];
 
 @Module({

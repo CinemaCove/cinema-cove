@@ -31,6 +31,7 @@ export class MongoAddonConfigsRepository implements AddonConfigsRepository {
       doc.minVoteCount ?? null,
       doc.releaseDateFrom ?? null,
       doc.releaseDateTo ?? null,
+      doc.curatedGroupId ?? null,
     );
   }
 
@@ -59,6 +60,7 @@ export class MongoAddonConfigsRepository implements AddonConfigsRepository {
       includeAdult: entity.includeAdult,
     };
 
+    if (entity.curatedGroupId) data['curatedGroupId'] = entity.curatedGroupId;
     if (entity.tmdbListId) data['tmdbListId'] = entity.tmdbListId;
     if (entity.tmdbListType) data['tmdbListType'] = entity.tmdbListType;
     if (entity.traktListId) data['traktListId'] = entity.traktListId;
@@ -124,6 +126,16 @@ export class MongoAddonConfigsRepository implements AddonConfigsRepository {
     if (query.type) filter['type'] = query.type;
 
     const doc = await this.model.findOne(filter).exec();
+    return doc ? this.toEntity(doc) : null;
+  }
+
+  async findExistingFranchiseGroup(
+    userId: string,
+    curatedGroupId: string,
+  ): Promise<AddonConfigEntity | null> {
+    const doc = await this.model
+      .findOne({ owner: new Types.ObjectId(userId), source: 'franchise-group', curatedGroupId })
+      .exec();
     return doc ? this.toEntity(doc) : null;
   }
 

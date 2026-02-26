@@ -37,6 +37,7 @@ export class CreateAddonConfigCommandHandler
       dto.minVoteCount ?? null,
       dto.releaseDateFrom ?? null,
       dto.releaseDateTo ?? null,
+      dto.curatedGroupId ?? null,
     );
 
     const created = await this.repository.create(entity);

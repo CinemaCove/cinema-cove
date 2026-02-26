@@ -5,7 +5,8 @@ export class AddonConfigResponseDto {
   public readonly owner: string;
   public readonly name: string;
   public readonly type: 'movie' | 'tv';
-  public readonly source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list';
+  public readonly source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list' | 'franchise-group';
+  public readonly curatedGroupId: string | null;
   public readonly tmdbListId: string | null;
   public readonly tmdbListType: 'watchlist' | 'favorites' | 'rated' | null;
   public readonly traktListId: string | null;
@@ -25,6 +26,7 @@ export class AddonConfigResponseDto {
     this.name = entity.name;
     this.type = entity.type;
     this.source = entity.source;
+    this.curatedGroupId = entity.curatedGroupId;
     this.tmdbListId = entity.tmdbListId;
     this.tmdbListType = entity.tmdbListType;
     this.traktListId = entity.traktListId;

@@ -14,6 +14,8 @@ import { GetAddonConfigByIdQuery } from '../addon-configs/application/queries/ge
 import type { AddonConfigResponseDto } from '../addon-configs/application/dtos/addon-config-response.dto';
 import { GetUserByIdQuery } from '../users/application/queries/get-user-by-id.query';
 import type { UserResponseDto } from '../users/application/dtos/user-response.dto';
+import { GetCuratedGroupByIdQuery } from '../curated-groups/application/queries/get-curated-group-by-id.query';
+import type { CuratedGroupDto } from '../curated-groups/application/dtos/curated-group.dto';
 
 @Controller()
 export class StremioController {
@@ -64,6 +66,10 @@ export class StremioController {
   @Get(':configId/manifest.json')
   async getManifest(@Param('configId') configId: string) {
     const config = await this.resolveConfig(configId);
+    if (config.source === 'franchise-group') {
+      const group = await this.resolveGroup(config.curatedGroupId!);
+      return this.stremioService.buildFranchiseGroupManifest(config, group);
+    }
     if (config.source === 'curated-list') {
       return this.stremioService.buildCuratedListManifest(config);
     }
@@ -83,6 +89,10 @@ export class StremioController {
     @Param('id') id: string,
   ) {
     const config = await this.resolveConfig(configId);
+    if (config.source === 'franchise-group') {
+      const group = await this.resolveGroup(config.curatedGroupId!);
+      return this.stremioService.buildFranchiseGroupCatalog(config, group, undefined, 0);
+    }
     if (config.source === 'curated-list') {
       return this.stremioService.buildCuratedListCatalog(config, 0);
     }
@@ -129,6 +139,11 @@ export class StremioController {
     const params = new URLSearchParams(extras);
     const skip = parseInt(params.get('skip') ?? '0', 10);
 
+    if (config.source === 'franchise-group') {
+      const group = await this.resolveGroup(config.curatedGroupId!);
+      const genre = params.get('genre') ?? undefined;
+      return this.stremioService.buildFranchiseGroupCatalog(config, group, genre, skip);
+    }
     if (config.source === 'curated-list') {
       return this.stremioService.buildCuratedListCatalog(config, skip);
     }
@@ -183,6 +198,7 @@ export class StremioController {
       tmdbListType: doc.tmdbListType ?? undefined,
       traktListId: doc.traktListId ?? undefined,
       traktListType: doc.traktListType ?? undefined,
+      curatedGroupId: doc.curatedGroupId ?? undefined,
       includeAdult: doc.includeAdult,
       minVoteAverage: doc.minVoteAverage ?? undefined,
       minVoteCount: doc.minVoteCount ?? undefined,
@@ -216,5 +232,13 @@ export class StremioController {
       new GetUserByIdQuery(ownerId),
     );
     return user?.traktAccessToken ?? undefined;
+  }
+
+  private async resolveGroup(groupId: string): Promise<CuratedGroupDto> {
+    const group = await this.queryBus.execute<GetCuratedGroupByIdQuery, CuratedGroupDto | null>(
+      new GetCuratedGroupByIdQuery(groupId),
+    );
+    if (!group) throw new NotFoundException('Franchise group not found');
+    return group;
   }
 }
