@@ -45,7 +45,7 @@ export class InstallCuratedListCommandHandler
       new CreateAddonConfigCommand(
         command.userId,
         {
-          source: 'tmdb-list',
+          source: curatedList.unified ? 'curated-list' : 'tmdb-list',
           tmdbListId: curatedList.tmdbListId,
           name: curatedList.name.slice(0, 20),
           type: 'movie',

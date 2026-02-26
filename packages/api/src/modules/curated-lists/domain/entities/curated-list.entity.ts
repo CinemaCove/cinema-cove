@@ -6,4 +6,5 @@ export class CuratedListEntity {
   public imagePath: string | null = null;
   public icon: string = '';
   public order: number = 0;
+  public unified: boolean = false;
 }

@@ -64,6 +64,9 @@ export class StremioController {
   @Get(':configId/manifest.json')
   async getManifest(@Param('configId') configId: string) {
     const config = await this.resolveConfig(configId);
+    if (config.source === 'curated-list') {
+      return this.stremioService.buildCuratedListManifest(config);
+    }
     if (config.source === 'tmdb-list') {
       return this.stremioService.buildTmdbListManifest(config);
     }
@@ -80,6 +83,9 @@ export class StremioController {
     @Param('id') id: string,
   ) {
     const config = await this.resolveConfig(configId);
+    if (config.source === 'curated-list') {
+      return this.stremioService.buildCuratedListCatalog(config, 0);
+    }
     if (config.source === 'tmdb-list') {
       const creds = config.tmdbListType
         ? await this.resolveTmdbCredentials(config.owner)
@@ -123,6 +129,9 @@ export class StremioController {
     const params = new URLSearchParams(extras);
     const skip = parseInt(params.get('skip') ?? '0', 10);
 
+    if (config.source === 'curated-list') {
+      return this.stremioService.buildCuratedListCatalog(config, skip);
+    }
     if (config.source === 'tmdb-list') {
       const creds = config.tmdbListType
         ? await this.resolveTmdbCredentials(config.owner)

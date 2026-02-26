@@ -6,7 +6,7 @@ export interface AddonConfig {
   type: 'movie' | 'tv';
   languages: string[];
   sort: SortBy;
-  source: 'discover' | 'tmdb-list' | 'trakt-list';
+  source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list';
   tmdbListId?: string;
   tmdbListType?: 'watchlist' | 'favorites' | 'rated';
   traktListId?: string;

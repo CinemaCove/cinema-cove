@@ -5,7 +5,7 @@ export class AddonConfigResponseDto {
   public readonly owner: string;
   public readonly name: string;
   public readonly type: 'movie' | 'tv';
-  public readonly source: 'discover' | 'tmdb-list' | 'trakt-list';
+  public readonly source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list';
   public readonly tmdbListId: string | null;
   public readonly tmdbListType: 'watchlist' | 'favorites' | 'rated' | null;
   public readonly traktListId: string | null;

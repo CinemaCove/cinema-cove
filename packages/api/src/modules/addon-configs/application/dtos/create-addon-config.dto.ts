@@ -3,7 +3,7 @@ export class CreateAddonConfigDto {
   public readonly type!: 'movie' | 'tv';
   public readonly languages!: string[];
   public readonly sort!: string;
-  public readonly source?: 'discover' | 'tmdb-list' | 'trakt-list';
+  public readonly source?: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list';
   public readonly tmdbListId?: string;
   public readonly tmdbListType?: 'watchlist' | 'favorites' | 'rated';
   public readonly traktListId?: string;
