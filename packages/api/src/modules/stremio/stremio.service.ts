@@ -599,7 +599,7 @@ export class StremioService {
           extra: [
             {
               name: 'genre',
-              isRequired: false,
+              isRequired: true,
               options: group.lists.map((l) => l.name),
             },
             { name: 'skip', isRequired: false },
@@ -678,67 +678,8 @@ export class StremioService {
       return { metas };
     }
 
-    // No genre: page 1 sampler from every franchise, combined in list order
-    const limit = pLimit(3);
-    const allItems = (
-      await Promise.all(
-        group.lists.map((franchise) =>
-          limit(async () => {
-            const data = await this.tmdbService.getCustomListItems(franchise.tmdbListId, 1);
-            return data.items;
-          }),
-        ),
-      )
-    ).flat();
-
-    const itemLimit = pLimit(5);
-    const metas: StremioMeta[] = await Promise.all(
-      allItems.map((item) =>
-        itemLimit(async () => {
-          if (item.mediaType === 'movie') {
-            const details = await this.tmdbService.getMovieDetails(item.id);
-            return {
-              id: details.imdbId || `tmdb:${details.id}`,
-              type: 'movie',
-              name: details.originalTitle,
-              poster: item.posterPath ? `https://image.tmdb.org/t/p/w500${item.posterPath}` : undefined,
-              description: details.overview,
-              imdbId: details.imdbId,
-              genres: details.genres.map((g) => g.name),
-              releaseInfo: details.releaseDate?.slice(0, 4),
-              director: [],
-              cast: [],
-              imdbRating: details.voteAverage.toFixed(1),
-              trailers: [],
-              runtime: 'N/A',
-              language: details.originalLanguage,
-              country: '',
-            } as StremioMeta;
-          } else {
-            const details = await this.tmdbService.getTvShowDetails(item.id);
-            return {
-              id: details.externalIds?.imdbId || `tmdb:${details.id}`,
-              type: 'series',
-              name: details.name,
-              poster: item.posterPath ? `https://image.tmdb.org/t/p/w500${item.posterPath}` : undefined,
-              description: details.overview,
-              imdbId: details.externalIds?.imdbId,
-              genres: details.genres.map((g) => g.name),
-              releaseInfo: `${details.firstAirDate?.slice(0, 4)}-${details.lastAirDate?.slice(0, 4)}`,
-              director: [],
-              cast: [],
-              imdbRating: details.voteAverage.toFixed(1),
-              trailers: [],
-              runtime: 'N/A',
-              language: details.originalLanguage,
-              country: '',
-            } as StremioMeta;
-          }
-        }),
-      ),
-    );
-
-    return { metas };
+    // No genre selected — genre is required, so this shouldn't be reached
+    return { metas: [] };
   }
 
   // ── Curated Lists (unified chronological) ──────────────────────────────────
