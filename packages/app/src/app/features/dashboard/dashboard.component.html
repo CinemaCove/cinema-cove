@@ -121,6 +121,52 @@
     }
 </section>
 
+<!-- Curated Groups -->
+<section class="dash-section" aria-labelledby="section-groups">
+    <div class="section-header">
+        <h3 class="section-title" id="section-groups">
+            <mat-icon aria-hidden="true">movie_filter</mat-icon>
+            Curated Groups
+        </h3>
+        <a mat-button routerLink="/curated-groups" aria-label="View all curated groups">
+            View all
+            <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+        </a>
+    </div>
+
+    @if (curatedGroupsStore.loading()) {
+        <div class="state-center">
+            <mat-spinner diameter="32" aria-label="Loading curated groups"/>
+        </div>
+    } @else if (previewGroups().length === 0) {
+        <p class="empty-curated">No curated groups yet. Check back soon!</p>
+    } @else {
+        <div class="preview-grid">
+            @for (group of previewGroups(); track group.id) {
+                <button class="preview-tile preview-curated"
+                        [class.has-image]="!!group.imagePath"
+                        [style]="group.imagePath ? {backgroundImage: 'url(' + group.imagePath + ')', backgroundSize: 'cover', backgroundPosition: 'center'} : null"
+                        type="button"
+                        (click)="openGroupDetail(group)"
+                        [attr.aria-label]="group.name">
+                    @if (!group.imagePath) {
+                        <mat-icon class="teaser-icon" aria-hidden="true">{{ group.icon }}</mat-icon>
+                    }
+                    <span class="preview-name">{{ group.name }}</span>
+                </button>
+            }
+            @if (extraGroupsCount() > 0) {
+                <a class="preview-tile preview-more"
+                   routerLink="/curated-groups"
+                   [attr.aria-label]="'+' + extraGroupsCount() + ' more curated groups'">
+                    <mat-icon aria-hidden="true">more_horiz</mat-icon>
+                    <span>+{{ extraGroupsCount() }} more</span>
+                </a>
+            }
+        </div>
+    }
+</section>
+
 <!-- Integrations -->
 <section class="dash-section" aria-labelledby="section-integrations">
     <div class="section-header">

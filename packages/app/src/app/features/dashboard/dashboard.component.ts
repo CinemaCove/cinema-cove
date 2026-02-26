@@ -6,10 +6,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AddonConfigItem } from '../../core/services/addon-configs.service';
 import { CuratedListItem } from '../../core/services/curated-lists.service';
+import { CuratedGroupItem } from '../../core/services/curated-groups.service';
 import { CatalogsStore } from '../../signal-store/catalogs.store';
 import { CuratedListsStore } from '../../signal-store/curated-lists.store';
+import { CuratedGroupsStore } from '../../signal-store/curated-groups.store';
 import { IntegrationsStore } from '../../signal-store/integrations.store';
 import { CuratedDetailDialogComponent } from '../curated/curated-detail-dialog/curated-detail-dialog.component';
+import { CuratedGroupDetailDialogComponent } from '../curated-groups/curated-group-detail-dialog/curated-group-detail-dialog.component';
 import { AdUnitComponent } from '../../shared/ad-unit/ad-unit.component';
 
 @Component({
@@ -22,6 +25,7 @@ import { AdUnitComponent } from '../../shared/ad-unit/ad-unit.component';
 export class DashboardComponent implements OnInit {
   protected readonly catalogsStore = inject(CatalogsStore);
   protected readonly curatedListsStore = inject(CuratedListsStore);
+  protected readonly curatedGroupsStore = inject(CuratedGroupsStore);
   protected readonly integrationsStore = inject(IntegrationsStore);
   private readonly dialog = inject(MatDialog);
 
@@ -41,6 +45,10 @@ export class DashboardComponent implements OnInit {
   protected readonly previewCurated = computed(() => this.curatedListsStore.items().slice(0, 3));
   protected readonly extraCuratedCount = computed(() =>
     Math.max(0, this.curatedListsStore.items().length - 3),
+  );
+  protected readonly previewGroups = computed(() => this.curatedGroupsStore.items().slice(0, 3));
+  protected readonly extraGroupsCount = computed(() =>
+    Math.max(0, this.curatedGroupsStore.items().length - 3),
   );
 
   isMixed(catalog: AddonConfigItem): boolean {
@@ -84,9 +92,18 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  openGroupDetail(group: CuratedGroupItem): void {
+    this.dialog.open(CuratedGroupDetailDialogComponent, {
+      data: group,
+      width: '480px',
+      maxWidth: '95vw',
+    });
+  }
+
   ngOnInit(): void {
     this.catalogsStore.load();
     this.curatedListsStore.load(true);
+    this.curatedGroupsStore.load(true);
     this.integrationsStore.load();
   }
 }

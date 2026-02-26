@@ -1,0 +1,44 @@
+<div class="page-header">
+    <h2 class="page-title">Curated Groups</h2>
+    <p class="page-subtitle">Hand-picked themed collections — franchises, directors, genres and more — each as a single Stremio catalog with filter options.</p>
+</div>
+
+@if (store.loading()) {
+    <div class="state-center">
+        <mat-spinner diameter="48"/>
+    </div>
+} @else if (store.status() === 'error') {
+    <div class="state-center">
+        <mat-icon class="empty-icon">error_outline</mat-icon>
+        <p class="state-message">Failed to load curated groups.</p>
+        <button mat-stroked-button (click)="store.load(true)">
+            <mat-icon>refresh</mat-icon>
+            Retry
+        </button>
+    </div>
+} @else if (store.items().length === 0) {
+    <div class="state-center">
+        <mat-icon class="empty-icon">movie_filter</mat-icon>
+        <p class="state-message">No curated groups yet. Check back soon!</p>
+    </div>
+} @else {
+    <div class="curated-grid">
+        @for (group of store.items(); track group.id) {
+            <button class="curated-card" (click)="openDetail(group)" type="button"
+                    [attr.aria-label]="'View ' + group.name">
+                <div class="card-visual">
+                    @if (group.imagePath) {
+                        <img [src]="group.imagePath" [alt]="group.name" class="card-image"/>
+                    } @else {
+                        <mat-icon class="card-icon" aria-hidden="true">{{ group.icon }}</mat-icon>
+                    }
+                </div>
+                <div class="card-body">
+                    <span class="card-name">{{ group.name }}</span>
+                    <span class="card-desc">{{ group.description }}</span>
+                    <span class="card-count">{{ group.lists.length }} list{{ group.lists.length === 1 ? '' : 's' }}</span>
+                </div>
+            </button>
+        }
+    </div>
+}
