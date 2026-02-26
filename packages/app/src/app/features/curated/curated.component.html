@@ -25,12 +25,17 @@
     <div class="curated-grid">
         @for (list of store.items(); track list.id) {
             <button class="curated-card" (click)="openDetail(list)" type="button"
-                    [attr.aria-label]="'View ' + list.name">
+                    [attr.aria-label]="'View ' + list.name + (needsUpdate(list) ? ' — update available' : '')">
                 <div class="card-visual">
                     @if (list.imagePath) {
                         <img [src]="list.imagePath" [alt]="list.name" class="card-image"/>
                     } @else {
                         <mat-icon class="card-icon" aria-hidden="true">{{ list.icon }}</mat-icon>
+                    }
+                    @if (needsUpdate(list)) {
+                        <span class="update-badge" aria-hidden="true">
+                            <mat-icon>update</mat-icon>
+                        </span>
                     }
                 </div>
                 <div class="card-body">

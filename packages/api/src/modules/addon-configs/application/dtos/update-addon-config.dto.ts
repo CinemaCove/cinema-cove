@@ -8,4 +8,5 @@ export class UpdateAddonConfigDto {
   public readonly minVoteCount?: number | null;
   public readonly releaseDateFrom?: number | null;
   public readonly releaseDateTo?: number | null;
+  public readonly installedVersion?: number | null;
 }

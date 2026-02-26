@@ -32,6 +32,7 @@ export class MongoAddonConfigsRepository implements AddonConfigsRepository {
       doc.releaseDateFrom ?? null,
       doc.releaseDateTo ?? null,
       doc.curatedGroupId ?? null,
+      doc.installedVersion ?? null,
     );
   }
 
@@ -61,6 +62,7 @@ export class MongoAddonConfigsRepository implements AddonConfigsRepository {
     };
 
     if (entity.curatedGroupId) data['curatedGroupId'] = entity.curatedGroupId;
+    if (entity.installedVersion !== null) data['installedVersion'] = entity.installedVersion;
     if (entity.tmdbListId) data['tmdbListId'] = entity.tmdbListId;
     if (entity.tmdbListType) data['tmdbListType'] = entity.tmdbListType;
     if (entity.traktListId) data['traktListId'] = entity.traktListId;

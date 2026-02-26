@@ -10,6 +10,13 @@
     }
     <p class="description">{{ data.description }}</p>
 
+    @if (hasUpdate()) {
+        <div class="update-banner" role="status">
+            <mat-icon aria-hidden="true">update</mat-icon>
+            <span>This list has been updated. Reinstall to acknowledge the changes.</span>
+        </div>
+    }
+
     @if (installUrl()) {
         <div class="install-result">
             <code class="install-url">{{ installUrl() }}</code>
@@ -30,9 +37,9 @@
             @if (installing()) {
                 <mat-spinner diameter="18" class="btn-spinner"/>
             } @else {
-                <mat-icon>download</mat-icon>
+                <mat-icon>{{ hasUpdate() ? 'update' : 'download' }}</mat-icon>
             }
-            Install
+            {{ hasUpdate() ? 'Reinstall' : 'Install' }}
         </button>
     }
 </mat-dialog-actions>

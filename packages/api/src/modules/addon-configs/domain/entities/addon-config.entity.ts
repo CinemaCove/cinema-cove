@@ -18,5 +18,6 @@ export class AddonConfigEntity {
     public readonly releaseDateFrom: number | null,
     public readonly releaseDateTo: number | null,
     public readonly curatedGroupId: string | null = null,
+    public readonly installedVersion: number | null = null,
   ) {}
 }

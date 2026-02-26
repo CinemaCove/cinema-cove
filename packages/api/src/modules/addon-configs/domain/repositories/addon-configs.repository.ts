@@ -10,6 +10,7 @@ export interface UpdateAddonConfigData {
   minVoteCount?: number | null;
   releaseDateFrom?: number | null;
   releaseDateTo?: number | null;
+  installedVersion?: number | null;
 }
 
 export interface FindExistingTmdbListQuery {

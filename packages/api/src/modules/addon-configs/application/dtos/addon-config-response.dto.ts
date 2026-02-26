@@ -19,6 +19,7 @@ export class AddonConfigResponseDto {
   public readonly minVoteCount: number | null;
   public readonly releaseDateFrom: number | null;
   public readonly releaseDateTo: number | null;
+  public readonly installedVersion: number | null;
 
   constructor(entity: AddonConfigEntity) {
     this.id = entity.id!;
@@ -39,5 +40,6 @@ export class AddonConfigResponseDto {
     this.minVoteCount = entity.minVoteCount;
     this.releaseDateFrom = entity.releaseDateFrom;
     this.releaseDateTo = entity.releaseDateTo;
+    this.installedVersion = entity.installedVersion;
   }
 }

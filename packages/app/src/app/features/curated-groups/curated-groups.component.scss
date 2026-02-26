@@ -73,7 +73,28 @@
   }
 }
 
+.update-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mat-sys-tertiary);
+  color: var(--mat-sys-on-tertiary);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .card-visual {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;

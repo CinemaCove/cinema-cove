@@ -7,4 +7,5 @@ export class CuratedListEntity {
   public icon: string = '';
   public order: number = 0;
   public unified: boolean = false;
+  public changeVersion: number = 1;
 }

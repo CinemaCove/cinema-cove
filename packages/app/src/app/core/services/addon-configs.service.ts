@@ -22,13 +22,16 @@ export interface AddonConfigItem extends AddonConfigFilters {
   id: string;
   name: string;
   type: 'movie' | 'tv';
-  source: 'discover' | 'tmdb-list' | 'trakt-list';
+  source: 'discover' | 'tmdb-list' | 'trakt-list' | 'curated-list' | 'franchise-group';
+  tmdbListId: string | null;
+  curatedGroupId: string | null;
   tmdbListType: 'watchlist' | 'favorites' | 'rated' | null;
   traktListType: 'watchlist' | 'favorites' | 'rated' | null;
   imagePath: string | null;
   languages: string[];
   sort: string;
   installUrl: string;
+  installedVersion: number | null;
 }
 
 @Injectable({ providedIn: 'root' })

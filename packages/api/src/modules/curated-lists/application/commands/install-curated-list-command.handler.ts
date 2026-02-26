@@ -8,6 +8,7 @@ import type { AddonConfigResponseDto } from '../../../addon-configs/application/
 import { GetUserByIdQuery } from '../../../users/application/queries/get-user-by-id.query';
 import type { UserResponseDto } from '../../../users/application/dtos/user-response.dto';
 import { CreateAddonConfigCommand } from '../../../addon-configs/application/commands/create-addon-config.command';
+import { UpdateAddonConfigCommand } from '../../../addon-configs/application/commands/update-addon-config.command';
 
 @CommandHandler(InstallCuratedListCommand)
 export class InstallCuratedListCommandHandler
@@ -30,6 +31,9 @@ export class InstallCuratedListCommandHandler
     >(new FindExistingTmdbListQuery(command.userId, { tmdbListId: curatedList.tmdbListId }));
 
     if (existing) {
+      await this.commandBus.execute(
+        new UpdateAddonConfigCommand(existing.id, command.userId, { installedVersion: curatedList.changeVersion }),
+      );
       return {
         id: existing.id,
         installUrl: `stremio://${command.host}/api/${existing.id}/manifest.json`,
@@ -53,6 +57,7 @@ export class InstallCuratedListCommandHandler
           sort: 'popularity.desc',
           includeAdult: false,
           imagePath: curatedList.imagePath ?? undefined,
+          installedVersion: curatedList.changeVersion,
         },
         user?.maxAllowedConfigs ?? 20,
       ),

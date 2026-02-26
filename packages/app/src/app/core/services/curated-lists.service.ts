@@ -11,6 +11,7 @@ export interface CuratedListItem {
   imagePath: string | null;
   icon: string;
   order: number;
+  changeVersion: number;
 }
 
 export interface CuratedListInstallResult {

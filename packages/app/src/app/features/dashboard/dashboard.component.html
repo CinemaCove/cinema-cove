@@ -2,6 +2,27 @@
     <h2 class="page-title">Dashboard</h2>
 </div>
 
+@if (staleListCount() > 0 || staleGroupCount() > 0) {
+    <div class="update-banner" role="status">
+        <mat-icon class="update-banner-icon" aria-hidden="true">update</mat-icon>
+        <span class="update-banner-text">Some installed catalogs have updates — reinstall to get the latest changes.</span>
+        <div class="update-banner-actions">
+            @if (staleListCount() > 0) {
+                <a mat-button routerLink="/curated">
+                    Curated Lists ({{ staleListCount() }})
+                    <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+                </a>
+            }
+            @if (staleGroupCount() > 0) {
+                <a mat-button routerLink="/curated-groups">
+                    Curated Groups ({{ staleGroupCount() }})
+                    <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+                </a>
+            }
+        </div>
+    </div>
+}
+
 @if (!catalogsStore.loading() && catalogsStore.items().length > 0) {
     <div class="stats-row" role="list" aria-label="Catalog statistics">
         <div class="stat-chip" role="listitem">

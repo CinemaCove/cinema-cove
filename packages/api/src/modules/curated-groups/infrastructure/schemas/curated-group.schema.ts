@@ -34,6 +34,9 @@ export class CuratedGroupSchemaClass {
 
   @Prop({ type: [FranchiseListItemSchema], default: [] })
   lists!: FranchiseListItemSchema[];
+
+  @Prop({ default: 1 })
+  changeVersion!: number;
 }
 
 export const CuratedGroupSchema = SchemaFactory.createForClass(CuratedGroupSchemaClass);

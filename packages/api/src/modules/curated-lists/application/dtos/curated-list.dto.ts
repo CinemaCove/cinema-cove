@@ -9,6 +9,7 @@ export class CuratedListDto {
   public readonly icon: string;
   public readonly order: number;
   public readonly unified: boolean;
+  public readonly changeVersion: number;
 
   constructor(entity: CuratedListEntity) {
     this.id = entity.id!;
@@ -19,5 +20,6 @@ export class CuratedListDto {
     this.icon = entity.icon;
     this.order = entity.order;
     this.unified = entity.unified;
+    this.changeVersion = entity.changeVersion;
   }
 }
