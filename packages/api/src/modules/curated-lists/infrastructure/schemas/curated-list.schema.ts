@@ -25,6 +25,9 @@ export class CuratedListSchemaClass {
 
   @Prop({ default: false })
   unified!: boolean;
+
+  @Prop({ default: 1 })
+  changeVersion!: number;
 }
 
 export const CuratedListSchema = SchemaFactory.createForClass(CuratedListSchemaClass);

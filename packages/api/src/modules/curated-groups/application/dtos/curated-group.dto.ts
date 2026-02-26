@@ -8,6 +8,7 @@ export class CuratedGroupDto {
   public readonly icon: string;
   public readonly order: number;
   public readonly lists: FranchiseListItem[];
+  public readonly changeVersion: number;
 
   constructor(entity: CuratedGroupEntity) {
     this.id = entity.id!;
@@ -17,5 +18,6 @@ export class CuratedGroupDto {
     this.icon = entity.icon;
     this.order = entity.order;
     this.lists = entity.lists;
+    this.changeVersion = entity.changeVersion;
   }
 }

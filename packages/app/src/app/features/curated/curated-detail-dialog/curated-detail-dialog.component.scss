@@ -36,6 +36,24 @@
   white-space: pre-line;
 }
 
+.update-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: var(--mat-sys-body-medium);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
+
 .install-result {
   background: var(--mat-sys-secondary-container);
   border-radius: 8px;

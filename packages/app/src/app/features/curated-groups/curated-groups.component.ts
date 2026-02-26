@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CuratedGroupItem } from '../../core/services/curated-groups.service';
 import { CuratedGroupsStore } from '../../signal-store/curated-groups.store';
+import { CatalogsStore } from '../../signal-store/catalogs.store';
 import { CuratedGroupDetailDialogComponent } from './curated-group-detail-dialog/curated-group-detail-dialog.component';
 
 @Component({
@@ -16,10 +17,19 @@ import { CuratedGroupDetailDialogComponent } from './curated-group-detail-dialog
 })
 export class CuratedGroupsComponent implements OnInit {
   protected readonly store = inject(CuratedGroupsStore);
+  private readonly catalogsStore = inject(CatalogsStore);
   private readonly dialog = inject(MatDialog);
 
   ngOnInit(): void {
     this.store.load(true);
+    this.catalogsStore.load();
+  }
+
+  needsUpdate(group: CuratedGroupItem): boolean {
+    const config = this.catalogsStore.items().find(
+      (c) => c.source === 'franchise-group' && c.curatedGroupId === group.id,
+    );
+    return config !== undefined && (config.installedVersion ?? 0) < group.changeVersion;
   }
 
   openDetail(group: CuratedGroupItem): void {

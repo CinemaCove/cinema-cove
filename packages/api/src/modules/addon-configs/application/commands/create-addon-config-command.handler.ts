@@ -38,6 +38,7 @@ export class CreateAddonConfigCommandHandler
       dto.releaseDateFrom ?? null,
       dto.releaseDateTo ?? null,
       dto.curatedGroupId ?? null,
+      dto.installedVersion ?? null,
     );
 
     const created = await this.repository.create(entity);

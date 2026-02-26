@@ -55,6 +55,9 @@ export class AddonConfig {
 
   @Prop({ min: 1888 })
   releaseDateTo?: number;
+
+  @Prop({ min: 1 })
+  installedVersion?: number;
 }
 
 export const AddonConfigSchema = SchemaFactory.createForClass(AddonConfig);

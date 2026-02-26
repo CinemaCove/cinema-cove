@@ -37,6 +37,7 @@ export class MongoCuratedGroupsRepository extends CuratedGroupsRepository {
       tmdbListId: l.tmdbListId,
       unified: l.unified ?? false,
     }));
+    entity.changeVersion = doc.changeVersion ?? 1;
     return entity;
   }
 }

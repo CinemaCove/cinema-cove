@@ -11,6 +11,36 @@
   font: var(--mat-sys-headline-small);
 }
 
+// Update banner
+
+.update-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.update-banner-icon {
+  flex-shrink: 0;
+}
+
+.update-banner-text {
+  flex: 1;
+  font: var(--mat-sys-body-medium);
+  min-width: 180px;
+}
+
+.update-banner-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 // Stats row
 
 .stats-row {

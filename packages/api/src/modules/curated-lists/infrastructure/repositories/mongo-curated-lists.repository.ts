@@ -34,6 +34,7 @@ export class MongoCuratedListsRepository extends CuratedListsRepository {
     entity.icon = doc.icon;
     entity.order = doc.order;
     entity.unified = doc.unified ?? false;
+    entity.changeVersion = doc.changeVersion ?? 1;
     return entity;
   }
 }

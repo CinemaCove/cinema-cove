@@ -13,12 +13,11 @@ import { CuratedGroupsStore } from '../../signal-store/curated-groups.store';
 import { IntegrationsStore } from '../../signal-store/integrations.store';
 import { CuratedDetailDialogComponent } from '../curated/curated-detail-dialog/curated-detail-dialog.component';
 import { CuratedGroupDetailDialogComponent } from '../curated-groups/curated-group-detail-dialog/curated-group-detail-dialog.component';
-import { AdUnitComponent } from '../../shared/ad-unit/ad-unit.component';
 
 @Component({
   selector: 'cc-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, AdUnitComponent],
+  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -49,6 +48,24 @@ export class DashboardComponent implements OnInit {
   protected readonly previewGroups = computed(() => this.curatedGroupsStore.items().slice(0, 3));
   protected readonly extraGroupsCount = computed(() =>
     Math.max(0, this.curatedGroupsStore.items().length - 3),
+  );
+
+  protected readonly staleListCount = computed(() =>
+    this.curatedListsStore.items().filter((list) => {
+      const config = this.catalogsStore.items().find(
+        (c) => (c.source === 'curated-list' || c.source === 'tmdb-list') && c.tmdbListId === list.tmdbListId,
+      );
+      return config !== undefined && (config.installedVersion ?? 0) < list.changeVersion;
+    }).length,
+  );
+
+  protected readonly staleGroupCount = computed(() =>
+    this.curatedGroupsStore.items().filter((group) => {
+      const config = this.catalogsStore.items().find(
+        (c) => c.source === 'franchise-group' && c.curatedGroupId === group.id,
+      );
+      return config !== undefined && (config.installedVersion ?? 0) < group.changeVersion;
+    }).length,
   );
 
   isMixed(catalog: AddonConfigItem): boolean {

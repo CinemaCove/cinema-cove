@@ -12,4 +12,5 @@ export class CuratedGroupEntity {
   public icon: string = '';
   public order: number = 0;
   public lists: FranchiseListItem[] = [];
+  public changeVersion: number = 1;
 }

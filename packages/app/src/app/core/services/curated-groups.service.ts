@@ -17,6 +17,7 @@ export interface CuratedGroupItem {
   icon: string;
   order: number;
   lists: FranchiseListItem[];
+  changeVersion: number;
 }
 
 export interface CuratedGroupInstallResult {

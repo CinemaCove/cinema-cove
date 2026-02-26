@@ -25,12 +25,17 @@
     <div class="curated-grid">
         @for (group of store.items(); track group.id) {
             <button class="curated-card" (click)="openDetail(group)" type="button"
-                    [attr.aria-label]="'View ' + group.name">
+                    [attr.aria-label]="'View ' + group.name + (needsUpdate(group) ? ' — update available' : '')">
                 <div class="card-visual">
                     @if (group.imagePath) {
                         <img [src]="group.imagePath" [alt]="group.name" class="card-image"/>
                     } @else {
                         <mat-icon class="card-icon" aria-hidden="true">{{ group.icon }}</mat-icon>
+                    }
+                    @if (needsUpdate(group)) {
+                        <span class="update-badge" aria-hidden="true">
+                            <mat-icon>update</mat-icon>
+                        </span>
                     }
                 </div>
                 <div class="card-body">
