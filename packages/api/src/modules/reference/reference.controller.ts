@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
+import { SkipThrottle } from '@nestjs/throttler';
 import { GetLanguagesQuery, GetSortOptionsQuery } from './application';
 
+@SkipThrottle()
 @Controller('reference')
 export class ReferenceController {
   constructor(private readonly queryBus: QueryBus) {}

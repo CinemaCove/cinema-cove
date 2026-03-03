@@ -4,9 +4,12 @@ import {
   NotFoundException,
   Param,
   Redirect,
+  UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { QueryBus } from '@nestjs/cqrs';
+import { SkipThrottle } from '@nestjs/throttler';
+import { StremioThrottlerGuard } from '../../common/guards/throttler.guards';
 import { StremioService } from './stremio.service';
 import { DiscoverFilters } from '../shared/infrastructure/tmdb/tmdb.service';
 import { AddonConfig } from './types/addon-config.interface';
@@ -17,6 +20,7 @@ import type { UserResponseDto } from '../users/application/dtos/user-response.dt
 import { GetCuratedGroupByIdQuery } from '../curated-groups/application/queries/get-curated-group-by-id.query';
 import type { CuratedGroupDto } from '../curated-groups/application/dtos/curated-group.dto';
 
+@UseGuards(StremioThrottlerGuard)
 @Controller()
 export class StremioController {
   constructor(
@@ -27,6 +31,7 @@ export class StremioController {
 
   @Get('configure')
   @Redirect()
+  @SkipThrottle()
   getConfigure() {
     const configureUrl = this.configService.get<string>(
       'CONFIGURE_URL',
@@ -36,6 +41,7 @@ export class StremioController {
   }
 
   @Get('manifest.json')
+  @SkipThrottle()
   getLandingManifest() {
     const configureUrl = this.configService.get<string>(
       'CONFIGURE_URL',

@@ -15,6 +15,7 @@ import {
 import type { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiThrottlerGuard } from '../../common/guards/throttler.guards';
 import {
   CreateAddonConfigCommand,
   CreateAddonConfigDto,
@@ -26,7 +27,7 @@ import {
 } from './application';
 import { GetUserByIdQuery } from '../users/application';
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
 @Controller('addon-configs')
 export class AddonConfigsController {
   constructor(

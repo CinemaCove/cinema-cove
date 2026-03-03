@@ -11,6 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiThrottlerGuard } from '../../common/guards/throttler.guards';
 import {
   GetProfileQuery,
   UpdateProfileCommand,
@@ -22,7 +23,7 @@ interface JwtUser {
 }
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
 export class UsersController {
   constructor(
     private readonly queryBus: QueryBus,
