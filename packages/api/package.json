@@ -31,6 +31,7 @@
         "@nestjs/mongoose": "^11.0.4",
         "@nestjs/passport": "^11.0.5",
         "@nestjs/platform-express": "^11.1.14",
+        "@nestjs/throttler": "^6.5.0",
         "argon2": "^0.44.0",
         "axios": "^1.13.5",
         "class-transformer": "^0.5.1",

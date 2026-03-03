@@ -16,6 +16,8 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
+import { SkipThrottle } from '@nestjs/throttler';
+import { ApiThrottlerGuard } from '../../common/guards/throttler.guards';
 import {
   ConnectTmdbCommand,
   ConnectTraktCommand,
@@ -58,7 +60,7 @@ export class IntegrationsController {
   // ── TMDB Status ───────────────────────────────────────────────────────────
 
   @Get('tmdb/status')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async tmdbStatus(@Req() req: Request & { user: { sub: string } }): Promise<TmdbStatusDto> {
     return this.queryBus.execute(new GetTmdbStatusQuery(req.user.sub));
   }
@@ -66,7 +68,7 @@ export class IntegrationsController {
   // ── TMDB Connect ──────────────────────────────────────────────────────────
 
   @Post('tmdb/connect')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async tmdbConnect(@Req() req: Request & { user: { sub: string } }): Promise<AuthUrlDto> {
     const host = req.get('X-Forwarded-Host') ?? req.get('host');
     const protocol = req.get('X-Forwarded-Proto') ?? req.protocol;
@@ -77,6 +79,7 @@ export class IntegrationsController {
   // ── TMDB Callback ─────────────────────────────────────────────────────────
 
   @Get('tmdb/callback')
+  @SkipThrottle()
   async tmdbCallback(
     @Query('request_token') requestToken: string,
     @Query('approved') approved: string,
@@ -94,7 +97,7 @@ export class IntegrationsController {
 
   @Delete('tmdb/disconnect')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async tmdbDisconnect(@Req() req: Request & { user: { sub: string } }): Promise<void> {
     await this.commandBus.execute(new DisconnectTmdbCommand(req.user.sub));
   }
@@ -102,7 +105,7 @@ export class IntegrationsController {
   // ── TMDB Lists ────────────────────────────────────────────────────────────
 
   @Get('tmdb/lists')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async getTmdbLists(
     @Req() req: Request & { user: { sub: string } },
     @Query('page') pageStr?: string,
@@ -112,7 +115,7 @@ export class IntegrationsController {
   }
 
   @Post('tmdb/lists/install')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async installTmdbList(
     @Req() req: Request & { user: { sub: string } },
     @Body() body: InstallTmdbListBodyDto,
@@ -124,7 +127,7 @@ export class IntegrationsController {
   // ── Trakt Status ──────────────────────────────────────────────────────────
 
   @Get('trakt/status')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async traktStatus(@Req() req: Request & { user: { sub: string } }): Promise<TraktStatusDto> {
     return this.queryBus.execute(new GetTraktStatusQuery(req.user.sub));
   }
@@ -132,7 +135,7 @@ export class IntegrationsController {
   // ── Trakt Connect ─────────────────────────────────────────────────────────
 
   @Post('trakt/connect')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async traktConnect(@Req() req: Request & { user: { sub: string } }): Promise<AuthUrlDto> {
     const host = req.get('X-Forwarded-Host') ?? req.get('host');
     const protocol = req.get('X-Forwarded-Proto') ?? req.protocol;
@@ -143,6 +146,7 @@ export class IntegrationsController {
   // ── Trakt Callback ────────────────────────────────────────────────────────
 
   @Get('trakt/callback')
+  @SkipThrottle()
   async traktCallback(
     @Query('code') code: string,
     @Query('userId') userId: string,
@@ -163,7 +167,7 @@ export class IntegrationsController {
 
   @Delete('trakt/disconnect')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async traktDisconnect(@Req() req: Request & { user: { sub: string } }): Promise<void> {
     await this.commandBus.execute(new DisconnectTraktCommand(req.user.sub));
   }
@@ -171,13 +175,13 @@ export class IntegrationsController {
   // ── Trakt Lists ───────────────────────────────────────────────────────────
 
   @Get('trakt/lists')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async getTraktLists(@Req() req: Request & { user: { sub: string } }): Promise<TraktListsResponseDto> {
     return this.queryBus.execute(new GetTraktListsQuery(req.user.sub));
   }
 
   @Post('trakt/lists/install')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), ApiThrottlerGuard)
   async installTraktList(
     @Req() req: Request & { user: { sub: string } },
     @Body() body: InstallTraktListBodyDto,

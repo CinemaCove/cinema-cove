@@ -9,11 +9,13 @@ import {
 import type { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiThrottlerGuard } from '../../common/guards/throttler.guards';
 import { GetAllCuratedListsQuery } from './application/queries/get-all-curated-lists.query';
 import { InstallCuratedListCommand } from './application/commands/install-curated-list.command';
 import type { InstallCuratedListResult } from './application/commands/install-curated-list.command';
 import type { CuratedListDto } from './application/dtos/curated-list.dto';
 
+@UseGuards(ApiThrottlerGuard)
 @Controller('curated-lists')
 export class CuratedListsController {
   constructor(

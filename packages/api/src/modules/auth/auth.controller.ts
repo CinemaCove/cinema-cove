@@ -12,6 +12,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
+import { SkipThrottle } from '@nestjs/throttler';
+import { AuthThrottlerGuard } from '../../common/guards/throttler.guards';
 import { AuthService } from './services';
 import { LoginDto, RegisterDto, TokenResponseDto } from './dtos';
 
@@ -19,6 +21,7 @@ interface OAuthResult {
   token: string;
 }
 
+@UseGuards(AuthThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   private readonly configureUrl: string;
@@ -43,12 +46,14 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @SkipThrottle()
   googleAuth(): void {
     // Passport redirects to Google
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @SkipThrottle()
   googleCallback(@Req() req: Request, @Res() res: Response): void {
     const { token } = req.user as OAuthResult;
     res.redirect(`${this.configureUrl}/auth/callback?token=${token}`);
@@ -56,12 +61,14 @@ export class AuthController {
 
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
+  @SkipThrottle()
   facebookAuth(): void {
     // Passport redirects to Facebook
   }
 
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
+  @SkipThrottle()
   facebookCallback(@Req() req: Request, @Res() res: Response): void {
     const { token } = req.user as OAuthResult;
     res.redirect(`${this.configureUrl}/auth/callback?token=${token}`);

@@ -2,11 +2,13 @@ import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiThrottlerGuard } from '../../common/guards/throttler.guards';
 import { GetAllCuratedGroupsQuery } from './application/queries/get-all-curated-groups.query';
 import { InstallFranchiseGroupCommand } from './application/commands/install-franchise-group.command';
 import type { InstallFranchiseGroupResult } from './application/commands/install-franchise-group.command';
 import type { CuratedGroupDto } from './application/dtos/curated-group.dto';
 
+@UseGuards(ApiThrottlerGuard)
 @Controller('curated-groups')
 export class CuratedGroupsController {
   constructor(
