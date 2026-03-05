@@ -1,67 +1,75 @@
 <h2 mat-dialog-title class="trivia-title">
-  <mat-icon aria-hidden="true">quiz</mat-icon>
-  {{ data.title }}
+    <mat-icon aria-hidden="true">quiz</mat-icon>
+    {{ data.title }}
 </h2>
 
 <mat-dialog-content class="trivia-content">
-  @if (state() === 'question') {
-    <mat-progress-bar
-      [value]="progress()"
-      [class.urgent]="secondsLeft() <= 10"
-      aria-label="Time remaining"
-    ></mat-progress-bar>
-    <p class="trivia-timer" aria-live="polite">{{ secondsLeft() }}s remaining</p>
-    @if (data.imageUrl) {
-      <div class="trivia-image-wrapper">
-        <img [src]="data.imageUrl" [alt]="data.title" class="trivia-image" />
-      </div>
+    @if (state() === 'question') {
+        <div class="progress-wrapper">
+            <mat-progress-bar
+                    [value]="progress()"
+                    [class.urgent]="secondsLeft() <= 10"
+                    aria-label="Time remaining"
+            ></mat-progress-bar>
+        </div>
+        <p class="trivia-timer" aria-live="polite">{{ secondsLeft() }}s remaining</p>
+        @if (data.imageUrl) {
+            <div class="trivia-image-wrapper">
+                <img [src]="data.imageUrl" [alt]="data.title" class="trivia-image"/>
+            </div>
+        }
+        <p class="trivia-question">{{ data.question }}</p>
+        <div class="trivia-choices" role="list">
+            @for (choice of data.choices; track $index) {
+                <button
+                        mat-stroked-button
+                        class="trivia-choice"
+                        role="listitem"
+                        (click)="answer($index)"
+                >{{ choice }}
+                </button>
+            }
+        </div>
     }
-    <p class="trivia-question">{{ data.question }}</p>
-    <div class="trivia-choices" role="list">
-      @for (choice of data.choices; track $index) {
-        <button
-          mat-stroked-button
-          class="trivia-choice"
-          role="listitem"
-          (click)="answer($index)"
-        >{{ choice }}</button>
-      }
-    </div>
-  }
 
-  @if (state() === 'correct') {
-    <div class="trivia-result trivia-result--correct" role="status">
-      <mat-icon aria-hidden="true">check_circle</mat-icon>
-      <p>Correct! Well done!</p>
-      <p class="trivia-answer-reveal">The answer was: <strong>{{ data.choices![data.correctChoiceIndex!] }}</strong></p>
-    </div>
-  }
+    @if (state() === 'correct') {
+        <div class="trivia-result trivia-result--correct" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <p>Correct! Well done!</p>
+            <p class="trivia-answer-reveal">The answer was:
+                <strong>{{ data.choices![data.correctChoiceIndex!] }}</strong></p>
+        </div>
+    }
 
-  @if (state() === 'wrong') {
-    <div class="trivia-result trivia-result--wrong" role="status">
-      <mat-icon aria-hidden="true">cancel</mat-icon>
-      <p>Not quite!</p>
-      <p class="trivia-answer-reveal">The correct answer was: <strong>{{ data.choices![data.correctChoiceIndex!] }}</strong></p>
-      @if (data.explanation) {
-        <p class="trivia-explanation">{{ data.explanation }}</p>
-      }
-    </div>
-  }
+    @if (state() === 'wrong') {
+        <div class="trivia-result trivia-result--wrong" role="status">
+            <mat-icon aria-hidden="true">cancel</mat-icon>
+            <p>Not quite!</p>
+            <p class="trivia-answer-reveal">The correct answer was:
+                <strong>{{ data.choices![data.correctChoiceIndex!] }}</strong></p>
+            @if (data.explanation) {
+                <p class="trivia-explanation">{{ data.explanation }}</p>
+            }
+        </div>
+    }
 
-  @if (state() === 'timeout') {
-    <div class="trivia-result trivia-result--timeout" role="status">
-      <mat-icon aria-hidden="true">timer_off</mat-icon>
-      <p>Time's up!</p>
-      <p class="trivia-answer-reveal">The correct answer was: <strong>{{ data.choices![data.correctChoiceIndex!] }}</strong></p>
-      @if (data.explanation) {
-        <p class="trivia-explanation">{{ data.explanation }}</p>
-      }
-    </div>
-  }
+    @if (state() === 'timeout') {
+        <div class="trivia-result trivia-result--timeout" role="status">
+            <mat-icon aria-hidden="true">timer_off</mat-icon>
+            <p>Time's up!</p>
+            <p class="trivia-answer-reveal">The correct answer was:
+                <strong>{{ data.choices![data.correctChoiceIndex!] }}</strong></p>
+            @if (data.explanation) {
+                <p class="trivia-explanation">{{ data.explanation }}</p>
+            }
+        </div>
+    }
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  @if (state() !== 'question') {
-    <button mat-flat-button (click)="close()">Done</button>
-  }
+<mat-dialog-actions>
+    <button mat-button (click)="optOut()" class="opt-out-btn">Don't show trivia</button>
+    <span class="spacer"></span>
+    @if (state() !== 'question') {
+        <button mat-flat-button (click)="close()">Done</button>
+    }
 </mat-dialog-actions>
