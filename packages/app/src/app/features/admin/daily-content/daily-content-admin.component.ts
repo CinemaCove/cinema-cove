@@ -3,9 +3,11 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,10 +18,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatDialog } from '@angular/material/dialog';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from '../../../core/pipes/locale-date.pipe';
 import {
   DailyContentItem,
   DailyContentService,
@@ -27,6 +30,8 @@ import {
 } from '../../../core/services/daily-content.service';
 import { UploadsService } from '../../../core/services/uploads.service';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
+import { TriviaDialogComponent } from '../../../shared/trivia-dialog/trivia-dialog.component';
+import { FunFactDialogComponent } from '../../../shared/fun-fact-dialog/fun-fact-dialog.component';
 
 @Component({
   selector: 'cc-daily-content-admin',
@@ -44,7 +49,8 @@ import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-d
     MatDividerModule,
     MatDatepickerModule,
     MatTimepickerModule,
-    DatePipe,
+    MatPaginatorModule,
+    LocaleDatePipe,
   ],
   templateUrl: './daily-content-admin.component.html',
   styleUrl: './daily-content-admin.component.scss',
@@ -61,6 +67,11 @@ export class DailyContentAdminComponent implements OnInit {
   readonly uploading = signal(false);
   readonly error = signal<string | null>(null);
   readonly editingId = signal<string | null>(null);
+  readonly pageSize = signal(10);
+  readonly pageIndex = signal(0);
+  readonly pagedItems = computed(() =>
+    this.items().slice(this.pageIndex() * this.pageSize(), (this.pageIndex() + 1) * this.pageSize())
+  );
 
   readonly displayedColumns = ['type', 'title', 'publishAt', 'actions'];
 
@@ -97,6 +108,7 @@ export class DailyContentAdminComponent implements OnInit {
       .subscribe({
         next: (items) => {
           this.items.set(items);
+          // this.pageIndex.set(0);
           this.loading.set(false);
         },
         error: () => {
@@ -241,6 +253,19 @@ export class DailyContentAdminComponent implements OnInit {
           next: () => { this.saving.set(false); this.form.reset({ type: 'trivia', publishAtDate: this.tomorrow(), publishAtTime: this.midnight() }); this.loadItems(); },
           error: () => { this.saving.set(false); this.error.set('Failed to save content.'); },
         });
+    }
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageSize.set(event.pageSize);
+    this.pageIndex.set(event.pageIndex);
+  }
+
+  previewItem(item: DailyContentItem): void {
+    if (item.type === 'trivia') {
+      this.dialog.open(TriviaDialogComponent, { data: item, width: '520px', disableClose: true });
+    } else {
+      this.dialog.open(FunFactDialogComponent, { data: item, width: '480px' });
     }
   }
 

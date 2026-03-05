@@ -69,11 +69,8 @@
             [disabled]="uploading()"
             (click)="fileInput.click()"
           >
-            @if (uploading()) {
-              <mat-icon>cloud_upload</mat-icon> Uploading...
-            } @else {
-              <mat-icon>upload</mat-icon> Upload
-            }
+            <mat-icon>{{ uploading() ? 'cloud_upload' : 'upload' }}</mat-icon>
+            {{ uploading() ? 'Uploading...' : 'Upload' }}
           </button>
           <input #fileInput type="file" accept="image/*" class="hidden-file-input" (change)="onFileChange($event)" />
           <span class="paste-hint">or paste anywhere</span>
@@ -130,7 +127,7 @@
     @if (loading()) {
       <mat-spinner diameter="32"></mat-spinner>
     } @else {
-      <table mat-table [dataSource]="items()" class="content-table">
+      <table mat-table [dataSource]="pagedItems()" class="content-table">
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef>Type</th>
           <td mat-cell *matCellDef="let item">{{ item.type }}</td>
@@ -141,11 +138,14 @@
         </ng-container>
         <ng-container matColumnDef="publishAt">
           <th mat-header-cell *matHeaderCellDef>Publish At</th>
-          <td mat-cell *matCellDef="let item">{{ item.publishAt | date: 'short' }}</td>
+          <td mat-cell *matCellDef="let item">{{ item.publishAt | localeDate }}</td>
         </ng-container>
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let item" class="actions-cell">
+            <button mat-icon-button aria-label="Preview" (click)="previewItem(item)">
+              <mat-icon>visibility</mat-icon>
+            </button>
             <button mat-icon-button aria-label="Edit" (click)="editItem(item)">
               <mat-icon>edit</mat-icon>
             </button>
@@ -161,6 +161,14 @@
       @if (items().length === 0) {
         <p class="empty-msg">No content scheduled yet.</p>
       }
+      <mat-paginator
+        [length]="items().length"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 25, 50]"
+        [pageIndex]="pageIndex()"
+        (page)="onPage($event)"
+        aria-label="Select page"
+      ></mat-paginator>
     }
   </section>
 </div>

@@ -7,12 +7,18 @@
 .trivia-content {
   min-width: 320px;
   max-width: 480px;
+  overflow-y: hidden !important;
 }
 
 .trivia-timer {
   font-size: 0.75rem;
   color: var(--mat-sys-on-surface-variant);
   margin: 4px 0 12px;
+}
+
+.progress-wrapper {
+  height: 20px;
+  overflow: hidden;
 }
 
 mat-progress-bar {
@@ -26,15 +32,17 @@ mat-progress-bar {
 
 .trivia-image-wrapper {
   margin: 8px 0 12px;
-  border-radius: 8px;
-  overflow: hidden;
+  display: flex;
+  justify-content: center;
 }
 
 .trivia-image {
-  width: 100%;
-  max-height: 200px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 250px;
+  width: auto;
+  height: auto;
   display: block;
+  border-radius: 8px;
 }
 
 .trivia-question {
@@ -86,6 +94,15 @@ mat-progress-bar {
 .trivia-answer-reveal {
   font-size: 0.9rem !important;
   font-weight: normal !important;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.opt-out-btn {
+  font-size: 0.75rem;
   color: var(--mat-sys-on-surface-variant);
 }
 

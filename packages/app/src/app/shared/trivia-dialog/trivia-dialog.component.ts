@@ -13,7 +13,9 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+
 import type { DailyContentPublic } from '../../core/services/daily-content.service';
+import { UserService } from '../../core/services/user.service';
 
 const TRIVIA_DURATION_SECONDS = 30;
 
@@ -30,6 +32,7 @@ export class TriviaDialogComponent implements OnInit {
   readonly data = inject<DailyContentPublic>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<TriviaDialogComponent>);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly userService = inject(UserService);
 
   readonly secondsLeft = signal(TRIVIA_DURATION_SECONDS);
   readonly progress = computed(() => (this.secondsLeft() / TRIVIA_DURATION_SECONDS) * 100);
@@ -56,6 +59,11 @@ export class TriviaDialogComponent implements OnInit {
     } else {
       this.state.set('wrong');
     }
+  }
+
+  optOut(): void {
+    this.userService.setTriviaOptOut(true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    this.dialogRef.close();
   }
 
   close(): void {

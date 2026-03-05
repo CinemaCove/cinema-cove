@@ -14,9 +14,10 @@ export class UploadsService {
 
   async uploadImage(file: Express.Multer.File): Promise<string> {
     return new Promise((resolve, reject) => {
+      const isGif = file.mimetype === 'image/gif';
       cloudinary.uploader
         .upload_stream(
-          { folder: 'cinemacove/daily-content', resource_type: 'image' },
+          { folder: 'cinemacove/daily-content', resource_type: 'image', ...(isGif && { format: 'gif' }) },
           (error, result) => {
             if (error || !result) {
               reject(new InternalServerErrorException('Image upload failed'));
