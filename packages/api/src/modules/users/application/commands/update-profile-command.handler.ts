@@ -32,6 +32,10 @@ export class UpdateProfileCommandHandler implements ICommandHandler<
       );
     }
 
+    if (command.triviaOptOut !== undefined) {
+      await this.usersRepository.updateTriviaOptOut(command.id, command.triviaOptOut);
+    }
+
     await this.usersRepository.save(user);
   }
 }

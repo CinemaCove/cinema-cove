@@ -6,6 +6,7 @@ export class UpdateProfileCommand extends Command<void> {
     public displayName?: string,
     public currentPassword?: string,
     public newPassword?: string,
+    public triviaOptOut?: boolean,
   ) {
     super();
   }

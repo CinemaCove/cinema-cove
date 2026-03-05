@@ -1,10 +1,10 @@
 import {
+  IsBoolean,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
-  ValidateIf,
 } from 'class-validator';
 
 export class UpdateProfileDto {
@@ -27,4 +27,8 @@ export class UpdateProfileDto {
     message: 'Password must contain at least one number',
   })
   newPassword?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  triviaOptOut?: boolean;
 }

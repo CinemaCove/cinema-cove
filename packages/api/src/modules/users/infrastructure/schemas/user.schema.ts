@@ -51,6 +51,15 @@ export class User {
 
   @Prop({ default: 20 })
   maxAllowedConfigs!: number;
+
+  @Prop({ default: 'user', enum: ['user', 'admin'] })
+  role!: 'user' | 'admin';
+
+  @Prop({ default: false })
+  triviaOptOut!: boolean;
+
+  @Prop({ type: [String], default: [] })
+  seenDailyContentIds!: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

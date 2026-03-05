@@ -9,6 +9,9 @@ export class UserEntity {
   public traktRefreshToken: string | null = null;
   public traktUsername: string | null = null;
   public traktExpiresAt: number | null = null;
+  public role: 'user' | 'admin' = 'user';
+  public triviaOptOut: boolean = false;
+  public seenDailyContentIds: string[] = [];
 
   constructor(
     public id: string | null,

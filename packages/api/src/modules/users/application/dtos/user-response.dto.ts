@@ -14,6 +14,9 @@ export class UserResponseDto {
   public readonly traktRefreshToken: string | null;
   public readonly traktUsername: string | null;
   public readonly traktExpiresAt: number | null;
+  public readonly role: 'user' | 'admin';
+  public readonly triviaOptOut: boolean;
+  public readonly seenDailyContentIds: string[];
 
   constructor(user: UserEntity) {
     this.id = user.id!;
@@ -29,5 +32,8 @@ export class UserResponseDto {
     this.traktRefreshToken = user.traktRefreshToken;
     this.traktUsername = user.traktUsername;
     this.traktExpiresAt = user.traktExpiresAt;
+    this.role = user.role;
+    this.triviaOptOut = user.triviaOptOut;
+    this.seenDailyContentIds = user.seenDailyContentIds;
   }
 }

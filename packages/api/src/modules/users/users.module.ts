@@ -43,5 +43,6 @@ const HANDLERS = [
     ...HANDLERS,
     { provide: UsersRepository, useClass: MongoUsersRepository },
   ],
+  exports: [UsersRepository],
 })
 export class UsersModule {}

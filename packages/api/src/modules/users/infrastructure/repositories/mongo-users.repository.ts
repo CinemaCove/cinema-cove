@@ -28,6 +28,9 @@ export class MongoUsersRepository implements UsersRepository {
     entity.traktRefreshToken = doc.traktRefreshToken ?? null;
     entity.traktUsername = doc.traktUsername ?? null;
     entity.traktExpiresAt = doc.traktExpiresAt ?? null;
+    entity.role = doc.role ?? 'user';
+    entity.triviaOptOut = doc.triviaOptOut ?? false;
+    entity.seenDailyContentIds = doc.seenDailyContentIds ?? [];
     return entity;
   }
 
@@ -118,6 +121,16 @@ export class MongoUsersRepository implements UsersRepository {
   public async clearTraktTokens(userId: string): Promise<void> {
     await this.userModel
       .updateOne({ _id: userId }, { $unset: { traktAccessToken: '', traktRefreshToken: '', traktUsername: '', traktExpiresAt: '' } })
+      .exec();
+  }
+
+  public async updateTriviaOptOut(userId: string, optOut: boolean): Promise<void> {
+    await this.userModel.updateOne({ _id: userId }, { triviaOptOut: optOut }).exec();
+  }
+
+  public async addSeenDailyContent(userId: string, contentId: string): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: userId }, { $addToSet: { seenDailyContentIds: contentId } })
       .exec();
   }
 }
