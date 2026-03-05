@@ -22,4 +22,5 @@ export abstract class UsersRepository {
   abstract clearTraktTokens(userId: string): Promise<void>;
   abstract updateTriviaOptOut(userId: string, optOut: boolean): Promise<void>;
   abstract addSeenDailyContent(userId: string, contentId: string): Promise<void>;
+  abstract updateAnnouncementsLastReadAt(userId: string, date: Date): Promise<void>;
 }

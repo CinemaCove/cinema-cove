@@ -12,6 +12,7 @@ export class UserEntity {
   public role: 'user' | 'admin' = 'user';
   public triviaOptOut: boolean = false;
   public seenDailyContentIds: string[] = [];
+  public announcementsLastReadAt: Date | null = null;
 
   constructor(
     public id: string | null,

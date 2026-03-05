@@ -1,0 +1,33 @@
+<div class="news-page">
+  <h1 class="page-title">News & Announcements</h1>
+
+  @if (items().length === 0 && !loading() && !error()) {
+    <p class="empty-state">No announcements yet. Check back later!</p>
+  }
+
+  <div class="news-list">
+    @for (item of items(); track item.id) {
+      <mat-card class="news-card">
+        <mat-card-header>
+          <mat-card-title>{{ item.title }}</mat-card-title>
+          <mat-card-subtitle>{{ item.publishedAt | date: 'mediumDate' }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="news-body" [innerHTML]="item.content"></div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-row">
+      <mat-spinner diameter="36" />
+    </div>
+  }
+
+  @if (error()) {
+    <p class="error-msg" role="alert">Failed to load announcements. Please try again.</p>
+  }
+
+  <div #sentinel class="sentinel" aria-hidden="true"></div>
+</div>

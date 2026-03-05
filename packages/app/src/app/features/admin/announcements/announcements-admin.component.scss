@@ -1,0 +1,53 @@
+.admin-page {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.loading-row {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.announcements-table {
+  width: 100%;
+}
+
+.state-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  background: rgba(0, 0, 0, 0.08);
+
+  &.published {
+    background: rgba(76, 175, 80, 0.15);
+    color: #2e7d32;
+  }
+}
+
+.actions-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.empty-state {
+  text-align: center;
+  opacity: 0.5;
+  padding: 48px;
+}

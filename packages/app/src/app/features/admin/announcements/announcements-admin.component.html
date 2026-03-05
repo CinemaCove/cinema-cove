@@ -1,0 +1,57 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Announcements</h1>
+    <button mat-flat-button (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      New Announcement
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-row">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else {
+    <table mat-table [dataSource]="items()" class="announcements-table">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="state">
+        <th mat-header-cell *matHeaderCellDef>State</th>
+        <td mat-cell *matCellDef="let item">
+          <span class="state-chip" [class.published]="item.state === 'published'">
+            {{ item.state }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="publishedAt">
+        <th mat-header-cell *matHeaderCellDef>Published</th>
+        <td mat-cell *matCellDef="let item">
+          {{ item.publishedAt ? (item.publishedAt | date: 'medium') : '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item" class="actions-cell">
+          <button mat-icon-button matTooltip="Edit" (click)="openEdit(item)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Delete" (click)="delete(item)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+
+    @if (items().length === 0) {
+      <p class="empty-state">No announcements yet.</p>
+    }
+  }
+</div>

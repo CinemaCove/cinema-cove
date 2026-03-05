@@ -1,0 +1,82 @@
+.rte-wrapper {
+  border: 1px solid var(--mat-form-field-outlined-idle-outline-color);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &:focus-within {
+    border-color: var(--mat-form-field-focus-outline-color);
+    outline: none;
+  }
+}
+
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--mat-form-field-outlined-idle-outline-color, color-mix(in srgb, currentColor 12%, transparent));
+  background: var(--mat-app-surface-container);
+
+  button.active {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    border-radius: 4px;
+  }
+
+  .heading-btn {
+    min-width: 36px;
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 36px;
+  }
+}
+
+.rte-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--mat-form-field-outlined-idle-outline-color);
+  margin: 0 4px;
+}
+
+.rte-content {
+  min-height: 200px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-y: auto;
+  cursor: text;
+
+  ::ng-deep .ProseMirror {
+    outline: none;
+    min-height: 180px;
+
+    p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: var(--mat-form-field-hint-text-color);
+      pointer-events: none;
+      height: 0;
+    }
+
+    h1 { font-size: 1.75rem; font-weight: 700; margin: 0.75em 0 0.4em; }
+    h2 { font-size: 1.4rem; font-weight: 600; margin: 0.75em 0 0.4em; }
+    h3 { font-size: 1.15rem; font-weight: 600; margin: 0.75em 0 0.4em; }
+    ul, ol { padding-left: 1.5em; }
+    blockquote { border-left: 3px solid var(--mat-form-field-outlined-idle-outline-color); margin: 0; padding-left: 1em; opacity: 0.7; }
+    pre { background: color-mix(in srgb, currentColor 6%, transparent); border-radius: 4px; padding: 0.75em 1em; font-family: monospace; overflow-x: auto; }
+    code { background: color-mix(in srgb, currentColor 8%, transparent); border-radius: 3px; padding: 0.1em 0.3em; font-family: monospace; font-size: 0.9em; }
+    img { max-width: 100%; height: auto; border-radius: 4px; }
+    iframe { width: 100%; max-width: 640px; aspect-ratio: 16/9; border: 0; border-radius: 4px; }
+    hr { border: none; border-top: 2px solid var(--mat-form-field-outlined-idle-outline-color); margin: 1.5em 0; }
+    a { color: var(--mat-primary-label-text-color); text-decoration: underline; }
+    p { margin: 0.5em 0; }
+    p:first-child { margin-top: 0; }
+  }
+}
+
+.rte-file-input {
+  display: none;
+}
