@@ -138,20 +138,10 @@ export class DashboardComponent implements OnInit {
       .subscribe((content) => {
         if (!content) return;
         this.dailyContentService.markSeen(content.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-        if (content.type === 'trivia') {
-          this.dialog.open(TriviaDialogComponent, {
-            data: content,
-            width: '520px',
-            maxWidth: '95vw',
-            disableClose: true,
-          });
-        } else {
-          this.dialog.open(FunFactDialogComponent, {
-            data: content,
-            width: '480px',
-            maxWidth: '95vw',
-          });
-        }
+        const ref = content.type === 'trivia'
+          ? this.dialog.open(TriviaDialogComponent, { data: content, width: '520px', maxWidth: '95vw', disableClose: true })
+          : this.dialog.open(FunFactDialogComponent, { data: content, width: '480px', maxWidth: '95vw' });
+        ref.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadDailyContent());
       });
   }
 }

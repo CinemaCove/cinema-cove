@@ -5,7 +5,8 @@ export class GetTodaysDailyContentQuery extends Query<DailyContentPublicDto | nu
   constructor(
     public readonly userId: string,
     public readonly seenIds: string[],
-    public readonly optOut: boolean,
+    public readonly triviaOptOut: boolean,
+    public readonly funFactOptOut: boolean,
   ) {
     super();
   }

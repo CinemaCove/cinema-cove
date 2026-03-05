@@ -57,6 +57,7 @@ export class UsersController {
         body.currentPassword,
         body.newPassword,
         body.triviaOptOut,
+        body.funFactOptOut,
       ),
     );
 

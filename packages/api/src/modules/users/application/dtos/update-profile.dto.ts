@@ -31,4 +31,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsBoolean()
   triviaOptOut?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  funFactOptOut?: boolean;
 }

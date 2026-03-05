@@ -11,6 +11,7 @@ export class UserEntity {
   public traktExpiresAt: number | null = null;
   public role: 'user' | 'admin' = 'user';
   public triviaOptOut: boolean = false;
+  public funFactOptOut: boolean = false;
   public seenDailyContentIds: string[] = [];
 
   constructor(

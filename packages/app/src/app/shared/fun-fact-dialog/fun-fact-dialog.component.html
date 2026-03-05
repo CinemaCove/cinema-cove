@@ -14,6 +14,8 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions>
+  <button mat-button (click)="optOut()" class="opt-out-btn">Don't show fun facts</button>
+  <span class="spacer"></span>
   <button mat-flat-button mat-dialog-close cdkFocusInitial>Got it!</button>
 </mat-dialog-actions>

@@ -90,14 +90,26 @@
             <h2>Preferences</h2>
             <label class="preference-row">
                 <div class="preference-label">
-                    <span>Daily Trivia & Fun Facts</span>
-                    <span class="preference-hint">When enabled, a trivia question or fun fact may appear on the dashboard each day.</span>
+                    <span>Daily Trivia</span>
+                    <span class="preference-hint">When enabled, a trivia question may appear on the dashboard each day.</span>
                 </div>
                 <mat-slide-toggle
                     [checked]="!p.triviaOptOut"
                     [disabled]="savingOptOut()"
                     (change)="toggleTriviaOptOut()"
-                    aria-label="Daily trivia and fun facts"
+                    aria-label="Daily trivia"
+                ></mat-slide-toggle>
+            </label>
+            <label class="preference-row">
+                <div class="preference-label">
+                    <span>Daily Fun Facts</span>
+                    <span class="preference-hint">When enabled, a fun fact may appear on the dashboard each day.</span>
+                </div>
+                <mat-slide-toggle
+                    [checked]="!p.funFactOptOut"
+                    [disabled]="savingOptOut()"
+                    (change)="toggleFunFactOptOut()"
+                    aria-label="Daily fun facts"
                 ></mat-slide-toggle>
             </label>
         </section>

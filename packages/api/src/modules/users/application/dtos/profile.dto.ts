@@ -6,6 +6,7 @@ export class ProfileDto {
   public readonly hasPassword: boolean;
   public readonly role: 'user' | 'admin';
   public readonly triviaOptOut: boolean;
+  public readonly funFactOptOut: boolean;
 
   constructor(user: UserEntity) {
     this.email = user.email;
@@ -13,5 +14,6 @@ export class ProfileDto {
     this.hasPassword = user.hasPassword();
     this.role = user.role;
     this.triviaOptOut = user.triviaOptOut;
+    this.funFactOptOut = user.funFactOptOut;
   }
 }

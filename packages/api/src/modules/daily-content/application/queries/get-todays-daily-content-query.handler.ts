@@ -10,8 +10,10 @@ export class GetTodaysDailyContentQueryHandler
   constructor(private readonly repo: DailyContentRepository) {}
 
   async execute(query: GetTodaysDailyContentQuery): Promise<DailyContentPublicDto | null> {
-    if (query.optOut) return null;
-    const entity = await this.repo.findActiveForDate(new Date(), query.seenIds);
+    const excludeTypes: string[] = [];
+    if (query.triviaOptOut) excludeTypes.push('trivia');
+    if (query.funFactOptOut) excludeTypes.push('fun-fact');
+    const entity = await this.repo.findActiveForDate(new Date(), query.seenIds, excludeTypes);
     return entity ? new DailyContentPublicDto(entity) : null;
   }
 }

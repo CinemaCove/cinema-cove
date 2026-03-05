@@ -58,6 +58,9 @@ export class User {
   @Prop({ default: false })
   triviaOptOut!: boolean;
 
+  @Prop({ default: false })
+  funFactOptOut!: boolean;
+
   @Prop({ type: [String], default: [] })
   seenDailyContentIds!: string[];
 }

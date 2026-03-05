@@ -30,7 +30,7 @@ export class DailyContentController {
     if (!user) return null;
 
     return this.queryBus.execute(
-      new GetTodaysDailyContentQuery(sub, user.seenDailyContentIds ?? [], user.triviaOptOut ?? false),
+      new GetTodaysDailyContentQuery(sub, user.seenDailyContentIds ?? [], user.triviaOptOut ?? false, user.funFactOptOut ?? false),
     );
   }
 

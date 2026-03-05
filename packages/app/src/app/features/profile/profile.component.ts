@@ -110,6 +110,15 @@ export class ProfileComponent implements OnInit {
       .subscribe({ next: () => this.savingOptOut.set(false), error: () => this.savingOptOut.set(false) });
   }
 
+  toggleFunFactOptOut(): void {
+    const current = this.profile()?.funFactOptOut ?? false;
+    this.savingOptOut.set(true);
+    this.userService
+      .setFunFactOptOut(!current)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.savingOptOut.set(false), error: () => this.savingOptOut.set(false) });
+  }
+
   savePassword(): void {
     const raw = this.passwordForm.getRawValue();
     if (raw.newPassword !== raw.confirmPassword) {

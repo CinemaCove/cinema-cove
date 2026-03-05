@@ -39,7 +39,7 @@ export class MongoDailyContentRepository implements DailyContentRepository {
     return doc ? this.toEntity(doc) : null;
   }
 
-  async findActiveForDate(date: Date, excludeIds: string[]): Promise<DailyContentEntity | null> {
+  async findActiveForDate(date: Date, excludeIds: string[], excludeTypes: string[] = []): Promise<DailyContentEntity | null> {
     const startOfDay = new Date(date);
     startOfDay.setUTCHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -53,6 +53,10 @@ export class MongoDailyContentRepository implements DailyContentRepository {
 
     if (excludeIds.length > 0) {
       query['_id'] = { $nin: excludeIds };
+    }
+
+    if (excludeTypes.length > 0) {
+      query['type'] = { $nin: excludeTypes };
     }
 
     const doc = await this.model.findOne(query).exec();

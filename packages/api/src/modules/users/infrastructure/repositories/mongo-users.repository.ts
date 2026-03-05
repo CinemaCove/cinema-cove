@@ -30,6 +30,7 @@ export class MongoUsersRepository implements UsersRepository {
     entity.traktExpiresAt = doc.traktExpiresAt ?? null;
     entity.role = doc.role ?? 'user';
     entity.triviaOptOut = doc.triviaOptOut ?? false;
+    entity.funFactOptOut = doc.funFactOptOut ?? false;
     entity.seenDailyContentIds = doc.seenDailyContentIds ?? [];
     return entity;
   }
@@ -126,6 +127,10 @@ export class MongoUsersRepository implements UsersRepository {
 
   public async updateTriviaOptOut(userId: string, optOut: boolean): Promise<void> {
     await this.userModel.updateOne({ _id: userId }, { triviaOptOut: optOut }).exec();
+  }
+
+  public async updateFunFactOptOut(userId: string, optOut: boolean): Promise<void> {
+    await this.userModel.updateOne({ _id: userId }, { funFactOptOut: optOut }).exec();
   }
 
   public async addSeenDailyContent(userId: string, contentId: string): Promise<void> {
