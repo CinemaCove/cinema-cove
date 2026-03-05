@@ -1,0 +1,29 @@
+.fun-fact-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fun-fact-content {
+  min-width: 280px;
+  max-width: 480px;
+}
+
+.fun-fact-image-wrapper {
+  margin: 0 0 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fun-fact-image {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+.fun-fact-body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}

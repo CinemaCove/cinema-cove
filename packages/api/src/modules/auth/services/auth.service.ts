@@ -37,6 +37,7 @@ export class AuthService {
     const jwt = this.signJwt({
       id: res.id,
       email: res.email,
+      role: res.role,
     });
 
     return new TokenResponseDto(jwt);
@@ -59,6 +60,7 @@ export class AuthService {
     const token = this.signJwt({
       id: user.id,
       email: user.email,
+      role: user.role,
     });
 
     return new TokenResponseDto(token);
@@ -102,7 +104,7 @@ export class AuthService {
     return new TokenResponseDto(this.signJwt(user!));
   }
 
-  private signJwt(user: { id: string; email: string | null }): string {
-    return this.jwtService.sign({ sub: user.id, email: user.email });
+  private signJwt(user: { id: string; email: string | null; role?: 'user' | 'admin' }): string {
+    return this.jwtService.sign({ sub: user.id, email: user.email, role: user.role ?? 'user' });
   }
 }

@@ -51,7 +51,7 @@
             [opened]="!isHandset() || sidenavOpen()"
             (closedStart)="sidenavOpen.set(false)">
         <mat-nav-list>
-            @for (item of navItems; track item.route) {
+            @for (item of navItems(); track item.route) {
                 <a mat-list-item
                    [routerLink]="item.route"
                    routerLinkActive="active-nav-item"

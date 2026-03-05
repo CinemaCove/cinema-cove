@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { UserService } from '../../core/services/user.service';
 
 @Component({
@@ -27,6 +28,7 @@ import { UserService } from '../../core/services/user.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatDividerModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -44,6 +46,8 @@ export class ProfileComponent implements OnInit {
   readonly savingPassword = signal(false);
   readonly passwordSuccess = signal(false);
   readonly passwordError = signal<string | null>(null);
+
+  readonly savingOptOut = signal(false);
 
   readonly nameForm = new FormGroup({
     displayName: new FormControl('', {
@@ -95,6 +99,15 @@ export class ProfileComponent implements OnInit {
           this.nameError.set('Failed to update name. Please try again.');
         },
       });
+  }
+
+  toggleTriviaOptOut(): void {
+    const current = this.profile()?.triviaOptOut ?? false;
+    this.savingOptOut.set(true);
+    this.userService
+      .setTriviaOptOut(!current)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.savingOptOut.set(false), error: () => this.savingOptOut.set(false) });
   }
 
   savePassword(): void {

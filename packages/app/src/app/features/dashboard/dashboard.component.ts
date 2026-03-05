@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,6 +14,9 @@ import { CuratedGroupsStore } from '../../signal-store/curated-groups.store';
 import { IntegrationsStore } from '../../signal-store/integrations.store';
 import { CuratedDetailDialogComponent } from '../curated/curated-detail-dialog/curated-detail-dialog.component';
 import { CuratedGroupDetailDialogComponent } from '../curated-groups/curated-group-detail-dialog/curated-group-detail-dialog.component';
+import { TriviaDialogComponent } from '../../shared/trivia-dialog/trivia-dialog.component';
+import { FunFactDialogComponent } from '../../shared/fun-fact-dialog/fun-fact-dialog.component';
+import { DailyContentService } from '../../core/services/daily-content.service';
 
 @Component({
   selector: 'cc-dashboard',
@@ -27,6 +31,8 @@ export class DashboardComponent implements OnInit {
   protected readonly curatedGroupsStore = inject(CuratedGroupsStore);
   protected readonly integrationsStore = inject(IntegrationsStore);
   private readonly dialog = inject(MatDialog);
+  private readonly dailyContentService = inject(DailyContentService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly previewCatalogs = computed(() => this.catalogsStore.items().slice(0, 3));
   protected readonly extraCount = computed(() =>
@@ -122,5 +128,30 @@ export class DashboardComponent implements OnInit {
     this.curatedListsStore.load(true);
     this.curatedGroupsStore.load(true);
     this.integrationsStore.load();
+    this.loadDailyContent();
+  }
+
+  private loadDailyContent(): void {
+    this.dailyContentService
+      .getToday()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((content) => {
+        if (!content) return;
+        this.dailyContentService.markSeen(content.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+        if (content.type === 'trivia') {
+          this.dialog.open(TriviaDialogComponent, {
+            data: content,
+            width: '520px',
+            maxWidth: '95vw',
+            disableClose: true,
+          });
+        } else {
+          this.dialog.open(FunFactDialogComponent, {
+            data: content,
+            width: '480px',
+            maxWidth: '95vw',
+          });
+        }
+      });
   }
 }

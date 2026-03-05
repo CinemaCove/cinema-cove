@@ -1,0 +1,19 @@
+<h2 mat-dialog-title class="fun-fact-title">
+  <mat-icon aria-hidden="true">lightbulb</mat-icon>
+  {{ data.title }}
+</h2>
+
+<mat-dialog-content class="fun-fact-content">
+  @if (data.imageUrl) {
+    <div class="fun-fact-image-wrapper">
+      <img [src]="data.imageUrl" [alt]="data.title" class="fun-fact-image" />
+    </div>
+  }
+  @if (data.content) {
+    <p class="fun-fact-body">{{ data.content }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close cdkFocusInitial>Got it!</button>
+</mat-dialog-actions>

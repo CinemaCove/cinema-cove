@@ -7,6 +7,8 @@ export interface UserProfile {
   email: string | null;
   displayName: string | null;
   hasPassword: boolean;
+  role: 'user' | 'admin';
+  triviaOptOut: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -34,5 +36,11 @@ export class UserService {
     return this.http
       .patch<{ ok: boolean }>(`${environment.apiUrl}/users/me`, body)
       .pipe(tap(() => this.profile.update((p) => p ? { ...p, hasPassword: true } : p)));
+  }
+
+  setTriviaOptOut(optOut: boolean) {
+    return this.http
+      .patch<{ ok: boolean }>(`${environment.apiUrl}/users/me`, { triviaOptOut: optOut })
+      .pipe(tap(() => this.profile.update((p) => p ? { ...p, triviaOptOut: optOut } : p)));
   }
 }

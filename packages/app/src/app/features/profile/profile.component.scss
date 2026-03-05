@@ -59,3 +59,26 @@
 .btn-spinner {
   display: inline-block;
 }
+
+.preference-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.preference-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span:first-child {
+    font: var(--mat-sys-body-large);
+  }
+}
+
+.preference-hint {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}

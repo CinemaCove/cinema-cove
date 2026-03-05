@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -20,7 +20,9 @@ const NAV_ITEMS = [
   { icon: 'local_library', label: 'Curated Lists', route: '/curated', exact: false },
   { icon: 'movie_filter', label: 'Groups', route: '/curated-groups', exact: false },
   { icon: 'extension', label: 'Integrations', route: '/integrations', exact: false },
-] as const;
+];
+
+const ADMIN_NAV_ITEM = { icon: 'admin_panel_settings', label: 'Admin', route: '/admin/daily-content', exact: false };
 
 @Component({
   selector: 'cc-shell',
@@ -50,7 +52,10 @@ export class ShellComponent implements OnInit {
   readonly userService = inject(UserService);
   private readonly router = inject(Router);
 
-  readonly navItems = NAV_ITEMS;
+  readonly navItems = computed(() => {
+    const profile = this.userService.profile();
+    return profile?.role === 'admin' ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
+  });
 
   readonly isHandset = toSignal(
     this.breakpointObserver

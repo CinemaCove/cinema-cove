@@ -18,6 +18,8 @@ import {
   AuthThrottlerGuard,
   StremioThrottlerGuard,
 } from './common/guards/throttler.guards';
+import { DailyContentModule } from './modules/daily-content/daily-content.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 
 @Module({
   imports: [
@@ -66,6 +68,8 @@ import {
     StremioModule,
     CuratedListsModule,
     CuratedGroupsModule,
+    DailyContentModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [StremioThrottlerGuard, AuthThrottlerGuard, ApiThrottlerGuard],

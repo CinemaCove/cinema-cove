@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,20 @@ export const routes: Routes = [
           import('./features/set-password/set-password.component').then(
             (m) => m.SetPasswordComponent,
           ),
+      },
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
+        children: [
+          {
+            path: 'daily-content',
+            loadComponent: () =>
+              import('./features/admin/daily-content/daily-content-admin.component').then(
+                (m) => m.DailyContentAdminComponent,
+              ),
+          },
+          { path: '', redirectTo: 'daily-content', pathMatch: 'full' },
+        ],
       },
     ],
   },

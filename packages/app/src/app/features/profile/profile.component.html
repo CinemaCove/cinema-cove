@@ -83,6 +83,24 @@
                 </button>
             </form>
         </section>
+        <mat-divider/>
+
+        <!-- Preferences -->
+        <section class="profile-section">
+            <h2>Preferences</h2>
+            <label class="preference-row">
+                <div class="preference-label">
+                    <span>Daily Trivia & Fun Facts</span>
+                    <span class="preference-hint">When enabled, a trivia question or fun fact may appear on the dashboard each day.</span>
+                </div>
+                <mat-slide-toggle
+                    [checked]="!p.triviaOptOut"
+                    [disabled]="savingOptOut()"
+                    (change)="toggleTriviaOptOut()"
+                    aria-label="Daily trivia and fun facts"
+                ></mat-slide-toggle>
+            </label>
+        </section>
     } @else {
         <div class="loading-row">
             <mat-spinner diameter="32"/>

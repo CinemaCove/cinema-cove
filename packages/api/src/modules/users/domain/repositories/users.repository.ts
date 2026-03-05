@@ -20,4 +20,6 @@ export abstract class UsersRepository {
   abstract clearTmdbSession(userId: string): Promise<void>;
   abstract saveTraktTokens(userId: string, accessToken: string, refreshToken: string, username: string, expiresAt: number): Promise<void>;
   abstract clearTraktTokens(userId: string): Promise<void>;
+  abstract updateTriviaOptOut(userId: string, optOut: boolean): Promise<void>;
+  abstract addSeenDailyContent(userId: string, contentId: string): Promise<void>;
 }
