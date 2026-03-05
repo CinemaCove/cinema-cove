@@ -13,6 +13,7 @@ export class UserEntity {
   public triviaOptOut: boolean = false;
   public funFactOptOut: boolean = false;
   public seenDailyContentIds: string[] = [];
+  public announcementsLastReadAt: Date | null = null;
 
   constructor(
     public id: string | null,

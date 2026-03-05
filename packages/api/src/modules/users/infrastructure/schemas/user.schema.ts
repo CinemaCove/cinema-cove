@@ -63,6 +63,9 @@ export class User {
 
   @Prop({ type: [String], default: [] })
   seenDailyContentIds!: string[];
+
+  @Prop()
+  announcementsLastReadAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

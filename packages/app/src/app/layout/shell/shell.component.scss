@@ -1,3 +1,79 @@
+// Notification panel styles (must be outside :host since mat-menu renders in overlay)
+::ng-deep .notif-menu-panel {
+  width: 360px;
+  max-width: 360px !important;
+  max-height: 480px;
+  overflow-y: auto;
+
+  .notif-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px 8px;
+  }
+
+  .notif-title {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .notif-loading, .notif-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    font-size: 0.875rem;
+    opacity: 0.6;
+  }
+
+  .notif-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .notif-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start !important;
+    height: auto !important;
+    padding: 10px 16px !important;
+    white-space: normal !important;
+    line-height: 1.4;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    .notif-item-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      width: 100%;
+    }
+
+    .notif-item-snippet {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 2px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .notif-item-date {
+      font-size: 0.75rem;
+      opacity: 0.5;
+      margin-top: 4px;
+    }
+  }
+
+  .notif-view-all {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
 :host {
   display: flex;
   flex-direction: column;

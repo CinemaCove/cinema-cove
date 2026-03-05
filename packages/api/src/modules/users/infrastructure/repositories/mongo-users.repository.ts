@@ -32,6 +32,7 @@ export class MongoUsersRepository implements UsersRepository {
     entity.triviaOptOut = doc.triviaOptOut ?? false;
     entity.funFactOptOut = doc.funFactOptOut ?? false;
     entity.seenDailyContentIds = doc.seenDailyContentIds ?? [];
+    entity.announcementsLastReadAt = doc.announcementsLastReadAt ?? null;
     return entity;
   }
 
@@ -136,6 +137,12 @@ export class MongoUsersRepository implements UsersRepository {
   public async addSeenDailyContent(userId: string, contentId: string): Promise<void> {
     await this.userModel
       .updateOne({ _id: userId }, { $addToSet: { seenDailyContentIds: contentId } })
+      .exec();
+  }
+
+  public async updateAnnouncementsLastReadAt(userId: string, date: Date): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: userId }, { announcementsLastReadAt: date })
       .exec();
   }
 }

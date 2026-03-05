@@ -52,6 +52,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'news',
+        loadComponent: () =>
+          import('./features/news/news.component').then((m) => m.NewsComponent),
+      },
+      {
         path: 'set-password',
         loadComponent: () =>
           import('./features/set-password/set-password.component').then(
@@ -67,6 +72,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/admin/daily-content/daily-content-admin.component').then(
                 (m) => m.DailyContentAdminComponent,
+              ),
+          },
+          {
+            path: 'announcements',
+            loadComponent: () =>
+              import('./features/admin/announcements/announcements-admin.component').then(
+                (m) => m.AnnouncementsAdminComponent,
               ),
           },
           { path: '', redirectTo: 'daily-content', pathMatch: 'full' },

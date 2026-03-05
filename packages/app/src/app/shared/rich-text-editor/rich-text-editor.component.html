@@ -1,0 +1,62 @@
+<div class="rte-wrapper">
+  <div class="rte-toolbar" role="toolbar" aria-label="Text formatting">
+    <button mat-icon-button type="button" matTooltip="Bold" (click)="bold()" [class.active]="isActive('bold')">
+      <mat-icon>format_bold</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Italic" (click)="italic()" [class.active]="isActive('italic')">
+      <mat-icon>format_italic</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Strikethrough" (click)="strike()" [class.active]="isActive('strike')">
+      <mat-icon>strikethrough_s</mat-icon>
+    </button>
+
+    <div class="rte-divider" aria-hidden="true"></div>
+
+    <button mat-button type="button" class="heading-btn" matTooltip="Heading 1" (click)="heading(1)" [class.active]="isActive('heading', {level: 1})">H1</button>
+    <button mat-button type="button" class="heading-btn" matTooltip="Heading 2" (click)="heading(2)" [class.active]="isActive('heading', {level: 2})">H2</button>
+    <button mat-button type="button" class="heading-btn" matTooltip="Heading 3" (click)="heading(3)" [class.active]="isActive('heading', {level: 3})">H3</button>
+
+    <div class="rte-divider" aria-hidden="true"></div>
+
+    <button mat-icon-button type="button" matTooltip="Bullet list" (click)="bulletList()" [class.active]="isActive('bulletList')">
+      <mat-icon>format_list_bulleted</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Ordered list" (click)="orderedList()" [class.active]="isActive('orderedList')">
+      <mat-icon>format_list_numbered</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Blockquote" (click)="blockquote()" [class.active]="isActive('blockquote')">
+      <mat-icon>format_quote</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Code block" (click)="codeBlock()" [class.active]="isActive('codeBlock')">
+      <mat-icon>code</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Horizontal rule" (click)="horizontalRule()">
+      <mat-icon>horizontal_rule</mat-icon>
+    </button>
+
+    <div class="rte-divider" aria-hidden="true"></div>
+
+    <button mat-icon-button type="button" matTooltip="Link" (click)="setLink()" [class.active]="isActive('link')">
+      <mat-icon>link</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Insert image" (click)="triggerImageUpload()">
+      <mat-icon>image</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Insert YouTube video" (click)="insertYoutube()">
+      <mat-icon>smart_display</mat-icon>
+    </button>
+
+    <div class="rte-divider" aria-hidden="true"></div>
+
+    <button mat-icon-button type="button" matTooltip="Undo" (click)="undo()">
+      <mat-icon>undo</mat-icon>
+    </button>
+    <button mat-icon-button type="button" matTooltip="Redo" (click)="redo()">
+      <mat-icon>redo</mat-icon>
+    </button>
+  </div>
+
+  <div #editorEl class="rte-content" aria-label="Content editor"></div>
+
+  <input #fileInput type="file" accept="image/*" class="rte-file-input" (change)="onFileSelected($event)" aria-hidden="true" tabindex="-1" />
+</div>
