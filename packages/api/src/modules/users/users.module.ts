@@ -12,7 +12,7 @@ import {
   GetUserByIdQueryHandler,
   GetUserByOauthQueryHandler,
   RegisterUserCommandHandler,
-  RegisterUserWithOAuthCommand,
+  RegisterUserWithOAuthCommandHandler,
   SaveTmdbSessionCommandHandler,
   SaveTraktTokensCommandHandler,
   UpdateProfileCommandHandler,
@@ -22,7 +22,7 @@ import { PasswordHasherModule } from '../shared/infrastructure/password-hasher/p
 const HANDLERS = [
   AddOAuthProviderCommandHandler,
   RegisterUserCommandHandler,
-  RegisterUserWithOAuthCommand,
+  RegisterUserWithOAuthCommandHandler,
   UpdateProfileCommandHandler,
   SaveTmdbSessionCommandHandler,
   ClearTmdbSessionCommandHandler,

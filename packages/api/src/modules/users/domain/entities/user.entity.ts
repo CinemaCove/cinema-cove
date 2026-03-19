@@ -36,21 +36,19 @@ export class UserEntity {
   }
 
   public async changePassword(
-    currentPassword: string,
+    currentPassword: string | undefined,
     newPassword: string,
     passwordHasher: PasswordHasher,
   ) {
-    if (!this.passwordHash) {
-      throw new Error('User has no password set');
-    }
+    if (this.passwordHash) {
+      const valid = await passwordHasher.verify(
+        this.passwordHash,
+        currentPassword ?? '',
+      );
 
-    const valid = await passwordHasher.verify(
-      this.passwordHash,
-      currentPassword,
-    );
-
-    if (valid) {
-      throw new Error('Current password is incorrect');
+      if (!valid) {
+        throw new Error('Current password is incorrect');
+      }
     }
 
     if (!this.isStrongPassword(newPassword)) {

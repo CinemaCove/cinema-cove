@@ -7,13 +7,13 @@
 .trivia-content {
   min-width: 320px;
   max-width: 480px;
-  overflow-y: hidden !important;
 }
 
 .trivia-timer {
   font-size: 0.75rem;
   color: var(--mat-sys-on-surface-variant);
-  margin: 4px 0 12px;
+  margin: 4px 0 10px;
+  display: none;
 }
 
 .progress-wrapper {
@@ -48,7 +48,7 @@ mat-progress-bar {
 .trivia-question {
   font-size: 1rem;
   font-weight: 500;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
 }
 
 .trivia-choices {
