@@ -60,6 +60,9 @@
                     @if (passwordForm.controls.newPassword.hasError('minlength')) {
                         <mat-error>Minimum 8 characters</mat-error>
                     }
+                    @if (passwordForm.controls.newPassword.hasError('pattern')) {
+                        <mat-error>Must contain at least one uppercase letter and one number</mat-error>
+                    }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">

@@ -59,7 +59,7 @@ export class ProfileComponent implements OnInit {
   readonly passwordForm = new FormGroup({
     currentPassword: new FormControl('', { nonNullable: true }),
     newPassword: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(8)],
+      validators: [Validators.required, Validators.minLength(8), Validators.pattern(/[A-Z]/), Validators.pattern(/[0-9]/)],
       nonNullable: true,
     }),
     confirmPassword: new FormControl('', {
