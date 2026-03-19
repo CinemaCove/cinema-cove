@@ -323,8 +323,18 @@ export class StremioService {
       if (tmdbMediaType !== config.type) return { metas: [] };
       items = [...(data.results ?? [])];
     } else {
-      const data = await this.tmdbService.getCustomListItems(config.tmdbListId!, page);
-      items = [...data.items].filter((item) => item.mediaType === tmdbMediaType);
+      const needed = skip + 20;
+      const collected: TmdbListItem[] = [];
+      let currentPage = 1;
+      const firstData = await this.tmdbService.getCustomListItems(config.tmdbListId!, 1);
+      const totalPages = Math.ceil(firstData.itemCount / 20);
+      collected.push(...firstData.items.filter((item) => item.mediaType === tmdbMediaType));
+      while (collected.length < needed && currentPage < totalPages) {
+        currentPage++;
+        const data = await this.tmdbService.getCustomListItems(config.tmdbListId!, currentPage);
+        collected.push(...data.items.filter((item) => item.mediaType === tmdbMediaType));
+      }
+      items = collected.slice(skip, skip + 20);
     }
 
     const limit = pLimit(5);
